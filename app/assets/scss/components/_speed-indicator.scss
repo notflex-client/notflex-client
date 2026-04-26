@@ -1,0 +1,106 @@
+@use "../tools/token" as *;
+@use "../mixins/typography" as *;
+
+.speed-indicator {
+  // ── Title ──────────────────────────────────────────────────
+  &__title {
+    text-align: center;
+    color: token("color-text-primary");
+    margin-bottom: token("dm-20");
+  }
+
+  // ── Track area ─────────────────────────────────────────────
+  &__track-area {
+    position: relative;
+  }
+
+  // Horizontal line connecting all dots
+  // Starts/ends at the center of the first/last dot-wrap (9px = 18px / 2)
+  &__line {
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    right: 9px;
+    height: 2px;
+    background-color: token("grey-600");
+    pointer-events: none;
+  }
+
+  // ── Steps row ──────────────────────────────────────────────
+  &__steps {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  &__step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: token("dm-8");
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: token("dm-4");
+    margin: calc(-1 * token("dm-4"));
+    outline: none;
+
+    &:focus-visible .speed-indicator__dot {
+      box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.45);
+    }
+  }
+
+  // ── Dot ────────────────────────────────────────────────────
+  // Fixed-size wrapper keeps step layout stable when dot grows on active
+  &__dot-wrap {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__dot {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: token("grey-500");
+    transition: width 0.15s ease, height 0.15s ease, background-color 0.15s ease;
+
+    .speed-indicator__step.is-active & {
+      width: 18px;
+      height: 18px;
+      background-color: token("white");
+    }
+  }
+
+  // ── Labels ─────────────────────────────────────────────────
+  &__step-label {
+    @include typography-variant("caption-1-regular");
+    color: token("color-text-secondary");
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1.2;
+    transition: color 0.15s ease;
+
+    .speed-indicator__step.is-active & {
+      @include typography-variant("caption-1-medium");
+      color: token("color-text-primary");
+    }
+  }
+
+  &__sublabel {
+    display: block;
+    @include typography-variant("caption-2-regular");
+    color: token("color-text-secondary");
+    transition: color 0.15s ease;
+
+    .speed-indicator__step.is-active & {
+      color: token("color-text-primary");
+    }
+  }
+}

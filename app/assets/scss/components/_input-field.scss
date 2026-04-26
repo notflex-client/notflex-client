@@ -1,0 +1,126 @@
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: token("dm-4");
+  width: 100%;
+
+  // ── Wrap ──────────────────────────────────────────────────
+  &__wrap {
+    position: relative;
+    width: 100%;
+    height: 56px;
+  }
+
+  // ── Control (the actual <input>) ──────────────────────────
+  &__control {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px 16px 4px;
+    background-color: var(--grey-600);
+    color: var(--color-text-primary);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-family: var(--font-family-sans);
+    font-size: var(--typo-regular-font-size-body);
+    line-height: 1;
+    outline: none;
+    caret-color: var(--white);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+
+    // hide the real placeholder — we use the <label> as floating label
+    &::placeholder { color: transparent; }
+
+    &:hover:not(:disabled) {
+      background-color: var(--grey-550);
+    }
+
+    &:focus {
+      background-color: var(--grey-550);
+      border-color: var(--white);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    // make room for Show/Hide toggle
+    .has-toggle & {
+      padding-right: 56px;
+    }
+  }
+
+  // ── Floating label ────────────────────────────────────────
+  &__label {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-family-sans);
+    font-size: var(--typo-regular-font-size-body);
+    line-height: 1;
+    color: var(--color-text-secondary);
+    pointer-events: none;
+    transform-origin: left center;
+    transition: top 0.15s ease, font-size 0.15s ease, transform 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  // Float up when focused OR filled (`:not(:placeholder-shown)` detects filled)
+  &__wrap:focus-within &__label,
+  &__control:not(:placeholder-shown) ~ &__label {
+    top: 10px;
+    transform: translateY(0);
+    font-size: var(--typo-regular-font-size-caption-1);
+  }
+
+  // ── Show/Hide toggle (password) ───────────────────────────
+  &__eye {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-family-sans);
+    font-size: var(--typo-regular-font-size-caption-1);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s ease;
+
+    &:hover { color: var(--white); }
+  }
+
+  // ── Error state ───────────────────────────────────────────
+  &.is-error &__control {
+    border-color: var(--color-action-brand);
+
+    &:focus { border-color: var(--color-action-brand); }
+  }
+
+  &__error {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 0;
+    font-family: var(--font-family-sans);
+    font-size: var(--typo-regular-font-size-caption-1);
+    line-height: 1.4;
+    color: var(--color-action-brand);
+  }
+
+  &__error-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  // ── Disabled state ────────────────────────────────────────
+  &.is-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+}

@@ -1,0 +1,13 @@
+$font-family: (
+  sans: "'Netflix Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+  logo: "'Bebas Neue', sans-serif",
+);
+
+// Font files are loaded via @font-face in foundation/_fonts.scss
+$font-files: ();
+
+$font-weight: (
+  regular: 400,
+  medium: 500,
+  bold: 700,
+);

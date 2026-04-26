@@ -1,0 +1,30 @@
+@use "sass:map";
+@use "../tokens/breakpoints" as bp;
+
+@function breakpoint($key) {
+  @return map.get(bp.$breakpoints, $key);
+}
+
+@mixin up($key) {
+  @media (min-width: breakpoint($key)) {
+    @content;
+  }
+}
+
+@mixin down($key) {
+  @media (max-width: (breakpoint($key) - 0.02px)) {
+    @content;
+  }
+}
+
+@mixin between($from, $to) {
+  @media (min-width: breakpoint($from)) and (max-width: (breakpoint($to) - 0.02px)) {
+    @content;
+  }
+}
+
+@mixin only($key) {
+  @include up($key) {
+    @content;
+  }
+}

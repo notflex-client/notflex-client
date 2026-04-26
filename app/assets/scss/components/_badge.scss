@@ -1,0 +1,58 @@
+@use "../tools/token" as *;
+@use "../mixins/typography" as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 2px;
+  white-space: nowrap;
+  user-select: none;
+
+  // ── Size: default ─────────────────────────────────────────
+  &-default {
+    @include typography-variant("caption-1-medium");
+    padding: token("dm-2") token("dm-6");
+  }
+
+  // ── Size: small ───────────────────────────────────────────
+  &-small {
+    @include typography-variant("caption-2-medium");
+    padding: token("dm-2") token("dm-4");
+  }
+
+  // ══ VARIANTS ══════════════════════════════════════════════
+
+  // "New" — green text, no background
+  &-new {
+    color: #46d369;
+    background: transparent;
+  }
+
+  // "Recently Added", "Top 10" indicator — red fill
+  &-hot {
+    background-color: var(--color-action-brand);
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  // Rating badges: "TV-MA", "TV-14", "PG-13" — bordered
+  &-rating {
+    color: var(--color-text-secondary);
+    border: 1px solid var(--grey-500);
+    background: transparent;
+  }
+
+  // Quality badges: "HD", "4K", "SDR" — bordered
+  &-quality {
+    color: var(--color-text-secondary);
+    border: 1px solid var(--grey-500);
+    background: transparent;
+  }
+
+  // "Leaving Soon" — yellow text
+  &-leaving {
+    color: #f5c518;
+    background: transparent;
+  }
+}

@@ -1,0 +1,30 @@
+@use "../tools/token" as *;
+@use "../tokens/typography" as t;
+@use "../tokens/typography-scales" as ts;
+@use "../tokens/typography-variants" as tv;
+@use "../tokens/spacing" as sp;
+@use "../tokens/color-base" as cb;
+@use "../tokens/color-semantic" as cs;
+
+:root {
+  @include define-tokens(t.$font-family, "font-family");
+  @include define-tokens(t.$font-weight, "font-weight");
+
+  @each $weight, $scales in ts.$typo-scales {
+    @include define-tokens($scales, "typo-#{$weight}");
+  }
+
+  @include define-tokens(tv.$typo-variants, "typo-variant");
+
+  @include define-tokens(sp.$dm, "dm");
+
+  --black: #{cb.$black};
+  --white: #{cb.$white};
+  --red:   #{cb.$red};
+  @include define-tokens(cb.$secondary, "secondary");
+  @include define-tokens(cb.$grey, "grey");
+  @include define-tokens(cb.$overlay-white, "overlay-white");
+  @include define-tokens(cb.$overlay-black, "overlay-black");
+
+  @include define-tokens(cs.$color, "color");
+}

@@ -1,0 +1,67 @@
+@use "../tools/token" as *;
+
+.feature-section {
+  padding: token("dm-56") token("dm-40");
+  border-bottom: 8px solid var(--grey-800);
+  background-color: var(--color-background-base);
+
+  // ── Inner 2-col grid ──────────────────────────────────────
+  &__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: token("dm-40");
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  // reversed: media left, text right
+  &.is-reverse &__text  { order: 2; }
+  &.is-reverse &__media { order: 1; }
+
+  // ── Text ──────────────────────────────────────────────────
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: token("dm-16");
+    text-align: center;
+  }
+
+  &__title {
+    color: token("color-text-primary");
+    margin: 0;
+  }
+
+  &__desc {
+    color: token("color-text-primary");
+    margin: 0;
+  }
+
+  // ── Media ─────────────────────────────────────────────────
+  &__media {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__img {
+    width: 100%;
+    max-width: 560px;
+    height: auto;
+    display: block;
+  }
+
+  // ── Responsive ────────────────────────────────────────────
+  @media (max-width: 743px) {
+    padding: token("dm-40") token("dm-16");
+
+    &__inner {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    &.is-reverse &__text  { order: 1; }
+    &.is-reverse &__media { order: 2; }
+  }
+}

@@ -1,0 +1,77 @@
+// ============================================================
+// Semantic color tokens — map palette → intent.
+// Applied at :root (dark-only theme).
+// Usage in components: token("color-background-base"), etc.
+// ============================================================
+
+$color: (
+  // ----------------------------------------------------------
+  // Background — page and surface layers
+  // ----------------------------------------------------------
+  background: (
+    base:         #141414, // page root bg (grey-900)
+    surface:      #1f1f1f, // cards, panels
+    elevated:     #2a2a2a, // modals, dropdowns (grey-700)
+    overlay:      rgba(0, 0, 0, 0.60), // scrim behind modals
+    highlight:    rgba(255, 255, 255, 0.05), // hover tint on dark
+  ),
+
+  // ----------------------------------------------------------
+  // Text
+  // ----------------------------------------------------------
+  text: (
+    primary:      #ffffff,
+    secondary:    #b3b3b3, // grey-100
+    disabled:     #6d6d6e, // grey-300
+    inverse:      #000000,
+    on-brand:     #ffffff, // text on red buttons
+  ),
+
+  // ----------------------------------------------------------
+  // Action — interactive brand color (Netflix red)
+  // ----------------------------------------------------------
+  action: (
+    brand:        #e50914,
+    brand-hover:  #f50723, // red-300 (brighter)
+    brand-press:  #c11119, // red-200 (darker)
+    neutral:      #ffffff,
+    neutral-hover: rgba(255, 255, 255, 0.85),
+    neutral-press: rgba(255, 255, 255, 0.70),
+    disabled:     #6d6d6e,
+  ),
+
+  // ----------------------------------------------------------
+  // Border / Divider
+  // ----------------------------------------------------------
+  border: (
+    subtle:       rgba(255, 255, 255, 0.15),
+    default:      rgba(255, 255, 255, 0.30),
+    strong:       rgba(255, 255, 255, 0.50),
+  ),
+
+  // ----------------------------------------------------------
+  // Status
+  // ----------------------------------------------------------
+  status: (
+    info:         #0071eb, // blue-100
+    info-surface: rgba(0, 113, 235, 0.15),
+    success:      #46d369, // green
+    success-surface: rgba(70, 211, 105, 0.15),
+    warning:      #f9c500,
+    warning-surface: rgba(249, 197, 0, 0.15),
+    error:        #e50914,
+    error-surface: rgba(229, 9, 20, 0.15),
+  ),
+
+  // ----------------------------------------------------------
+  // Media / Content cards
+  // ----------------------------------------------------------
+  media: (
+    badge-new:    #46d369, // "New" label
+    badge-top10:  #e50914, // "Top 10" label
+    progress:     #e50914, // watch progress bar
+    rating-match: #46d369, // match % text
+    overlay-top:    rgba(0, 0, 0, 0.30),
+    overlay-bottom: rgba(0, 0, 0, 0.90),
+  ),
+);

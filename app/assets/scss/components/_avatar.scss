@@ -1,0 +1,116 @@
+@use "../tools/token" as *;
+@use "../mixins/typography" as *;
+
+// ── DOT SIZE (add-wrap / frame) per size ──────────────────────
+$avatar-size-large: 80px;
+$avatar-size-small: 44px;
+
+.avatar {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: token("dm-8");
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: center;
+
+  // ── Frame (image container) ─────────────────────────────
+  &__frame {
+    display: block;
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: token("grey-700");
+    transition: filter 0.15s ease;
+  }
+
+  &__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: token("grey-600");
+  }
+
+  &:hover &__frame {
+    filter: brightness(0.65);
+  }
+
+  // ── Add Profile ─────────────────────────────────────────
+  &__add-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: token("grey-700");
+    border: 2px solid token("grey-600");
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  &__add-icon {
+    width: 45%;
+    height: 45%;
+    color: token("color-text-secondary");
+  }
+
+  &:hover &__add-wrap {
+    background-color: token("grey-600");
+    border-color: token("white");
+  }
+
+  // ── Name ────────────────────────────────────────────────
+  &__name {
+    color: token("color-text-secondary");
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+  }
+
+  &:hover &__name {
+    color: token("color-text-primary");
+  }
+
+  // ── Arrow (small trigger variant) ───────────────────────
+  &__arrow {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    color: token("color-text-secondary");
+  }
+
+  // ══ SIZE: large ══════════════════════════════════════════
+  &-large {
+    .avatar__frame,
+    .avatar__add-wrap {
+      width: $avatar-size-large;
+      height: $avatar-size-large;
+    }
+  }
+
+  // ══ SIZE: small ══════════════════════════════════════════
+  &-small {
+    .avatar__frame {
+      width: $avatar-size-small;
+      height: $avatar-size-small;
+      border-radius: 4px;
+    }
+
+    .avatar__add-wrap {
+      width: $avatar-size-small;
+      height: $avatar-size-small;
+    }
+
+    // Position arrow relative to frame
+    position: relative;
+  }
+}

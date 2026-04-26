@@ -1,0 +1,61 @@
+// ============================================================
+// Base color palette — raw values only, no semantic meaning.
+// Do NOT use these directly in components; use _color-semantic.scss.
+// ============================================================
+
+$black: #000000;
+$white: #ffffff;
+$red:   #e50914; // Netflix brand red
+
+// Secondary palette
+$secondary: (
+  red-100:  #eb3942,
+  red-200:  #c11119,
+  red-300:  #f50723,
+  blue-100: #0071eb,
+  blue-200: #448ef4,
+  blue-300: #54b9d5,
+  green:    #46d369,
+);
+
+// Grey scale (10 = lightest, 900 = darkest)
+$grey: (
+  10:  #e5e5e5,
+  20:  #dcdcdc,
+  25:  #d2d2d2,
+  50:  #bcbcbc,
+  100: #b3b3b3,
+  150: #979797,
+  200: #808080,
+  250: #777777,
+  300: #6d6d6e,
+  350: #545454,
+  400: #414141,
+  450: #404040,
+  500: #3a3a3a,
+  550: #363636,
+  600: #333333,
+  650: #2f2f2f,
+  700: #2a2a2a,
+  750: #262626,
+  800: #232323,
+  850: #181818,
+  900: #141414,
+);
+
+// Transparent white
+$overlay-white: (
+  15: rgba(255, 255, 255, 0.15),
+  20: rgba(255, 255, 255, 0.20),
+  30: rgba(255, 255, 255, 0.30),
+  35: rgba(255, 255, 255, 0.35),
+  50: rgba(255, 255, 255, 0.50),
+  70: rgba(255, 255, 255, 0.70),
+);
+
+// Transparent black
+$overlay-black: (
+  30: rgba(0, 0, 0, 0.30),
+  60: rgba(0, 0, 0, 0.60),
+  90: rgba(0, 0, 0, 0.90),
+);

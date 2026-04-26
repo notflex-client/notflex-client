@@ -1,0 +1,202 @@
+@use "../tools/token" as *;
+
+// ─────────────────────────────────────────────────────────────────
+// CSS custom properties — override per usage context:
+//
+//   --slider-track-bg          track background
+//   --slider-range-bg          filled range color
+//   --slider-thumb-color       thumb background
+//   --slider-track-size        default track thickness
+//   --slider-track-hover-size  track thickness on hover (progress variant)
+//   --slider-thumb-size        thumb diameter
+// ─────────────────────────────────────────────────────────────────
+
+.slider {
+  --slider-track-bg:          #{token("grey-700")};
+  --slider-range-bg:          #{token("color-action-brand")};
+  --slider-thumb-color:       #{token("color-action-brand")};
+  --slider-track-size:        4px;
+  --slider-track-hover-size:  4px;  // overridden by progress variant
+  --slider-thumb-size:        14px;
+
+  display: flex;
+  align-items: center;
+  gap: token("dm-8");
+  outline: none;
+  cursor: pointer;
+
+  // ── Control ────────────────────────────────────────────────
+  &__control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+
+  // ── Track ──────────────────────────────────────────────────
+  &__track {
+    position: relative;
+    width: 100%;
+    height: var(--slider-track-size);
+    background-color: var(--slider-track-bg);
+    border-radius: 9999px;
+    overflow: hidden;
+    transition: height 0.15s ease;
+  }
+
+  // ── Buffer (loaded / hover-preview layer) ──────────────────
+  &__buffer {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: var(--slider-buffer, 0%);
+    background-color: token("grey-600");
+    border-radius: 9999px;
+  }
+
+  // ── Range (filled portion) ─────────────────────────────────
+  &__range {
+    position: absolute;
+    height: 100%;
+    background-color: var(--slider-range-bg);
+    border-radius: 9999px;
+  }
+
+  // ── Thumb ──────────────────────────────────────────────────
+  // Zag.js handles all positioning (left/bottom/translate) via inline styles.
+  // Only visual + interaction styles go here.
+  // Scale on drag works by overriding --slider-thumb-transform (used by Zag's
+  // inline `transform: var(--slider-thumb-transform)`) from the orientation sections below.
+  &__thumb {
+    width: var(--slider-thumb-size);
+    height: var(--slider-thumb-size);
+    border-radius: 50%;
+    background-color: var(--slider-thumb-color);
+    cursor: grab;
+    outline: none;
+    transition: opacity 0.15s ease, box-shadow 0.1s ease;
+    // Enlarged hit area
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+    }
+    &:active,
+    &[data-dragging] {
+      cursor: grabbing;
+    }
+    &[data-focus-visible] {
+      box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.45);
+    }
+  }
+
+  // ── Value label ────────────────────────────────────────────
+  &__value {
+    flex-shrink: 0;
+    color: token("color-text-secondary");
+    white-space: nowrap;
+  }
+
+  // ── Disabled ───────────────────────────────────────────────
+  &.is-disabled {
+    pointer-events: none;
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  // ══ ORIENTATION: horizontal ════════════════════════════════
+  &-horizontal {
+    width: 100%;
+
+    .slider__control {
+      // tall enough to contain thumb + hit area
+      height: calc(var(--slider-thumb-size) + 20px);
+    }
+
+    // Scale thumb on drag by overriding Zag's --slider-thumb-transform
+    .slider__thumb {
+      &:active,
+      &[data-dragging] {
+        --slider-thumb-transform: translateX(-50%) scale(1.2);
+      }
+    }
+  }
+
+  // ══ ORIENTATION: vertical ══════════════════════════════════
+  &-vertical {
+    flex-direction: column;
+    width: auto;
+    height: 100%;
+    align-items: center;
+    gap: token("dm-8");
+
+    .slider__control {
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      width: calc(var(--slider-thumb-size) + 20px);
+    }
+
+    .slider__track {
+      // swap axes
+      width: var(--slider-track-size);
+      height: 100%;
+    }
+
+    .slider__range {
+      width: 100%;
+      height: auto;
+    }
+
+    .slider__thumb {
+      &:active,
+      &[data-dragging] {
+        --slider-thumb-transform: translateY(50%) scale(1.2);
+      }
+    }
+
+    .slider__buffer { display: none; } // buffer N/A for vertical
+  }
+
+  // ══ VARIANT: progress (video scrubber) ═════════════════════
+  // Thin track expands on hover; thumb hidden until hover
+  &-progress {
+    --slider-track-size:       3px;
+    --slider-track-hover-size: 5px;
+    --slider-thumb-size:       13px;
+
+    &:hover,
+    &[data-focus-within] {
+      .slider__track {
+        height: var(--slider-track-hover-size);
+      }
+      .slider__thumb {
+        opacity: 1;
+      }
+    }
+
+    // Thumb invisible at rest
+    .slider__thumb {
+      opacity: 0;
+      transition: transform 0.1s ease, opacity 0.15s ease;
+    }
+
+    // When dragging, keep thumb visible even without hover
+    .slider__thumb[data-dragging],
+    .slider__thumb[data-focus-visible] {
+      opacity: 1;
+    }
+  }
+
+  // ══ VARIANT: volume ════════════════════════════════════════
+  // Vertical, taller thumb, fills bottom→top
+  &-volume {
+    --slider-thumb-size: 16px;
+    --slider-track-size: 4px;
+  }
+
+  // ══ VARIANT: default ═══════════════════════════════════════
+  // Standard horizontal slider — nothing extra needed
+}

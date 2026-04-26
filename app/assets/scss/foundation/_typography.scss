@@ -1,0 +1,10 @@
+@use "../mixins/typography" as *;
+@use "../tokens/typography-variants" as tv;
+
+// Generates a CSS class for each variant in $typo-variants.
+// Usage in templates: <p class="body-regular"> or <h1 class="title-1-bold">
+@each $variant, $props in tv.$typo-variants {
+  .#{$variant} {
+    @include typography-variant($variant);
+  }
+}

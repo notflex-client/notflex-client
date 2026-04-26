@@ -1,0 +1,107 @@
+// Typography scales organized by font-weight group.
+// Unlike artech (breakpoint-based), Netflix type sizes vary per weight group.
+// Generated CSS vars: --typo-{weight}-font-size-{name}, --typo-{weight}-line-height-{name}
+
+$typo-scales: (
+  regular: (
+    font-size: (
+      caption-2:   11px,
+      caption-1:   13px,
+      small-body:  14px,
+      body:        16px,
+      headline-2:  17px,
+      headline-1:  18px,
+      title-4:     20px,
+      title-3:     21px,
+      title-2:     24px,
+      title-1:     27px,
+      large-title: 50px,
+    ),
+    line-height: (
+      caption-2:   15px,
+      caption-1:   18px,
+      small-body:  20px,
+      body:        24px,
+      headline-2:  22px,
+      headline-1:  24px,
+      title-4:     26px,
+      title-3:     27px,
+      title-2:     30px,
+      title-1:     34px,
+      large-title: 60px,
+    ),
+    letter-spacing: (
+      caption-2:   0px,
+      caption-1:   0.25px,
+      small-body:  -0.25px,
+      body:        0px,
+      headline-2:  0px,
+      headline-1:  0px,
+      title-4:     0px,
+      title-3:     0px,
+      title-2:     0px,
+      title-1:     0px,
+      large-title: 0px,
+    ),
+  ),
+
+  medium: (
+    font-size: (
+      caption-2:   12px,
+      caption-1:   13px,
+      small-body:  14px,
+      body:        16px,
+      headline-2:  20px,
+      headline-1:  21px,
+      title-4:     22px,
+      title-3:     24px,
+      title-2:     28px,
+      title-1:     30px,
+      large-title: 33px,
+    ),
+    line-height: (
+      caption-2:   16px,
+      caption-1:   18px,
+      small-body:  20px,
+      body:        24px,
+      headline-2:  26px,
+      headline-1:  27px,
+      title-4:     28px,
+      title-3:     30px,
+      title-2:     34px,
+      title-1:     36px,
+      large-title: 40px,
+    ),
+    letter-spacing: (
+      caption-2:   0px,
+      caption-1:   0px,
+      small-body:  0px,
+      body:        -0.5px,
+      headline-2:  0px,
+      headline-1:  0px,
+      title-4:     0px,
+      title-3:     -0.5px,
+      title-2:     0px,
+      title-1:     0px,
+      large-title: 0px,
+    ),
+  ),
+
+  bold: (
+    font-size: (
+      title-2:     20px,
+      title-1:     48px,
+      large-title: 55px,
+    ),
+    line-height: (
+      title-2:     24px,
+      title-1:     56px,
+      large-title: 64px,
+    ),
+    letter-spacing: (
+      title-2:     0px,
+      title-1:     0px,
+      large-title: 0px,
+    ),
+  ),
+);

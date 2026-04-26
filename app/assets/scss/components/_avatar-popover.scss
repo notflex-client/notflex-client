@@ -1,0 +1,143 @@
+@use "../tools/token" as *;
+
+$popover-profile-size: 40px;
+
+// ── Root wrapper (trigger + teleported panel) ─────────────────
+.avatar-popover-root {
+  display: inline-flex;
+  position: relative;
+}
+
+// Fallback trigger (used only when no trigger slot is provided)
+.avatar-popover__fallback-trigger {
+  background: none;
+  border: 1px solid token("grey-600");
+  border-radius: 4px;
+  padding: token("dm-4") token("dm-8");
+  color: token("color-text-secondary");
+  cursor: pointer;
+  font-size: 12px;
+}
+
+// ── Panel ─────────────────────────────────────────────────────
+.avatar-popover {
+  // Zag hides via data-state; reset display when open
+  &[data-state="closed"] { display: none; }
+  background-color: token("grey-900");
+  border: 1px solid token("grey-700");
+  border-radius: 4px;
+  min-width: 200px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+
+  // ── Profiles row ─────────────────────────────────────────
+  &__profiles {
+    display: flex;
+    gap: token("dm-12");
+    padding: token("dm-16") token("dm-16") token("dm-12");
+  }
+
+  &__profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: token("dm-6");
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover &-frame {
+      filter: brightness(0.65);
+    }
+  }
+
+  &__profile-frame {
+    width: $popover-profile-size;
+    height: $popover-profile-size;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: token("grey-700");
+    transition: filter 0.15s ease;
+    display: block;
+    flex-shrink: 0;
+
+    .avatar-popover__profile.is-active & {
+      box-shadow: 0 0 0 2px token("white");
+    }
+  }
+
+  &__profile-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__profile-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: token("grey-600");
+  }
+
+  &__profile-name {
+    color: token("color-text-secondary");
+    white-space: nowrap;
+  }
+
+  // ── Separator ────────────────────────────────────────────
+  &__sep {
+    height: 1px;
+    background-color: token("grey-700");
+    margin: 0;
+  }
+
+  // ── Menu list ────────────────────────────────────────────
+  &__menu {
+    list-style: none;
+    margin: 0;
+    padding: token("dm-8") 0;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: token("dm-12");
+    padding: token("dm-8") token("dm-16");
+    cursor: pointer;
+    color: token("color-text-secondary");
+    transition: background-color 0.1s ease, color 0.1s ease;
+    outline: none;
+
+    &:hover,
+    &:focus-visible {
+      background-color: token("grey-700");
+      color: token("color-text-primary");
+    }
+  }
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: inherit;
+  }
+
+  // ── Sign out ─────────────────────────────────────────────
+  &__sign-out {
+    display: block;
+    width: 100%;
+    padding: token("dm-12") token("dm-16");
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    color: token("color-text-secondary");
+    transition: color 0.1s ease;
+
+    &:hover {
+      color: token("color-text-primary");
+    }
+  }
+}

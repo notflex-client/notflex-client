@@ -1,0 +1,71 @@
+@use "../tools/token" as *;
+
+.accordion {
+  background-color: var(--grey-700);
+  border-radius: 4px;
+  overflow: hidden;
+
+  // ── Header ────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: token("dm-16");
+    width: 100%;
+    padding: token("dm-20") token("dm-20");
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--grey-650);
+    }
+  }
+
+  // ── Title ─────────────────────────────────────────────────
+  &__title {
+    flex: 1;
+    font-family: var(--font-family-sans);
+    font-size: var(--typo-regular-font-size-headline-2);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--typo-regular-line-height-headline-2);
+    color: var(--color-text-primary);
+  }
+
+  // ── Icon ──────────────────────────────────────────────────
+  &__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    color: var(--color-text-primary);
+  }
+
+  // ── Body — animated expand ─────────────────────────────────
+  &__body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease;
+  }
+
+  &.is-open &__body {
+    grid-template-rows: 1fr;
+  }
+
+  // overflow:hidden here clips everything — no padding allowed on this element
+  &__content {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  // padding lives here, safely inside the clipped container
+  &__inner {
+    padding: token("dm-16") token("dm-20") token("dm-20");
+    font-family: var(--font-family-sans);
+    font-size: var(--typo-regular-font-size-headline-2);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--typo-regular-line-height-headline-2);
+    color: var(--color-text-primary);
+  }
+}

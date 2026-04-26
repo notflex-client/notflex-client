@@ -1,0 +1,48 @@
+@use "../tools/token" as *;
+@use "../mixins/typography" as *;
+
+.movie-block {
+  display: flex;
+  flex-direction: column;
+  gap: token("dm-12");
+
+  // ── Section title ───────────────────────────────────────────
+  &__title {
+    @include typography-variant("body-medium");
+    margin: 0;
+    padding: 0 token("dm-4");
+    color: var(--color-text-secondary);
+    transition: color 0.15s ease;
+
+    &:hover { color: var(--color-text-primary); }
+  }
+
+  // ── Scrollable row ──────────────────────────────────────────
+  &__row {
+    display: flex;
+    gap: token("dm-4");
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  // ── Individual card slot ────────────────────────────────────
+  &__item {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+
+  // ══ VARIANT: default ═══════════════════════════════════════
+  &-default &__item { width: 160px; }
+
+  // ══ VARIANT: first (standard titled row) ═══════════════════
+  &-first &__item { width: 200px; }
+
+  // ══ VARIANT: top10 ═════════════════════════════════════════
+  &-top10 &__row { gap: 0; }
+  &-top10 &__item { width: 200px; }
+
+  // ══ VARIANT: continue ══════════════════════════════════════
+  &-continue &__item { width: 280px; }
+}

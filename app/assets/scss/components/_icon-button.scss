@@ -1,0 +1,106 @@
+@use "../tools/token" as *;
+
+// Size map: (container-size, icon-size)
+$icon-btn-sizes: (
+  large:  (size: 48px, icon: 24px),
+  medium: (size: 40px, icon: 20px),
+  small:  (size: 32px, icon: 16px),
+);
+
+.icon-btn {
+  --icon-btn-bg:       transparent;
+  --icon-btn-bg-hover: transparent;
+  --icon-btn-bg-press: transparent;
+  --icon-btn-color:    var(--color-text-primary);
+  --icon-btn-border:   none;
+  --icon-btn-size:     40px;
+  --icon-btn-icon:     20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--icon-btn-size);
+  height: var(--icon-btn-size);
+  border: var(--icon-btn-border);
+  border-radius: 4px;
+  background-color: var(--icon-btn-bg);
+  color: var(--icon-btn-color);
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+
+  > svg,
+  .icon-btn__icon {
+    width: var(--icon-btn-icon);
+    height: var(--icon-btn-icon);
+    flex-shrink: 0;
+  }
+
+  &:hover:not(:disabled):not(.is-disabled) {
+    background-color: var(--icon-btn-bg-hover);
+  }
+
+  &:active:not(:disabled):not(.is-disabled) {
+    background-color: var(--icon-btn-bg-press);
+  }
+
+  &:disabled,
+  &.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // ── Shape ─────────────────────────────────────────────────
+  &-circle { border-radius: 50%; }
+
+  // ── Sizes ─────────────────────────────────────────────────
+  @each $name, $vals in $icon-btn-sizes {
+    &-#{$name} {
+      --icon-btn-size: #{map-get($vals, size)};
+      --icon-btn-icon: #{map-get($vals, icon)};
+    }
+  }
+
+  // ── Variants ──────────────────────────────────────────────
+  &-ghost {
+    --icon-btn-bg:       transparent;
+    --icon-btn-bg-hover: var(--color-background-highlight);
+    --icon-btn-bg-press: var(--overlay-white-20);
+    --icon-btn-color:    var(--color-text-primary);
+    --icon-btn-border:   none;
+  }
+
+  &-overlay {
+    --icon-btn-bg:       var(--overlay-black-60);
+    --icon-btn-bg-hover: var(--overlay-black-30);
+    --icon-btn-bg-press: var(--overlay-black-60);
+    --icon-btn-color:    var(--color-text-primary);
+    --icon-btn-border:   none;
+  }
+
+  &-outline {
+    --icon-btn-bg:       transparent;
+    --icon-btn-bg-hover: var(--color-background-highlight);
+    --icon-btn-bg-press: var(--overlay-white-20);
+    --icon-btn-color:    var(--color-text-primary);
+    --icon-btn-border:   1px solid var(--color-border-default);
+  }
+
+  &-brand {
+    --icon-btn-bg:       var(--color-action-brand);
+    --icon-btn-bg-hover: var(--color-action-brand-hover);
+    --icon-btn-bg-press: var(--color-action-brand-press);
+    --icon-btn-color:    var(--color-text-on-brand);
+    --icon-btn-border:   none;
+  }
+
+  &-light {
+    --icon-btn-bg:       var(--white);
+    --icon-btn-bg-hover: var(--overlay-white-70);
+    --icon-btn-bg-press: var(--overlay-white-50);
+    --icon-btn-color:    var(--black);
+    --icon-btn-border:   none;
+  }
+}

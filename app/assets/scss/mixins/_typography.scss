@@ -1,0 +1,11 @@
+@use "../tools/token" as *;
+
+@mixin typography-variant($name) {
+  font-family:     token("typo-variant-#{$name}-font-family");
+  font-weight:     token("typo-variant-#{$name}-font-weight");
+  font-size:       token("typo-variant-#{$name}-font-size");
+  line-height:     token("typo-variant-#{$name}-line-height");
+  letter-spacing:  token("typo-variant-#{$name}-letter-spacing");
+  text-decoration: token("typo-variant-#{$name}-text-decoration");
+  text-transform:  token("typo-variant-#{$name}-text-transform");
+}

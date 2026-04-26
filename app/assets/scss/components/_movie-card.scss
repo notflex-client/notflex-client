@@ -1,0 +1,140 @@
+@use "../tools/token" as *;
+@use "../mixins/typography" as *;
+
+$play-size: 44px;
+
+.movie-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+
+  // ── Thumbnail ───────────────────────────────────────────────
+  &__thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background-color: var(--grey-700);
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  // ── Hover overlay ────────────────────────────────────────────
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    &.is-visible { opacity: 1; }
+  }
+
+  &:hover &__overlay { opacity: 1; }
+
+  &__play-icon {
+    width: $play-size;
+    height: $play-size;
+    color: var(--white);
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  }
+
+  // ── Netflix N (top-left badge) ────────────────────────────────
+  &__n {
+    position: absolute;
+    top: token("dm-6");
+    left: token("dm-6");
+    width: 14px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  // ── Duration badge (top-right, more-like-this / episode) ─────
+  &__duration {
+    @include typography-variant("caption-2-medium");
+    position: absolute;
+    top: token("dm-6");
+    right: token("dm-8");
+    color: var(--white);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  }
+
+  // ── Time remaining (bottom-right, player) ────────────────────
+  &__time {
+    @include typography-variant("caption-2-medium");
+    position: absolute;
+    bottom: token("dm-8");
+    right: token("dm-8");
+    color: var(--white);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  }
+
+  // ── Badge position (content from <Badge> component) ─────────
+  &__badge {
+    position: absolute;
+    bottom: token("dm-8");
+    left: token("dm-8");
+  }
+
+  // ── Progress bar (continue watching) ─────────────────────────
+  &__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.3);
+
+    &-fill {
+      height: 100%;
+      background-color: var(--color-action-brand);
+      border-radius: 0 2px 2px 0;
+    }
+  }
+
+  // ── Title below thumbnail (trailer) ─────────────────────────
+  &__title {
+    margin: 0;
+    padding: token("dm-8") token("dm-4") token("dm-4");
+    color: var(--color-text-secondary);
+  }
+
+  // ══ VARIANT: episode ══════════════════════════════════════════
+  &-episode &__thumb { aspect-ratio: 4 / 3; }
+
+  // ══ VARIANT: top10 ════════════════════════════════════════════
+  &-top10 {
+    flex-direction: row;
+    align-items: flex-end;
+    overflow: visible;
+  }
+
+  &__rank {
+    font-family: var(--font-family-logo);
+    font-size: 120px;
+    line-height: 0.85;
+    color: transparent;
+    -webkit-text-stroke: 3px var(--grey-600);
+    text-stroke: 3px var(--grey-600);
+    flex-shrink: 0;
+    margin-right: calc(-1 * var(--dm-20));
+    user-select: none;
+  }
+
+  &-top10 &__thumb {
+    flex: 1;
+    min-width: 0;
+    aspect-ratio: 2 / 3;
+    border-radius: 4px;
+  }
+}

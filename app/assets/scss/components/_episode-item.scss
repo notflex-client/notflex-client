@@ -1,0 +1,112 @@
+@use "../tools/token" as *;
+@use "../mixins/typography" as *;
+
+.episode-item {
+  display: flex;
+  align-items: center;
+  gap: token("dm-20");
+  padding: token("dm-16") token("dm-24");
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    background-color: token("grey-700");
+  }
+
+  // ── Episode number ──────────────────────────────────────────
+  &__number {
+    @include typography-variant("headline-1-regular");
+    width: 28px;
+    flex-shrink: 0;
+    text-align: center;
+    color: token("color-text-secondary");
+  }
+
+  // ── Thumbnail ───────────────────────────────────────────────
+  &__thumb {
+    position: relative;
+    width: 160px;
+    flex-shrink: 0;
+    aspect-ratio: 16 / 9;
+    background-color: token("grey-700");
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &__play {
+    width: 32px;
+    height: 32px;
+    color: token("white");
+  }
+
+  // ── Info ────────────────────────────────────────────────────
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: token("dm-6");
+  }
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: token("dm-12");
+  }
+
+  &__title {
+    @include typography-variant("body-medium");
+    color: token("color-text-primary");
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__duration {
+    @include typography-variant("caption-1-regular");
+    color: token("color-text-secondary");
+    flex-shrink: 0;
+  }
+
+  &__desc {
+    @include typography-variant("small-body-regular");
+    color: token("color-text-secondary");
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  // ══ Active state (current episode) ══════════════════════════
+  &.is-active &__overlay { opacity: 1; }
+  &.is-active &__title   { color: token("white"); }
+
+  // ══ Focused state (keyboard / selection highlight) ══════════
+  &.is-focused,
+  &:focus-visible {
+    outline: none;
+    background-color: token("grey-700");
+    box-shadow: inset 0 0 0 2px token("white");
+  }
+}

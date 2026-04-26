@@ -1,0 +1,74 @@
+@use "../tools/token" as *;
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: token("dm-8");
+  cursor: pointer;
+  user-select: none;
+
+  &.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // ── Hidden native input ───────────────────────────────────
+  &__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  // ── Visual box ────────────────────────────────────────────
+  &__box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    border: 1.5px solid var(--color-border-default);
+    background-color: transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  &__check {
+    display: none;
+    color: var(--white);
+  }
+
+  // ── Label text ────────────────────────────────────────────
+  &__label {
+    font-family: var(--font-family-sans);
+    font-size: var(--typo-regular-font-size-body);
+    line-height: var(--typo-regular-line-height-body);
+    color: var(--color-text-primary);
+  }
+
+  // ── Hover ─────────────────────────────────────────────────
+  &:hover:not(.is-disabled) &__box {
+    border-color: var(--color-border-strong);
+  }
+
+  // ── Checked ───────────────────────────────────────────────
+  &__input:checked ~ &__box {
+    background-color: var(--color-action-brand);
+    border-color: var(--color-action-brand);
+  }
+
+  &__input:checked ~ &__box &__check {
+    display: block;
+  }
+
+  // ── Focus ─────────────────────────────────────────────────
+  &__input:focus-visible ~ &__box {
+    outline: 2px solid var(--color-border-strong);
+    outline-offset: 2px;
+  }
+}

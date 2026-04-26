@@ -1,0 +1,18 @@
+@use "sass:map";
+
+$breakpoints: (
+  mobile: 375px,
+  tablet: 768px,
+  desktop: 1280px,
+  wide: 1440px,
+);
+
+$breakpoints: map.merge(
+  $breakpoints,
+  (
+    sm: map.get($breakpoints, mobile),
+    md: map.get($breakpoints, tablet),
+    lg: map.get($breakpoints, desktop),
+    xl: map.get($breakpoints, wide),
+  )
+);

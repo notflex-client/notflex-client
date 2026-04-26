@@ -1,0 +1,103 @@
+@use "../tools/token" as *;
+@use "../mixins/typography" as *;
+
+.btn {
+  --btn-bg:           transparent;
+  --btn-bg-hover:     transparent;
+  --btn-bg-press:     transparent;
+  --btn-color:        var(--color-text-primary);
+  --btn-border:       none;
+  --btn-border-hover: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: token("dm-8");
+  border: var(--btn-border);
+  background-color: var(--btn-bg);
+  color: var(--btn-color);
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+
+  &:hover:not(:disabled):not(.is-disabled) {
+    background-color: var(--btn-bg-hover);
+    border: var(--btn-border-hover);
+  }
+
+  &:active:not(:disabled):not(.is-disabled) {
+    background-color: var(--btn-bg-press);
+  }
+
+  &:disabled,
+  &.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &.is-block {
+    width: 100%;
+  }
+
+  // ── Icon slots ────────────────────────────────────────────
+  &__icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  // ── Sizes ─────────────────────────────────────────────────
+  &-large {
+    height: 56px;
+    padding: 0 token("dm-24");
+    @include typography-variant("body-medium");
+  }
+
+  &-small {
+    height: 36px;
+    padding: 0 token("dm-16");
+    @include typography-variant("small-body-medium");
+  }
+
+  // ── Variants ──────────────────────────────────────────────
+  &-brand {
+    --btn-bg:           var(--color-action-brand);
+    --btn-bg-hover:     var(--color-action-brand-hover);
+    --btn-bg-press:     var(--color-action-brand-press);
+    --btn-color:        var(--color-text-on-brand);
+    --btn-border:       none;
+    --btn-border-hover: none;
+  }
+
+  &-secondary {
+    --btn-bg:           var(--grey-700);
+    --btn-bg-hover:     var(--grey-650);
+    --btn-bg-press:     var(--grey-600);
+    --btn-color:        var(--color-text-primary);
+    --btn-border:       1px solid var(--color-border-subtle);
+    --btn-border-hover: 1px solid var(--color-border-default);
+  }
+
+  &-ghost {
+    --btn-bg:           transparent;
+    --btn-bg-hover:     var(--color-background-highlight);
+    --btn-bg-press:     var(--overlay-white-20);
+    --btn-color:        var(--color-text-primary);
+    --btn-border:       1px solid var(--color-border-default);
+    --btn-border-hover: 1px solid var(--color-border-strong);
+  }
+
+  &-light {
+    --btn-bg:           var(--white);
+    --btn-bg-hover:     var(--overlay-white-70);
+    --btn-bg-press:     var(--overlay-white-50);
+    --btn-color:        var(--black);
+    --btn-border:       none;
+    --btn-border-hover: none;
+  }
+}

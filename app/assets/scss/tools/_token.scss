@@ -1,0 +1,39 @@
+@use "sass:meta";
+@use "sass:string";
+
+@mixin define-tokens($map, $prefix: "") {
+  @each $k, $v in $map {
+    @if meta.type-of($v) == "map" {
+      @if $prefix == "" {
+        @include define-tokens($v, "#{$k}");
+      } @else {
+        @include define-tokens($v, "#{$prefix}-#{$k}");
+      }
+    } @else {
+      @if $prefix == "" {
+        --#{$k}: #{$v};
+      } @else {
+        --#{$prefix}-#{$k}: #{$v};
+      }
+    }
+  }
+}
+
+@function token($path, $fallback: null) {
+  $is-string: meta.type-of($path) == "string";
+  $has-dashes: $is-string and string.slice($path, 1, 2) == "--";
+
+  $name: null;
+
+  @if $has-dashes {
+    $name: $path;
+  } @else {
+    $name: "--#{$path}";
+  }
+
+  @if $fallback == null or $fallback == "" {
+    @return var(#{$name});
+  } @else {
+    @return var(#{$name}, #{$fallback});
+  }
+}

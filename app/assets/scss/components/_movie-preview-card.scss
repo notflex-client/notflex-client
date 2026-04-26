@@ -1,0 +1,114 @@
+@use "../tools/token" as *;
+@use "../mixins/typography" as *;
+
+.mpc {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--grey-800);
+  border-radius: 6px;
+  overflow: hidden;
+  width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+  // ── Poster ──────────────────────────────────────────────────
+  &__poster {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background-color: var(--grey-700);
+    overflow: hidden;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__poster-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: token("dm-12");
+    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%);
+  }
+
+  &__play-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover { background-color: rgba(255, 255, 255, 0.35); }
+  }
+
+  // ── Body ────────────────────────────────────────────────────
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: token("dm-12");
+    padding: token("dm-12") token("dm-16") token("dm-16");
+  }
+
+  // ── Action buttons ───────────────────────────────────────────
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__actions-left {
+    display: flex;
+    gap: token("dm-8");
+  }
+
+  // ── Meta badges ──────────────────────────────────────────────
+  &__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: token("dm-6");
+  }
+
+  &__seasons {
+    @include typography-variant("caption-1-medium");
+    color: var(--color-text-primary);
+  }
+
+  // ── Description ──────────────────────────────────────────────
+  &__desc {
+    @include typography-variant("small-body-regular");
+    color: var(--color-text-primary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  // ── Genre tags ────────────────────────────────────────────────
+  &__tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: token("dm-6");
+  }
+
+  &__tag {
+    @include typography-variant("small-body-regular");
+    color: var(--color-text-secondary);
+  }
+
+  &__dot {
+    @include typography-variant("caption-2-regular");
+    color: var(--grey-500);
+  }
+}

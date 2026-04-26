@@ -1,0 +1,137 @@
+@use "../tools/token" as *;
+
+.app-header {
+  --header-height:    68px;
+  --header-padding-x: #{token("dm-40")};
+  --header-bg:        #{token("color-background-base")};
+
+  position: relative;
+  width: 100%;
+  background-color: var(--header-bg);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease;
+  z-index: 100;
+
+  // ── Sticky ────────────────────────────────────────────────
+  &.is-sticky {
+    position: sticky;
+    top: 0;
+  }
+
+  // ── Transparent (home hero) ───────────────────────────────
+  &.is-transparent {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.7) 0%,
+      transparent 100%
+    );
+  }
+
+  &.is-scrolled {
+    background-color: var(--color-background-base);
+  }
+
+  // ── Hide on scroll ────────────────────────────────────────
+  &.is-hidden {
+    transform: translateY(-100%);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+  }
+
+  // ── Inner grid ────────────────────────────────────────────
+  &__inner {
+    display: grid;
+    grid-template-columns: max-content 1fr max-content;
+    align-items: center;
+    height: var(--header-height);
+    padding: 0 var(--header-padding-x);
+    gap: token("dm-24");
+  }
+
+  // ── Logo ──────────────────────────────────────────────────
+  &__logo {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+  }
+
+  // ── Desktop nav ───────────────────────────────────────────
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: token("dm-16");
+  }
+
+  // ── Right side ────────────────────────────────────────────
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: token("dm-16");
+    justify-content: flex-end;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: token("dm-12");
+  }
+
+  &__toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    padding: token("dm-4");
+  }
+
+  // ── Mobile dropdown ───────────────────────────────────────
+  &__mobile {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background-color: var(--color-background-base);
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+
+    &.is-open {
+      max-height: 100vh;
+      opacity: 1;
+    }
+  }
+
+  &__mobile-body {
+    display: flex;
+    flex-direction: column;
+    gap: token("dm-4");
+    padding: token("dm-16") var(--header-padding-x) token("dm-24");
+  }
+
+  // ── Responsive ────────────────────────────────────────────
+  @media (max-width: 743px) {
+    --header-padding-x: #{token("dm-16")};
+
+    &__inner {
+      grid-template-columns: max-content 1fr max-content;
+    }
+
+    &__nav {
+      display: none;
+    }
+
+    &__toggle {
+      display: flex;
+    }
+  }
+}

@@ -1,0 +1,83 @@
+@use "../tools/token" as *;
+
+.subtitle-panel {
+  display: flex;
+  background-color: token("grey-900");
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 380px;
+
+  // ── Column ─────────────────────────────────────────────────
+  &__col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow-y: auto;
+
+    // Thin scrollbar
+    scrollbar-width: thin;
+    scrollbar-color: token("grey-600") transparent;
+  }
+
+  // ── Column heading ─────────────────────────────────────────
+  &__heading {
+    padding: token("dm-16") token("dm-20");
+    border-bottom: 1px solid token("grey-700");
+    position: sticky;
+    top: 0;
+    background-color: token("grey-900");
+    z-index: 1;
+    color: token("color-text-primary");
+  }
+
+  // ── Vertical divider ───────────────────────────────────────
+  &__divider {
+    width: 1px;
+    background-color: token("grey-700");
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+
+  // ── List ───────────────────────────────────────────────────
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: token("dm-8") 0;
+  }
+
+  // ── Item ───────────────────────────────────────────────────
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: token("dm-8");
+    padding: token("dm-8") token("dm-20");
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    color: token("color-text-secondary");
+
+    &:hover {
+      background-color: token("grey-700");
+    }
+
+    &.is-selected {
+      color: token("color-text-primary");
+    }
+  }
+
+  // ── Checkmark ──────────────────────────────────────────────
+  &__check {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: token("white");
+    opacity: 0;
+
+    .subtitle-panel__item.is-selected & {
+      opacity: 1;
+    }
+  }
+}
