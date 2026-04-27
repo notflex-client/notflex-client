@@ -1,4 +1,5 @@
 @use "../tools/token" as *;
+@use "../mixins/typography" as *;
 
 .checkbox {
   display: inline-flex;
@@ -45,9 +46,7 @@
 
   // ── Label text ────────────────────────────────────────────
   &__label {
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-body);
-    line-height: var(--typo-regular-line-height-body);
+    @include typography-variant("body-regular");
     color: var(--color-text-primary);
   }
 

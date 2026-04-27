@@ -57,9 +57,9 @@ const api = computed(() => menu.connect(service, normalizeProps))
 
     <!-- ── Trigger slot ─────────────────────────────────── -->
     <slot name="trigger" :trigger-props="api.getTriggerProps()">
-      <button class="avatar-popover__fallback-trigger" v-bind="api.getTriggerProps()">
+      <Button variant="ghost" size="small" class="avatar-popover__fallback-trigger" v-bind="(api.getTriggerProps() as any)">
         Profile ▾
-      </button>
+      </Button>
     </slot>
 
     <!-- ── Panel ────────────────────────────────────────── -->
@@ -69,19 +69,21 @@ const api = computed(() => menu.connect(service, normalizeProps))
 
           <!-- Profiles -->
           <div class="avatar-popover__profiles">
-            <button
+            <Button
               v-for="p in profiles"
+              variant="ghost"
+              size="large"
               :key="p.value"
               class="avatar-popover__profile"
               :class="{ 'is-active': activeProfile === p.value }"
-              v-bind="api.getItemProps({ value: `profile:${p.value}` })"
+              v-bind="(api.getItemProps({ value: `profile:${p.value}` }) as any)"
             >
               <span class="avatar-popover__profile-frame">
                 <img v-if="p.image" :src="p.image" class="avatar-popover__profile-img" :alt="p.name" />
                 <span v-else class="avatar-popover__profile-placeholder" aria-hidden="true" />
               </span>
               <span class="caption-2-regular avatar-popover__profile-name">{{ p.name }}</span>
-            </button>
+            </Button>
           </div>
 
           <div class="avatar-popover__sep" v-bind="api.getSeparatorProps()" />
@@ -117,12 +119,14 @@ const api = computed(() => menu.connect(service, normalizeProps))
           <div class="avatar-popover__sep" v-bind="api.getSeparatorProps()" />
 
           <!-- Sign out -->
-          <button
+          <Button
+            variant="ghost"
+            size="large"
             class="avatar-popover__sign-out small-body-regular"
-            v-bind="api.getItemProps({ value: 'sign-out' })"
+            v-bind="(api.getItemProps({ value: 'sign-out' }) as any)"
           >
             {{ signOutLabel }}
-          </button>
+          </Button>
 
         </div>
       </div>

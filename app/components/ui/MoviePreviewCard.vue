@@ -26,11 +26,11 @@ const emit = defineEmits<{
     <div class="mpc__poster">
       <img v-if="image" :src="image" class="mpc__img" alt="" />
       <div class="mpc__poster-overlay">
-        <button class="mpc__play-btn" type="button" aria-label="Play" @click="emit('play')">
+        <IconButton variant="ghost" shape="circle" size="medium" class="mpc__play-btn" aria-label="Play" @click="emit('play')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M5 3l14 9-14 9V3Z"/>
           </svg>
-        </button>
+        </IconButton>
       </div>
     </div>
 
@@ -72,7 +72,7 @@ const emit = defineEmits<{
       </div>
 
       <!-- Description -->
-      <p v-if="description" class="mpc__desc">{{ description }}</p>
+      <span v-if="description" class="mpc__desc">{{ description }}</span>
 
       <!-- Genre tags -->
       <div v-if="tags.length" class="mpc__tags">

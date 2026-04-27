@@ -15,9 +15,9 @@ const props = defineProps({
         <h2 class="title-1-bold feature-section__title">
           <slot name="title">{{ title }}</slot>
         </h2>
-        <p class="headline-2-regular feature-section__desc">
+        <span class="headline-2-regular feature-section__desc">
           <slot name="description">{{ description }}</slot>
-        </p>
+        </span>
       </div>
 
       <div class="feature-section__media">

@@ -14,7 +14,7 @@ function toggle() {
 <template>
   <div class="accordion" :class="{ 'is-open': isOpen }">
 
-    <button class="accordion__header" type="button" :aria-expanded="isOpen" @click="toggle">
+    <Button variant="ghost" size="large" class="accordion__header" type="button" :aria-expanded="isOpen" @click="toggle">
       <span class="accordion__title">
         <slot name="title">{{ title }}</slot>
       </span>
@@ -29,7 +29,7 @@ function toggle() {
           <path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
         </svg>
       </span>
-    </button>
+    </Button>
 
     <div class="accordion__body">
       <div class="accordion__content">

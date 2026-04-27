@@ -18,8 +18,10 @@ const emit = defineEmits<{ click: [e: MouseEvent] }>()
 
 <template>
   <!-- ── Add Profile ─────────────────────────────────────── -->
-  <button
+  <Button
     v-if="add"
+    variant="ghost"
+    size="large"
     class="avatar"
     :class="[`avatar-${size}`, 'avatar-add']"
     type="button"
@@ -33,11 +35,13 @@ const emit = defineEmits<{ click: [e: MouseEvent] }>()
       </svg>
     </span>
     <span v-if="size === 'large'" class="caption-1-regular avatar__name">Add Profile</span>
-  </button>
+  </Button>
 
   <!-- ── Regular avatar ──────────────────────────────────── -->
-  <button
+  <Button
     v-else
+    variant="ghost"
+    size="large"
     class="avatar"
     :class="[`avatar-${size}`]"
     type="button"
@@ -62,5 +66,5 @@ const emit = defineEmits<{ click: [e: MouseEvent] }>()
     >
       <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-  </button>
+  </Button>
 </template>

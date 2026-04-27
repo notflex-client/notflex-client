@@ -1,4 +1,5 @@
 @use "../tools/token" as *;
+@use "../mixins/typography" as *;
 
 .accordion {
   background-color: var(--grey-700);
@@ -12,9 +13,11 @@
     justify-content: space-between;
     gap: token("dm-16");
     width: 100%;
+    height: auto;
     padding: token("dm-20") token("dm-20");
     background: none;
     border: none;
+    border-radius: 0;
     text-align: left;
     cursor: pointer;
     transition: background-color 0.15s ease;
@@ -27,10 +30,7 @@
   // ── Title ─────────────────────────────────────────────────
   &__title {
     flex: 1;
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-headline-2);
-    font-weight: var(--font-weight-regular);
-    line-height: var(--typo-regular-line-height-headline-2);
+    @include typography-variant("headline-2-regular");
     color: var(--color-text-primary);
   }
 
@@ -62,10 +62,7 @@
   // padding lives here, safely inside the clipped container
   &__inner {
     padding: token("dm-16") token("dm-20") token("dm-20");
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-headline-2);
-    font-weight: var(--font-weight-regular);
-    line-height: var(--typo-regular-line-height-headline-2);
+    @include typography-variant("headline-2-regular");
     color: var(--color-text-primary);
   }
 }

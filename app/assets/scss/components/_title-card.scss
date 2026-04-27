@@ -1,4 +1,5 @@
 @use "../tools/token" as *;
+@use "../mixins/typography" as *;
 
 .title-card {
   display: flex;
@@ -18,9 +19,7 @@
   }
 
   &__category {
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-caption-1);
-    font-weight: var(--font-weight-medium);
+    @include typography-variant("caption-1-medium");
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--color-text-primary);
@@ -41,20 +40,15 @@
     display: flex;
     align-items: center;
     gap: token("dm-6");
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-caption-1);
-    font-weight: var(--font-weight-medium);
+    @include typography-variant("caption-1-medium");
     color: var(--color-text-primary);
   }
 
   // ── Description ───────────────────────────────────────────
   &__desc {
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-body);
-    line-height: var(--typo-regular-line-height-body);
+    @include typography-variant("body-regular");
     color: var(--color-text-primary);
     max-width: 420px;
-    margin: 0;
   }
 
   // ── Actions ───────────────────────────────────────────────

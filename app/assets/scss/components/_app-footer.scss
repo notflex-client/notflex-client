@@ -79,6 +79,7 @@
     border: 1px solid var(--color-border-subtle);
     border-radius: 3px;
     padding: token("dm-4") token("dm-12");
+    height: auto;
     cursor: pointer;
     transition: border-color 0.15s ease, color 0.15s ease;
 

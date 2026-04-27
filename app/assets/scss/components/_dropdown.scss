@@ -1,4 +1,5 @@
 @use "../tools/token" as *;
+@use "../mixins/typography" as *;
 
 .dropdown {
   --dropdown-bg:           #{token("color-background-elevated")};
@@ -103,9 +104,7 @@
   // ── Item ──────────────────────────────────────────────────
   &__item {
     padding: token("dm-8") token("dm-16");
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-body);
-    line-height: var(--typo-regular-line-height-body);
+    @include typography-variant("body-regular");
     color: var(--color-text-primary);
     cursor: pointer;
     user-select: none;

@@ -38,7 +38,7 @@ const api = computed(() => select.connect(service as any, normalizeProps) as Ret
 
 <template>
   <div class="dropdown" :class="{ [`dropdown-${size}`]: size !== 'large', 'is-open': api.open, 'is-disabled': disabled }">
-    <button class="dropdown__trigger" type="button" v-bind="api.getTriggerProps()">
+    <Button variant="ghost" size="large" class="dropdown__trigger" type="button" v-bind="(api.getTriggerProps() as any)">
       <span class="dropdown__value">
         <slot name="value" :api="api">
           {{ api.valueAsString || placeholder }}
@@ -47,7 +47,7 @@ const api = computed(() => select.connect(service as any, normalizeProps) as Ret
       <svg class="dropdown__chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
-    </button>
+    </Button>
 
     <Teleport to="body">
       <div v-bind="api.getPositionerProps()">

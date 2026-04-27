@@ -1,7 +1,10 @@
+@use "../tools/token" as *;
+@use "../mixins/typography" as *;
+
 .input-field {
   display: flex;
   flex-direction: column;
-  gap: token("dm-4");
+  gap: token("dm-12");
   width: 100%;
 
   // ── Wrap ──────────────────────────────────────────────────
@@ -22,14 +25,12 @@
     color: var(--color-text-primary);
     border: 1px solid transparent;
     border-radius: 4px;
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-body);
+    @include typography-variant("body-regular");
     line-height: 1;
     outline: none;
     caret-color: var(--white);
     transition: border-color 0.15s ease, background-color 0.15s ease;
 
-    // hide the real placeholder — we use the <label> as floating label
     &::placeholder { color: transparent; }
 
     &:hover:not(:disabled) {
@@ -46,7 +47,6 @@
       cursor: not-allowed;
     }
 
-    // make room for Show/Hide toggle
     .has-toggle & {
       padding-right: 56px;
     }
@@ -58,8 +58,7 @@
     left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-body);
+    @include typography-variant("body-regular");
     line-height: 1;
     color: var(--color-text-secondary);
     pointer-events: none;
@@ -68,7 +67,6 @@
     white-space: nowrap;
   }
 
-  // Float up when focused OR filled (`:not(:placeholder-shown)` detects filled)
   &__wrap:focus-within &__label,
   &__control:not(:placeholder-shown) ~ &__label {
     top: 10px;
@@ -82,14 +80,15 @@
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-caption-1);
-    font-weight: var(--font-weight-medium);
+    @include typography-variant("caption-1-medium");
     color: var(--color-text-secondary);
     background: none;
     border: none;
+    border-radius: 0;
     cursor: pointer;
     padding: 0;
+    width: auto;
+    height: auto;
     transition: color 0.15s ease;
 
     &:hover { color: var(--white); }
@@ -106,10 +105,7 @@
     display: flex;
     align-items: flex-start;
     gap: 6px;
-    margin: 0;
-    font-family: var(--font-family-sans);
-    font-size: var(--typo-regular-font-size-caption-1);
-    line-height: 1.4;
+    @include typography-variant("caption-1-regular");
     color: var(--color-action-brand);
   }
 

@@ -5,6 +5,8 @@
 @use "./foundation/typography" as *;
 
 // 2. Components
+@use "./components/button" as *;
+@use "./components/icon-button" as *;
 @use "./components/hero-banner" as *;
 @use "./components/movie-card" as *;
 @use "./components/movie-block" as *;
@@ -21,8 +23,6 @@
 @use "./components/title-card" as *;
 @use "./components/app-header" as *;
 @use "./components/app-footer" as *;
-@use "./components/button" as *;
-@use "./components/icon-button" as *;
 @use "./components/checkbox" as *;
 @use "./components/dropdown" as *;
 @use "./components/input-field" as *;

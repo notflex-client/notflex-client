@@ -26,7 +26,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: number] }>()
 <template>
   <div class="speed-indicator">
 
-    <p class="headline-1-medium speed-indicator__title">{{ title }}</p>
+    <span class="headline-1-medium speed-indicator__title">{{ title }}</span>
 
     <div class="speed-indicator__track-area">
       <!-- Track line behind dots -->
@@ -34,8 +34,10 @@ const emit = defineEmits<{ 'update:modelValue': [value: number] }>()
 
       <!-- Dots row -->
       <div class="speed-indicator__steps">
-        <button
+        <Button
           v-for="step in steps"
+          variant="ghost"
+          size="large"
           :key="step.value"
           class="speed-indicator__step"
           :class="{ 'is-active': modelValue === step.value }"
@@ -53,7 +55,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: number] }>()
               {{ step.sublabel }}
             </span>
           </span>
-        </button>
+        </Button>
       </div>
     </div>
 

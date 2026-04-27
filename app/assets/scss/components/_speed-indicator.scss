@@ -42,9 +42,11 @@
     gap: token("dm-8");
     background: none;
     border: none;
+    border-radius: 0;
     cursor: pointer;
     padding: token("dm-4");
     margin: calc(-1 * token("dm-4"));
+    height: auto;
     outline: none;
 
     &:focus-visible .speed-indicator__dot {

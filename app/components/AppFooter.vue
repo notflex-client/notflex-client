@@ -142,9 +142,9 @@ const socialLinks = [
     </div>
 
     <!-- Phone -->
-    <p class="body-regular app-footer__phone">
+    <span class="body-regular app-footer__phone">
       Questions? Call <a :href="`tel:${phone}`">{{ phone }}</a>
-    </p>
+    </span>
 
     <!-- Link grid -->
     <div class="app-footer__grid">
@@ -173,7 +173,7 @@ const socialLinks = [
 
     <!-- Bottom row — home only -->
     <div v-if="variant === 'home'" class="app-footer__bottom">
-      <button class="caption-1-regular app-footer__service" type="button">Service Code</button>
+      <Button variant="ghost" size="small" class="caption-1-regular app-footer__service" type="button">Service Code</Button>
       <span class="caption-2-regular app-footer__copyright">© 1997–{{ new Date().getFullYear() }} Netflix, Inc.</span>
     </div>
 
