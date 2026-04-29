@@ -1,12 +1,7 @@
 <script setup lang="ts">
 const heroEmail = ref('')
 const faqEmail  = ref('')
-const lang      = ref('en')
-
-const LANG_OPTIONS = [
-  { value: 'en', label: 'English' },
-  { value: 'vi', label: 'Tiếng Việt' },
-]
+const { lang, LANG_OPTIONS } = useLocale()
 
 const FAQ_ITEMS = [
   {

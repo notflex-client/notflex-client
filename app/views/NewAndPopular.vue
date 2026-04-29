@@ -4,7 +4,7 @@ import type { MovieBlockItem } from '~/components/ui/MovieBlock.vue'
 definePageMeta({ path: '/new-and-popular' })
 
 const { t } = useI18n()
-const lang = ref('en')
+const { lang } = useLocale()
 
 function thumb(seed: number) {
   return `https://picsum.photos/seed/${seed}/300/170`

@@ -2,7 +2,7 @@
 definePageMeta({ path: '/signup-otp' })
 
 const { t } = useI18n()
-const lang     = ref('en')
+const { lang } = useLocale()
 const route    = useRoute()
 const email    = computed(() => (route.query.email as string) || '')
 const requestId = ref((route.query.id as string) || '')

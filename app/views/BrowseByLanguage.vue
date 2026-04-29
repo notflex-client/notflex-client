@@ -4,7 +4,7 @@ import type { DropdownOption } from '~/components/ui/Dropdown.vue'
 definePageMeta({ path: '/browse-by-language' })
 
 const { t } = useI18n()
-const lang = ref('en')
+const { lang } = useLocale()
 
 // ── Language options ────────────────────────────────────────────────────────
 const ORIGINAL_LANGS = computed<DropdownOption[]>(() => [

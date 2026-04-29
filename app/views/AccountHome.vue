@@ -4,7 +4,13 @@ import type { MovieBlockItem } from '~/components/ui/MovieBlock.vue'
 definePageMeta({ path: '/browse' })
 
 const { t } = useI18n()
-const lang = ref('en')
+const { lang } = useLocale()
+
+const PROFILES = [
+  { value: 'james', name: 'James', image: 'https://i.pravatar.cc/150?img=11' },
+  { value: 'sarah', name: 'Sarah', image: 'https://i.pravatar.cc/150?img=47' },
+]
+const activeProfile = ref('james')
 
 const NAV_LINKS = computed(() => [
   { label: t('nav.home'),            active: true },
@@ -141,7 +147,22 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => [
             <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </IconButton>
-        <Avatar size="small" :showArrow="true" name="James" />
+        <AvatarPopover
+          :profiles="PROFILES"
+          :active-profile="activeProfile"
+          @select-profile="activeProfile = $event"
+          @sign-out="navigateTo('/login')"
+        >
+          <template #trigger="{ triggerProps }">
+            <Avatar
+              size="small"
+              :show-arrow="true"
+              :name="PROFILES.find(p => p.value === activeProfile)?.name ?? ''"
+              :image="PROFILES.find(p => p.value === activeProfile)?.image ?? ''"
+              v-bind="(triggerProps as any)"
+            />
+          </template>
+        </AvatarPopover>
       </template>
     </AppHeader>
 

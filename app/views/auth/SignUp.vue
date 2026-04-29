@@ -1,8 +1,8 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 definePageMeta({ path: '/signup' })
 
 const { t } = useI18n()
-const lang  = ref('en')
+const { lang } = useLocale()
 const email = ref('')
 const error = ref('')
 const submitLoading = ref(false)

@@ -63,9 +63,9 @@ const headerClass = computed(() => [
     <div class="app-header__inner">
 
       <!-- Logo -->
-      <div class="app-header__logo">
+      <NuxtLink to="/" class="app-header__logo">
         <slot name="logo" />
-      </div>
+      </NuxtLink>
 
       <!-- Desktop nav (optional) -->
       <nav v-if="$slots.navigation" class="app-header__nav">

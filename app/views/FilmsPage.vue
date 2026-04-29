@@ -5,7 +5,7 @@ import type { DropdownOption } from '~/components/ui/Dropdown.vue'
 definePageMeta({ path: '/films' })
 
 const { t } = useI18n()
-const lang = ref('en')
+const { lang } = useLocale()
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1400&q=80'
 

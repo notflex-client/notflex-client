@@ -4,7 +4,7 @@ import type { DropdownOption } from '~/components/ui/Dropdown.vue'
 definePageMeta({ path: '/my-list' })
 
 const { t } = useI18n()
-const lang = ref('en')
+const { lang } = useLocale()
 
 // ── Genre filter ────────────────────────────────────────────────────────────
 const GENRES = computed<DropdownOption[]>(() => [

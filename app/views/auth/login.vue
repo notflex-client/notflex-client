@@ -5,7 +5,7 @@ const { t } = useI18n()
 const email    = ref('')
 const password = ref('')
 const remember = ref(false)
-const lang     = ref('en')
+const { lang } = useLocale()
 
 function signIn() {
   navigateTo('/browse')

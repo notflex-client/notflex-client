@@ -2,7 +2,7 @@
 definePageMeta({ path: '/signup-final' })
 
 const { t } = useI18n()
-const lang      = ref('en')
+const { lang } = useLocale()
 const route     = useRoute()
 const requestId = computed(() => (route.query.id as string) || '')
 
