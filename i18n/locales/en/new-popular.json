@@ -1,0 +1,11 @@
+{
+  "newPopular": {
+    "rows": {
+      "newOnNetflix": "New on Netflix",
+      "top10Films": "Top 10 Films in Vietnam Today",
+      "top10Series": "Top 10 Series in Vietnam Today",
+      "comingSoon": "Coming Soon",
+      "nextWeek": "Coming Next Week"
+    }
+  }
+}

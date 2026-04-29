@@ -1,0 +1,50 @@
+{
+  "shared": {
+    "nav": {
+      "home": "Trang chủ",
+      "series": "Series",
+      "films": "Phim",
+      "newAndPopular": "Mới & Phổ biến",
+      "myList": "Danh sách của tôi",
+      "browseByLanguage": "Duyệt tìm theo ngôn ngữ"
+    },
+    "action": {
+      "search": "Tìm kiếm",
+      "notifications": "Thông báo",
+      "play": "Phát",
+      "moreInfo": "Thông tin khác",
+      "loading": "Đang tải...",
+      "genre": "Thể loại"
+    },
+    "badge": {
+      "newSeason": "Mùa mới",
+      "newEpisode": "Tập mới",
+      "newlyAdded": "Mới thêm",
+      "recentlyAdded": "Mới thêm",
+      "leavingSoon": "Sắp hết",
+      "top10": "TOP 10"
+    },
+    "genre": {
+      "all": "Tất cả",
+      "action": "Hành động",
+      "adventure": "Phiêu lưu",
+      "animation": "Hoạt hình",
+      "comedy": "Hài",
+      "crime": "Tội phạm",
+      "documentary": "Tài liệu",
+      "drama": "Kịch tính",
+      "family": "Gia đình",
+      "fantasy": "Giả tưởng",
+      "horror": "Kinh dị",
+      "romance": "Lãng mạn",
+      "scifi": "Khoa học viễn tưởng",
+      "thriller": "Thriller",
+      "war": "Chiến tranh",
+      "actionAdventure": "Hành động & Phiêu lưu",
+      "kids": "Thiếu nhi",
+      "mystery": "Bí ẩn",
+      "scifiFantasy": "Khoa học viễn tưởng & Giả tưởng",
+      "warPolitics": "Chiến tranh & Chính trị"
+    }
+  }
+}

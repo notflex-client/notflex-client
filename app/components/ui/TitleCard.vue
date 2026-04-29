@@ -44,25 +44,27 @@ const props = defineProps({
     <!-- Description — full only -->
     <p v-if="description && size === 'full'" class="title-card__desc">{{ description }}</p>
 
-    <!-- Buttons — full / medium / compact -->
+    <!-- Buttons — full / medium / compact (overridable via #actions slot) -->
     <div v-if="size !== 'title-only'" class="title-card__actions">
-      <Button variant="light" size="small">
-        <template #leading-icon>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M5 3l14 9-14 9V3Z"/>
-          </svg>
-        </template>
-        Play
-      </Button>
-      <Button variant="secondary" size="small">
-        <template #leading-icon>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M12 11v5M12 8.5V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </template>
-        More Info
-      </Button>
+      <slot name="actions">
+        <Button variant="light" size="small">
+          <template #leading-icon>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M5 3l14 9-14 9V3Z"/>
+            </svg>
+          </template>
+          Play
+        </Button>
+        <Button variant="secondary" size="small">
+          <template #leading-icon>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M12 11v5M12 8.5V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </template>
+          More Info
+        </Button>
+      </slot>
     </div>
 
   </div>

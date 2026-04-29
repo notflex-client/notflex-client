@@ -1,0 +1,11 @@
+{
+  "newPopular": {
+    "rows": {
+      "newOnNetflix": "Mới trên Netflix",
+      "top10Films": "Top 10 phim tại Việt Nam hôm nay",
+      "top10Series": "Top 10 series tại Việt Nam hôm nay",
+      "comingSoon": "Đáng chờ đợi",
+      "nextWeek": "Ra mắt tuần tới"
+    }
+  }
+}

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({ path: '/login' })
+
+const { t } = useI18n()
 const email    = ref('')
 const password = ref('')
 const remember = ref(false)
@@ -23,13 +26,13 @@ function signIn() {
     <HeroBanner variant="auth" image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80">
       <div class="auth-card">
 
-        <h1 class="title-2-bold">Sign In</h1>
+        <span class="title-2-bold">{{ t('auth.login.title') }}</span>
 
         <!-- Fields -->
         <div class="flex flex-col gap-4">
-          <InputField v-model="email" label="Email or phone number" type="email" autocomplete="email" />
-          <InputField v-model="password" label="Password" type="password" autocomplete="current-password" />
-          <Button variant="brand" size="large" :block="true" @click="signIn">Sign In</Button>
+          <InputField v-model="email" :label="t('auth.login.emailLabel')" type="email" autocomplete="email" />
+          <InputField v-model="password" :label="t('auth.login.passwordLabel')" type="password" autocomplete="current-password" />
+          <Button variant="brand" size="large" :block="true" @click="signIn">{{ t('auth.login.signIn') }}</Button>
         </div>
 
         <!-- OR divider -->
@@ -37,20 +40,20 @@ function signIn() {
           <span class="caption-1-regular">OR</span>
         </div>
 
-        <Button variant="ghost" size="large" :block="true">Use a Sign-In Code</Button>
+        <Button variant="ghost" size="large" :block="true">{{ t('auth.login.signInCode') }}</Button>
 
-        <a href="#" class="auth-card__forgot body-regular">Forgot Password?</a>
+        <a href="#" class="auth-card__forgot body-regular">{{ t('auth.login.forgotPassword') }}</a>
 
-        <Checkbox v-model="remember" label="Remember me" />
+        <Checkbox v-model="remember" :label="t('auth.login.rememberMe')" />
 
         <span class="caption-1-regular auth-card__new">
-          New to Netflix?
-          <NuxtLink to="/signup" class="auth-card__signup-link">Sign up now.</NuxtLink>
+          {{ t('auth.login.newToNetflix') }}
+          <NuxtLink to="/signup" class="auth-card__signup-link">{{ t('auth.login.signUpNow') }}</NuxtLink>
         </span>
 
         <span class="caption-2-regular auth-card__captcha">
-          This page is protected by Google reCAPTCHA to ensure you're not a bot.
-          <a href="#" class="auth-card__captcha-link">Learn more.</a>
+          {{ t('auth.login.recaptcha') }}
+          <a href="#" class="auth-card__captcha-link">{{ t('auth.login.learnMore') }}</a>
         </span>
 
       </div>
@@ -82,7 +85,6 @@ function signIn() {
   flex-direction: column;
   gap: token("dm-16");
 
-  // ── OR divider ──────────────────────────────────────────
   &__or {
     display: flex;
     align-items: center;
@@ -98,7 +100,6 @@ function signIn() {
     }
   }
 
-  // ── Forgot password ─────────────────────────────────────
   &__forgot {
     text-align: center;
     color: token("color-text-secondary");
@@ -106,7 +107,6 @@ function signIn() {
     &:hover { color: token("color-text-primary"); }
   }
 
-  // ── New to Netflix ──────────────────────────────────────
   &__new { color: token("color-text-secondary"); }
 
   &__signup-link {
@@ -115,7 +115,6 @@ function signIn() {
     &:hover { text-decoration: underline; }
   }
 
-  // ── reCAPTCHA note ──────────────────────────────────────
   &__captcha {
     color: token("color-text-secondary");
     opacity: 0.7;

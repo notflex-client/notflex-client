@@ -1,0 +1,19 @@
+{
+  "films": {
+    "pageTitle": "Phim",
+    "genrePlaceholder": "Thể loại",
+    "rows": {
+      "topPicks": "Lựa chọn hàng đầu hôm nay cho bạn",
+      "top10": "Top 10 Phim tại Việt Nam hôm nay",
+      "action": "Phim Hành động",
+      "romance": "Phim Lãng mạn",
+      "awardWinning": "Phim đoạt giải thưởng",
+      "netflixFilms": "Phim Netflix"
+    },
+    "hero": {
+      "category": "PHIM",
+      "title": "Inception",
+      "description": "Một tên trộm chuyên nghiệp ăn cắp thông tin bí mật bằng cách xâm nhập vào giấc mơ của người khác nhận được nhiệm vụ cài cắm ý tưởng vào tâm trí mục tiêu."
+    }
+  }
+}

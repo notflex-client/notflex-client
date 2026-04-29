@@ -1,0 +1,8 @@
+{
+  "myList": {
+    "pageTitle": "My List",
+    "genrePlaceholder": "Genre",
+    "empty": "Your list is empty.",
+    "emptySub": "Add your favorite movies and series to watch later."
+  }
+}

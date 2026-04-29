@@ -1,48 +1,108 @@
 @use "../tools/token" as *;
+@use "../tools/mq" as *;
 @use "../mixins/typography" as *;
+
+// Horizontal inset matching the hero/header content edge
+$px: token("dm-48");   // 48px
+$gap: token("dm-4");   // 4px gap between slides
+
+// Calc: (viewport - 2×padding - (n-1)×gap) / n
+@function slide-width($n) {
+  @return calc((100vw - 2 * #{$px} - #{$n - 1} * #{$gap}) / #{$n});
+}
 
 .movie-block {
   display: flex;
   flex-direction: column;
-  gap: token("dm-12");
+  gap: token("dm-8");
 
   // ── Section title ───────────────────────────────────────────
   &__title {
-    @include typography-variant("body-medium");
-    margin: 0;
-    padding: 0 token("dm-4");
-    color: var(--color-text-secondary);
-    transition: color 0.15s ease;
-
-    &:hover { color: var(--color-text-primary); }
+    display: block;
+    padding: 0 $px;
+    color: var(--color-text-primary);
+    cursor: default;
   }
 
-  // ── Scrollable row ──────────────────────────────────────────
+  // ── Outer wrapper (positions arrows, full-width) ─────────────
+  &__viewport-wrap {
+    position: relative;
+
+    &:hover .movie-block__arrow { opacity: 1; }
+  }
+
+  // ── Embla viewport ──────────────────────────────────────────
+  &__viewport {
+    overflow: hidden;
+    padding: 0 $px;
+  }
+
+  // ── Embla container ─────────────────────────────────────────
   &__row {
     display: flex;
-    gap: token("dm-4");
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
+    gap: $gap;
   }
 
-  // ── Individual card slot ────────────────────────────────────
-  &__item {
-    flex-shrink: 0;
-    scroll-snap-align: start;
+  // ── Individual slide ─────────────────────────────────────────
+  &__slide {
+    flex: 0 0 auto;
+    min-width: 0;
   }
 
-  // ══ VARIANT: default ═══════════════════════════════════════
-  &-default &__item { width: 160px; }
+  // ── Arrow buttons ────────────────────────────────────────────
+  &__arrow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: $px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    color: var(--white);
+    padding: 0;
 
-  // ══ VARIANT: first (standard titled row) ═══════════════════
-  &-first &__item { width: 200px; }
+    &-prev {
+      left: 0;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    }
 
-  // ══ VARIANT: top10 ═════════════════════════════════════════
+    &-next {
+      right: 0;
+      background: linear-gradient(to left, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    svg { pointer-events: none; }
+  }
+
+  // ══ SLIDE WIDTHS ═══════════════════════════════════════════
+  // Desktop (1280px+): 6 default/top10, 4 continue
+  // Default / first: 6 per row desktop → auto-scale
+  &-default &__slide,
+  &-first &__slide  { width: slide-width(6); }
+  &-continue &__slide  { width: slide-width(4); }
+
+  // Top10: rank-w + thumb-w - overlap = 150 + 133 - 20 = 263px
+  &-top10 &__slide  { width: 263px; }
+
+  // Tablet (768–1280px)
+  @include down(desktop) {
+    &-default &__slide,
+    &-first &__slide  { width: slide-width(4); }
+    &-continue &__slide  { width: slide-width(3); }
+  }
+
+  // Mobile (<768px)
+  @include down(tablet) {
+    &-default &__slide,
+    &-first &__slide  { width: slide-width(2); }
+    &-continue &__slide  { width: slide-width(1); }
+    &-top10 &__slide  { width: 160px; }
+  }
+
   &-top10 &__row { gap: 0; }
-  &-top10 &__item { width: 200px; }
-
-  // ══ VARIANT: continue ══════════════════════════════════════
-  &-continue &__item { width: 280px; }
 }
