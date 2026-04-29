@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 definePageMeta({ path: '/signup-otp' })
 
 const { t } = useI18n()
@@ -25,7 +25,7 @@ function startCountdown() {
 
 async function submit() {
   if (otp.value.length !== 6) {
-    error.value = t('auth.otp.errorIncomplete')
+    error.value = t('otp.errorIncomplete')
     return
   }
   submitLoading.value = true
@@ -37,7 +37,7 @@ async function submit() {
     })
     navigateTo(`/signup-final?id=${requestId.value}`)
   } catch (err: any) {
-    error.value = err.data?.message || t('auth.otp.errorInvalid')
+    error.value = err.data?.message || t('otp.errorInvalid')
   } finally {
     submitLoading.value = false
   }
@@ -56,7 +56,7 @@ async function resend() {
     requestId.value = res.id
     startCountdown()
   } catch (err: any) {
-    error.value = err.data?.message || t('auth.otp.errorResend')
+    error.value = err.data?.message || t('otp.errorResend')
   } finally {
     resendLoading.value = false
   }
@@ -86,21 +86,21 @@ watch(otp, (val) => {
     <HeroBanner variant="auth" image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80">
       <div class="auth-card">
 
-        <span class="title-2-bold">{{ t('auth.otp.title') }}</span>
+        <span class="title-2-bold">{{ t('otp.title') }}</span>
 
         <span class="body-regular auth-card__desc">
-          {{ t('auth.otp.sentTo') }}<br>
-          <span class="auth-card__email">{{ email || t('auth.otp.yourEmail') }}</span>
+          {{ t('otp.sentTo') }}<br>
+          <span class="auth-card__email">{{ email || t('otp.yourEmail') }}</span>
         </span>
 
         <div class="flex flex-col gap-4">
           <InputField
             v-model="otp"
-            :label="t('auth.otp.codeLabel')"
+            :label="t('otp.codeLabel')"
             type="text"
             autocomplete="one-time-code"
             :error="error"
-            class="auth-card__otp-input"
+
           />
           <Button
             variant="brand"
@@ -109,24 +109,24 @@ watch(otp, (val) => {
             :disabled="submitLoading || otp.length !== 6"
             @click="submit"
           >
-            {{ submitLoading ? t('auth.otp.verifying') : t('auth.otp.continue') }}
+            {{ submitLoading ? t('otp.verifying') : t('otp.continue') }}
           </Button>
         </div>
 
         <span class="caption-1-regular auth-card__resend">
-          {{ t('auth.otp.noCode') }}
+          {{ t('otp.noCode') }}
           <button
             class="auth-card__resend-btn caption-1-regular"
             :disabled="countdown > 0 || resendLoading"
             @click="resend"
           >
-            {{ countdown > 0 ? t('auth.otp.resendIn', { s: countdown }) : t('auth.otp.resend') }}
+            {{ countdown > 0 ? t('otp.resendIn', { s: countdown }) : t('otp.resend') }}
           </button>
         </span>
 
         <span class="caption-1-regular auth-card__back">
-          {{ t('auth.otp.wrongEmail') }}
-          <NuxtLink to="/signup" class="auth-card__link">{{ t('auth.otp.goBack') }}</NuxtLink>
+          {{ t('otp.wrongEmail') }}
+          <NuxtLink to="/signup" class="auth-card__link">{{ t('otp.goBack') }}</NuxtLink>
         </span>
 
       </div>
@@ -169,13 +169,7 @@ watch(otp, (val) => {
     font-weight: 700;
   }
 
-  &__otp-input {
-    :deep(.input-field__control) {
-      text-align: center;
-      font-size: 24px;
-      letter-spacing: token("dm-8");
-    }
-  }
+
 
   &__resend {
     display: flex;

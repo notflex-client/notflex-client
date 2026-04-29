@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 definePageMeta({ path: '/signup-final' })
 
 const { t } = useI18n()
@@ -22,15 +22,15 @@ async function submit() {
   error.value        = ''
 
   if (!name.value.trim()) {
-    nameError.value = t('auth.final.errorName')
+    nameError.value = t('final.errorName')
     return
   }
   if (password.value.length < 8) {
-    passwordError.value = t('auth.final.errorPasswordLength')
+    passwordError.value = t('final.errorPasswordLength')
     return
   }
   if (password.value !== confirmPassword.value) {
-    confirmError.value = t('auth.final.errorPasswordMatch')
+    confirmError.value = t('final.errorPasswordMatch')
     return
   }
 
@@ -52,7 +52,7 @@ async function submit() {
       nameError.value    = data.errors.name?.[0]     || ''
       passwordError.value = data.errors.password?.[0] || ''
     }
-    error.value = data?.message || t('auth.final.errorGeneric')
+    error.value = data?.message || t('final.errorGeneric')
   } finally {
     submitLoading.value = false
   }
@@ -82,12 +82,12 @@ watch([name, password, confirmPassword], () => {
     <HeroBanner variant="auth" image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80">
       <div class="auth-card">
 
-        <span class="title-2-bold">{{ t('auth.final.title') }}</span>
+        <span class="title-2-bold">{{ t('final.title') }}</span>
 
         <div class="flex flex-col gap-4">
           <InputField
             v-model="name"
-            :label="t('auth.final.nameLabel')"
+            :label="t('final.nameLabel')"
             type="text"
             autocomplete="name"
             :error="nameError"
@@ -96,7 +96,7 @@ watch([name, password, confirmPassword], () => {
           <InputField
             v-model="password"
             type="password"
-            :label="t('auth.final.passwordLabel')"
+            :label="t('final.passwordLabel')"
             autocomplete="new-password"
             :error="passwordError"
           />
@@ -104,7 +104,7 @@ watch([name, password, confirmPassword], () => {
           <InputField
             v-model="confirmPassword"
             type="password"
-            :label="t('auth.final.confirmLabel')"
+            :label="t('final.confirmLabel')"
             autocomplete="new-password"
             :error="confirmError"
           />
@@ -118,20 +118,20 @@ watch([name, password, confirmPassword], () => {
             :disabled="submitLoading"
             @click="submit"
           >
-            {{ submitLoading ? t('auth.final.creating') : t('auth.final.create') }}
+            {{ submitLoading ? t('final.creating') : t('final.create') }}
           </Button>
         </div>
 
         <span class="caption-2-regular auth-card__terms">
-          {{ t('auth.final.terms') }}
-          <a href="#" class="auth-card__terms-link">{{ t('auth.final.termsLink') }}</a>
-          {{ t('auth.final.and') }}
-          <a href="#" class="auth-card__terms-link">{{ t('auth.final.privacyLink') }}</a>{{ t('auth.final.termsEnd') }}
+          {{ t('final.terms') }}
+          <a href="#" class="auth-card__terms-link">{{ t('final.termsLink') }}</a>
+          {{ t('final.and') }}
+          <a href="#" class="auth-card__terms-link">{{ t('final.privacyLink') }}</a>{{ t('final.termsEnd') }}
         </span>
 
         <span class="caption-1-regular auth-card__new">
-          {{ t('auth.final.alreadyHave') }}
-          <NuxtLink to="/login" class="auth-card__signup-link">{{ t('auth.final.signIn') }}</NuxtLink>
+          {{ t('final.alreadyHave') }}
+          <NuxtLink to="/login" class="auth-card__signup-link">{{ t('final.signIn') }}</NuxtLink>
         </span>
 
       </div>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { MovieBlockItem } from '~/components/ui/MovieBlock.vue'
 
 definePageMeta({ path: '/browse' })
@@ -7,12 +7,12 @@ const { t } = useI18n()
 const lang = ref('en')
 
 const NAV_LINKS = computed(() => [
-  { label: t('shared.nav.home'),            active: true },
-  { label: t('shared.nav.series'),          href: '/series' },
-  { label: t('shared.nav.films'),           href: '/films' },
-  { label: t('shared.nav.newAndPopular'),   href: '/new-and-popular' },
-  { label: t('shared.nav.myList'),          href: '/my-list' },
-  { label: t('shared.nav.browseByLanguage'), href: '/browse-by-language' },
+  { label: t('nav.home'),            active: true },
+  { label: t('nav.series'),          href: '/series' },
+  { label: t('nav.films'),           href: '/films' },
+  { label: t('nav.newAndPopular'),   href: '/new-and-popular' },
+  { label: t('nav.myList'),          href: '/my-list' },
+  { label: t('nav.browseByLanguage'), href: '/browse-by-language' },
 ])
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80'
@@ -22,29 +22,29 @@ function thumb(seed: number) {
 }
 
 const MATCHED = computed<MovieBlockItem[]>(() => [
-  { image: thumb(10), badge: t('shared.badge.recentlyAdded') },
-  { image: thumb(20), badge: t('shared.badge.leavingSoon') },
+  { image: thumb(10), badge: t('badge.recentlyAdded') },
+  { image: thumb(20), badge: t('badge.leavingSoon') },
   { image: thumb(30) },
-  { image: thumb(40), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(40), badge: t('badge.recentlyAdded') },
   { image: thumb(50) },
-  { image: thumb(60), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(60), badge: t('badge.recentlyAdded') },
 ])
 
 const NEW_ON_NETFLIX = computed<MovieBlockItem[]>(() => [
-  { image: thumb(11), badge: t('shared.badge.recentlyAdded') },
-  { image: thumb(21), badge: t('shared.badge.leavingSoon') },
+  { image: thumb(11), badge: t('badge.recentlyAdded') },
+  { image: thumb(21), badge: t('badge.leavingSoon') },
   { image: thumb(31) },
-  { image: thumb(41), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(41), badge: t('badge.recentlyAdded') },
   { image: thumb(51) },
   { image: thumb(61) },
 ])
 
 const TOP_10 = computed<MovieBlockItem[]>(() => [
-  { image: thumb(12), badge: t('shared.badge.recentlyAdded'), rank: 1 },
-  { image: thumb(22), badge: t('shared.badge.recentlyAdded'), rank: 2 },
+  { image: thumb(12), badge: t('badge.recentlyAdded'), rank: 1 },
+  { image: thumb(22), badge: t('badge.recentlyAdded'), rank: 2 },
   { image: thumb(32),                                          rank: 3 },
   { image: thumb(42),                                          rank: 4 },
-  { image: thumb(52), badge: t('shared.badge.recentlyAdded'), rank: 5 },
+  { image: thumb(52), badge: t('badge.recentlyAdded'), rank: 5 },
   { image: thumb(62),                                          rank: 6 },
   { image: thumb(72),                                          rank: 7 },
 ])
@@ -57,55 +57,55 @@ const CONTINUE: MovieBlockItem[] = [
 ]
 
 const THINK_YOULL_LOVE = computed<MovieBlockItem[]>(() => [
-  { image: thumb(14), badge: t('shared.badge.recentlyAdded') },
-  { image: thumb(24), badge: t('shared.badge.recentlyAdded') },
-  { image: thumb(34), badge: t('shared.badge.leavingSoon') },
-  { image: thumb(44), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(14), badge: t('badge.recentlyAdded') },
+  { image: thumb(24), badge: t('badge.recentlyAdded') },
+  { image: thumb(34), badge: t('badge.leavingSoon') },
+  { image: thumb(44), badge: t('badge.recentlyAdded') },
   { image: thumb(54) },
-  { image: thumb(64), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(64), badge: t('badge.recentlyAdded') },
 ])
 
 const ANIMATION = computed<MovieBlockItem[]>(() => [
-  { image: thumb(15), badge: t('shared.badge.recentlyAdded') },
-  { image: thumb(25), badge: t('shared.badge.recentlyAdded') },
-  { image: thumb(35), badge: t('shared.badge.leavingSoon') },
-  { image: thumb(45), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(15), badge: t('badge.recentlyAdded') },
+  { image: thumb(25), badge: t('badge.recentlyAdded') },
+  { image: thumb(35), badge: t('badge.leavingSoon') },
+  { image: thumb(45), badge: t('badge.recentlyAdded') },
   { image: thumb(55) },
   { image: thumb(65) },
 ])
 
 const INSPIRING = computed<MovieBlockItem[]>(() => [
   { image: thumb(16) },
-  { image: thumb(26), badge: t('shared.badge.leavingSoon') },
-  { image: thumb(36), badge: t('shared.badge.leavingSoon') },
+  { image: thumb(26), badge: t('badge.leavingSoon') },
+  { image: thumb(36), badge: t('badge.leavingSoon') },
   { image: thumb(46) },
-  { image: thumb(56), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(56), badge: t('badge.recentlyAdded') },
   { image: thumb(66) },
 ])
 
 const WATCH_ONE_WEEKEND = computed<MovieBlockItem[]>(() => [
-  { image: thumb(17), badge: t('shared.badge.recentlyAdded') },
-  { image: thumb(27), badge: t('shared.badge.leavingSoon') },
+  { image: thumb(17), badge: t('badge.recentlyAdded') },
+  { image: thumb(27), badge: t('badge.leavingSoon') },
   { image: thumb(37) },
-  { image: thumb(47), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(47), badge: t('badge.recentlyAdded') },
   { image: thumb(57) },
   { image: thumb(67) },
 ])
 
 const CRITICALLY_ACCLAIMED = computed<MovieBlockItem[]>(() => [
-  { image: thumb(18), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(18), badge: t('badge.recentlyAdded') },
   { image: thumb(28) },
-  { image: thumb(38), badge: t('shared.badge.leavingSoon') },
+  { image: thumb(38), badge: t('badge.leavingSoon') },
   { image: thumb(48) },
   { image: thumb(58) },
   { image: thumb(68) },
 ])
 
 const FRESH_PICKS = computed<MovieBlockItem[]>(() => [
-  { image: thumb(19), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(19), badge: t('badge.recentlyAdded') },
   { image: thumb(29) },
-  { image: thumb(39), badge: t('shared.badge.leavingSoon') },
-  { image: thumb(49), badge: t('shared.badge.recentlyAdded') },
+  { image: thumb(39), badge: t('badge.leavingSoon') },
+  { image: thumb(49), badge: t('badge.recentlyAdded') },
   { image: thumb(59) },
   { image: thumb(69) },
 ])
@@ -129,13 +129,13 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => [
         >{{ link.label }}</a>
       </template>
       <template #action>
-        <IconButton variant="ghost" size="small" :aria-label="t('shared.action.search')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.search')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/>
             <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </IconButton>
-        <IconButton variant="ghost" size="small" :aria-label="t('shared.action.notifications')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.notifications')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

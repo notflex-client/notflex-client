@@ -1,50 +1,48 @@
 {
-  "shared": {
-    "nav": {
-      "home": "Home",
-      "series": "Series",
-      "films": "Films",
-      "newAndPopular": "New & Popular",
-      "myList": "My List",
-      "browseByLanguage": "Browse by Language"
-    },
-    "action": {
-      "search": "Search",
-      "notifications": "Notifications",
-      "play": "Play",
-      "moreInfo": "More Info",
-      "loading": "Loading...",
-      "genre": "Genre"
-    },
-    "badge": {
-      "newSeason": "New Season",
-      "newEpisode": "New Episode",
-      "newlyAdded": "Newly Added",
-      "recentlyAdded": "Recently Added",
-      "leavingSoon": "Leaving Soon",
-      "top10": "TOP 10"
-    },
-    "genre": {
-      "all": "All",
-      "action": "Action",
-      "adventure": "Adventure",
-      "animation": "Animation",
-      "comedy": "Comedy",
-      "crime": "Crime",
-      "documentary": "Documentary",
-      "drama": "Drama",
-      "family": "Family",
-      "fantasy": "Fantasy",
-      "horror": "Horror",
-      "romance": "Romance",
-      "scifi": "Science Fiction",
-      "thriller": "Thriller",
-      "war": "War",
-      "actionAdventure": "Action & Adventure",
-      "kids": "Kids",
-      "mystery": "Mystery",
-      "scifiFantasy": "Science Fiction & Fantasy",
-      "warPolitics": "War & Politics"
-    }
+  "nav": {
+    "home": "Home",
+    "series": "Series",
+    "films": "Films",
+    "newAndPopular": "New & Popular",
+    "myList": "My List",
+    "browseByLanguage": "Browse by Language"
+  },
+  "action": {
+    "search": "Search",
+    "notifications": "Notifications",
+    "play": "Play",
+    "moreInfo": "More Info",
+    "loading": "Loading...",
+    "genre": "Genre"
+  },
+  "badge": {
+    "newSeason": "New Season",
+    "newEpisode": "New Episode",
+    "newlyAdded": "Newly Added",
+    "recentlyAdded": "Recently Added",
+    "leavingSoon": "Leaving Soon",
+    "top10": "TOP 10"
+  },
+  "genre": {
+    "all": "All",
+    "action": "Action",
+    "adventure": "Adventure",
+    "animation": "Animation",
+    "comedy": "Comedy",
+    "crime": "Crime",
+    "documentary": "Documentary",
+    "drama": "Drama",
+    "family": "Family",
+    "fantasy": "Fantasy",
+    "horror": "Horror",
+    "romance": "Romance",
+    "scifi": "Science Fiction",
+    "thriller": "Thriller",
+    "war": "War",
+    "actionAdventure": "Action & Adventure",
+    "kids": "Kids",
+    "mystery": "Mystery",
+    "scifiFantasy": "Science Fiction & Fantasy",
+    "warPolitics": "War & Politics"
   }
 }

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { MovieBlockItem } from '~/components/ui/MovieBlock.vue'
 
 definePageMeta({ path: '/new-and-popular' })
@@ -12,24 +12,24 @@ function thumb(seed: number) {
 
 // ── Mới trên Netflix ────────────────────────────────────────────────────────
 const NEW_ON_NETFLIX = computed<MovieBlockItem[]>(() => [
-  { image: thumb(810), badge: t('shared.badge.newSeason') },
-  { image: thumb(811), badge: t('shared.badge.newSeason') },
-  { image: thumb(812), badge: t('shared.badge.newEpisode') },
+  { image: thumb(810), badge: t('badge.newSeason') },
+  { image: thumb(811), badge: t('badge.newSeason') },
+  { image: thumb(812), badge: t('badge.newEpisode') },
   { image: thumb(813) },
-  { image: thumb(814), badge: t('shared.badge.newEpisode') },
+  { image: thumb(814), badge: t('badge.newEpisode') },
   { image: thumb(815) },
-  { image: thumb(816), badge: t('shared.badge.newSeason') },
+  { image: thumb(816), badge: t('badge.newSeason') },
   { image: thumb(817) },
 ])
 
 // ── Top 10 phim ─────────────────────────────────────────────────────────────
 const TOP10_FILMS = computed<MovieBlockItem[]>(() => [
-  { image: thumb(821), rank: 1,  badge: t('shared.badge.newlyAdded') },
+  { image: thumb(821), rank: 1,  badge: t('badge.newlyAdded') },
   { image: thumb(822), rank: 2 },
-  { image: thumb(823), rank: 3,  badge: t('shared.badge.newlyAdded') },
-  { image: thumb(824), rank: 4,  badge: t('shared.badge.newlyAdded') },
+  { image: thumb(823), rank: 3,  badge: t('badge.newlyAdded') },
+  { image: thumb(824), rank: 4,  badge: t('badge.newlyAdded') },
   { image: thumb(825), rank: 5 },
-  { image: thumb(826), rank: 6,  badge: t('shared.badge.newlyAdded') },
+  { image: thumb(826), rank: 6,  badge: t('badge.newlyAdded') },
   { image: thumb(827), rank: 7 },
   { image: thumb(828), rank: 8 },
   { image: thumb(829), rank: 9 },
@@ -39,11 +39,11 @@ const TOP10_FILMS = computed<MovieBlockItem[]>(() => [
 // ── Top 10 series ────────────────────────────────────────────────────────────
 const TOP10_SERIES = computed<MovieBlockItem[]>(() => [
   { image: thumb(831), rank: 1 },
-  { image: thumb(832), rank: 2,  badge: t('shared.badge.newEpisode') },
+  { image: thumb(832), rank: 2,  badge: t('badge.newEpisode') },
   { image: thumb(833), rank: 3 },
   { image: thumb(834), rank: 4 },
   { image: thumb(835), rank: 5 },
-  { image: thumb(836), rank: 6,  badge: t('shared.badge.newEpisode') },
+  { image: thumb(836), rank: 6,  badge: t('badge.newEpisode') },
   { image: thumb(837), rank: 7 },
   { image: thumb(838), rank: 8 },
   { image: thumb(839), rank: 9 },
@@ -78,21 +78,21 @@ const NEXT_WEEK: MovieBlockItem[] = [
         <span class="new-page__logo">NOTFLEX</span>
       </template>
       <template #navigation>
-        <a href="/browse"          class="new-page__nav-link">{{ t('shared.nav.home') }}</a>
-        <a href="/series"          class="new-page__nav-link">{{ t('shared.nav.series') }}</a>
-        <a href="/films"           class="new-page__nav-link">{{ t('shared.nav.films') }}</a>
-        <a href="/new-and-popular" class="new-page__nav-link is-active">{{ t('shared.nav.newAndPopular') }}</a>
-        <a href="/my-list"         class="new-page__nav-link">{{ t('shared.nav.myList') }}</a>
-        <a href="/browse-by-language" class="new-page__nav-link">{{ t('shared.nav.browseByLanguage') }}</a>
+        <a href="/browse"          class="new-page__nav-link">{{ t('nav.home') }}</a>
+        <a href="/series"          class="new-page__nav-link">{{ t('nav.series') }}</a>
+        <a href="/films"           class="new-page__nav-link">{{ t('nav.films') }}</a>
+        <a href="/new-and-popular" class="new-page__nav-link is-active">{{ t('nav.newAndPopular') }}</a>
+        <a href="/my-list"         class="new-page__nav-link">{{ t('nav.myList') }}</a>
+        <a href="/browse-by-language" class="new-page__nav-link">{{ t('nav.browseByLanguage') }}</a>
       </template>
       <template #action>
-        <IconButton variant="ghost" size="small" :aria-label="t('shared.action.search')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.search')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/>
             <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </IconButton>
-        <IconButton variant="ghost" size="small" :aria-label="t('shared.action.notifications')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.notifications')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

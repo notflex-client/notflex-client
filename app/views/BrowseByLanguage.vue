@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { DropdownOption } from '~/components/ui/Dropdown.vue'
 
 definePageMeta({ path: '/browse-by-language' })
@@ -60,7 +60,7 @@ async function fetchItems() {
     items.value = Array.from({ length: 18 }, (_, i) => ({
       id:    String(i + 1),
       image: `https://picsum.photos/seed/${seed * 7 + 950 + i}/300/170`,
-      badge: i % 5 === 1 ? t('shared.badge.top10') : '',
+      badge: i % 5 === 1 ? t('badge.top10') : '',
     }))
   } finally {
     loading.value = false
@@ -80,21 +80,21 @@ watch([originalLang, audioLang], fetchItems)
         <span class="browse-lang-page__logo">NOTFLEX</span>
       </template>
       <template #navigation>
-        <a href="/browse"             class="browse-lang-page__nav-link">{{ t('shared.nav.home') }}</a>
-        <a href="/series"             class="browse-lang-page__nav-link">{{ t('shared.nav.series') }}</a>
-        <a href="/films"              class="browse-lang-page__nav-link">{{ t('shared.nav.films') }}</a>
-        <a href="/new-and-popular"    class="browse-lang-page__nav-link">{{ t('shared.nav.newAndPopular') }}</a>
-        <a href="/my-list"            class="browse-lang-page__nav-link">{{ t('shared.nav.myList') }}</a>
-        <a href="/browse-by-language" class="browse-lang-page__nav-link is-active">{{ t('shared.nav.browseByLanguage') }}</a>
+        <a href="/browse"             class="browse-lang-page__nav-link">{{ t('nav.home') }}</a>
+        <a href="/series"             class="browse-lang-page__nav-link">{{ t('nav.series') }}</a>
+        <a href="/films"              class="browse-lang-page__nav-link">{{ t('nav.films') }}</a>
+        <a href="/new-and-popular"    class="browse-lang-page__nav-link">{{ t('nav.newAndPopular') }}</a>
+        <a href="/my-list"            class="browse-lang-page__nav-link">{{ t('nav.myList') }}</a>
+        <a href="/browse-by-language" class="browse-lang-page__nav-link is-active">{{ t('nav.browseByLanguage') }}</a>
       </template>
       <template #action>
-        <IconButton variant="ghost" size="small" :aria-label="t('shared.action.search')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.search')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/>
             <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </IconButton>
-        <IconButton variant="ghost" size="small" :aria-label="t('shared.action.notifications')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.notifications')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

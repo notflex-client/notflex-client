@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { DropdownOption } from '~/components/ui/Dropdown.vue'
 
 definePageMeta({ path: '/my-list' })
@@ -8,17 +8,17 @@ const lang = ref('en')
 
 // ── Genre filter ────────────────────────────────────────────────────────────
 const GENRES = computed<DropdownOption[]>(() => [
-  { value: 'all',   label: t('shared.genre.all') },
-  { value: '28',    label: t('shared.genre.action') },
-  { value: '12',    label: t('shared.genre.adventure') },
-  { value: '16',    label: t('shared.genre.animation') },
-  { value: '35',    label: t('shared.genre.comedy') },
-  { value: '18',    label: t('shared.genre.drama') },
-  { value: '27',    label: t('shared.genre.horror') },
-  { value: '10749', label: t('shared.genre.romance') },
-  { value: '878',   label: t('shared.genre.scifi') },
-  { value: '53',    label: t('shared.genre.thriller') },
-  { value: '99',    label: t('shared.genre.documentary') },
+  { value: 'all',   label: t('genre.all') },
+  { value: '28',    label: t('genre.action') },
+  { value: '12',    label: t('genre.adventure') },
+  { value: '16',    label: t('genre.animation') },
+  { value: '35',    label: t('genre.comedy') },
+  { value: '18',    label: t('genre.drama') },
+  { value: '27',    label: t('genre.horror') },
+  { value: '10749', label: t('genre.romance') },
+  { value: '878',   label: t('genre.scifi') },
+  { value: '53',    label: t('genre.thriller') },
+  { value: '99',    label: t('genre.documentary') },
 ])
 
 interface ListItem {
@@ -43,7 +43,7 @@ async function fetchList(genreId: string) {
     items.value = Array.from({ length: 12 }, (_, i) => ({
       id:    String(i + 1),
       image: `https://picsum.photos/seed/${900 + i}/300/170`,
-      badge: i % 4 === 0 ? t('shared.badge.newSeason') : i % 5 === 0 ? t('shared.badge.newEpisode') : '',
+      badge: i % 4 === 0 ? t('badge.newSeason') : i % 5 === 0 ? t('badge.newEpisode') : '',
     }))
   } finally {
     loading.value = false
@@ -64,21 +64,21 @@ watch(selectedGenre, (val) => fetchList(val))
         <span class="mylist-page__logo">NOTFLEX</span>
       </template>
       <template #navigation>
-        <a href="/browse"             class="mylist-page__nav-link">{{ t('shared.nav.home') }}</a>
-        <a href="/series"             class="mylist-page__nav-link">{{ t('shared.nav.series') }}</a>
-        <a href="/films"              class="mylist-page__nav-link">{{ t('shared.nav.films') }}</a>
-        <a href="/new-and-popular"    class="mylist-page__nav-link">{{ t('shared.nav.newAndPopular') }}</a>
-        <a href="/my-list"            class="mylist-page__nav-link is-active">{{ t('shared.nav.myList') }}</a>
-        <a href="/browse-by-language" class="mylist-page__nav-link">{{ t('shared.nav.browseByLanguage') }}</a>
+        <a href="/browse"             class="mylist-page__nav-link">{{ t('nav.home') }}</a>
+        <a href="/series"             class="mylist-page__nav-link">{{ t('nav.series') }}</a>
+        <a href="/films"              class="mylist-page__nav-link">{{ t('nav.films') }}</a>
+        <a href="/new-and-popular"    class="mylist-page__nav-link">{{ t('nav.newAndPopular') }}</a>
+        <a href="/my-list"            class="mylist-page__nav-link is-active">{{ t('nav.myList') }}</a>
+        <a href="/browse-by-language" class="mylist-page__nav-link">{{ t('nav.browseByLanguage') }}</a>
       </template>
       <template #action>
-        <IconButton variant="ghost" size="small" :aria-label="t('shared.action.search')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.search')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/>
             <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </IconButton>
-        <IconButton variant="ghost" size="small" :aria-label="t('shared.action.notifications')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.notifications')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
