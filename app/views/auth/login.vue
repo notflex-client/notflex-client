@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({ path: '/login' })
+
+const { t } = useI18n()
 definePageMeta({ authRequired: false })
 
 const { $api } = useNuxtApp()
@@ -9,7 +12,7 @@ const email    = ref('')
 const password = ref('')
 const remember = ref(false)
 const loading  = ref(false)
-const lang     = ref('en')
+const { lang } = useLocale()
 
 async function signIn() {
   loading.value = true
@@ -43,16 +46,13 @@ async function signIn() {
     <HeroBanner variant="auth" image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80">
       <div class="auth-card">
 
-        <h1 class="title-2-bold">Sign In</h1>
+        <span class="title-2-bold">{{ t('login.title') }}</span>
 
         <!-- Fields -->
         <div class="flex flex-col gap-4">
-          <InputField v-model="email" label="Email or phone number" type="email" autocomplete="email" :error="formErrors.email" />
-          <InputField v-model="password" label="Password" type="password" autocomplete="current-password" :error="formErrors.password" />
-          <p v-if="errorMsg" class="auth-card__api-error">{{ errorMsg }}</p>
-          <Button variant="brand" size="large" :block="true" :disabled="loading || !email || !password" @click="signIn">
-            {{ loading ? 'Signing in...' : 'Sign In' }}
-          </Button>
+          <InputField v-model="email" :label="t('login.emailLabel')" type="email" autocomplete="email" />
+          <InputField v-model="password" :label="t('login.passwordLabel')" type="password" autocomplete="current-password" />
+          <Button variant="brand" size="large" :block="true" @click="signIn">{{ t('login.signIn') }}</Button>
         </div>
 
         <!-- OR divider -->
@@ -60,20 +60,20 @@ async function signIn() {
           <span class="caption-1-regular">OR</span>
         </div>
 
-        <Button variant="ghost" size="large" :block="true">Use a Sign-In Code</Button>
+        <Button variant="ghost" size="large" :block="true">{{ t('login.signInCode') }}</Button>
 
-        <a href="#" class="auth-card__forgot body-regular">Forgot Password?</a>
+        <a href="#" class="auth-card__forgot body-regular">{{ t('login.forgotPassword') }}</a>
 
-        <Checkbox v-model="remember" label="Remember me" />
+        <Checkbox v-model="remember" :label="t('login.rememberMe')" />
 
         <span class="caption-1-regular auth-card__new">
-          New to Netflix?
-          <NuxtLink to="/signup" class="auth-card__signup-link">Sign up now.</NuxtLink>
+          {{ t('login.newToNetflix') }}
+          <NuxtLink to="/signup" class="auth-card__signup-link">{{ t('login.signUpNow') }}</NuxtLink>
         </span>
 
         <span class="caption-2-regular auth-card__captcha">
-          This page is protected by Google reCAPTCHA to ensure you're not a bot.
-          <a href="#" class="auth-card__captcha-link">Learn more.</a>
+          {{ t('login.recaptcha') }}
+          <a href="#" class="auth-card__captcha-link">{{ t('login.learnMore') }}</a>
         </span>
 
       </div>
@@ -111,7 +111,6 @@ async function signIn() {
     color: #e87c03;
   }
 
-  // ── OR divider ──────────────────────────────────────────
   &__or {
     display: flex;
     align-items: center;
@@ -127,7 +126,6 @@ async function signIn() {
     }
   }
 
-  // ── Forgot password ─────────────────────────────────────
   &__forgot {
     text-align: center;
     color: token("color-text-secondary");
@@ -135,7 +133,6 @@ async function signIn() {
     &:hover { color: token("color-text-primary"); }
   }
 
-  // ── New to Netflix ──────────────────────────────────────
   &__new { color: token("color-text-secondary"); }
 
   &__signup-link {
@@ -144,7 +141,6 @@ async function signIn() {
     &:hover { text-decoration: underline; }
   }
 
-  // ── reCAPTCHA note ──────────────────────────────────────
   &__captcha {
     color: token("color-text-secondary");
     opacity: 0.7;

@@ -1,0 +1,18 @@
+{
+  "series": {
+    "pageTitle": "Series",
+    "genrePlaceholder": "Thể loại",
+    "rows": {
+      "topPicks": "Lựa chọn hàng đầu hôm nay cho bạn",
+      "top10": "Top 10 Series tại Việt Nam hôm nay",
+      "korean": "Series Hàn Quốc",
+      "trending": "Đang thịnh hành",
+      "netflixOriginals": "Netflix Originals"
+    },
+    "hero": {
+      "category": "SERIES",
+      "title": "Tài Xế Ẩn Danh",
+      "description": "Một tài xế taxi bí ẩn trả thù những tên tội phạm đã thoát khỏi lưới pháp luật bằng cách biến mình thành công cụ phục vụ cho khách hàng muốn trả thù."
+    }
+  }
+}

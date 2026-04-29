@@ -1,0 +1,19 @@
+{
+  "films": {
+    "pageTitle": "Films",
+    "genrePlaceholder": "Genre",
+    "rows": {
+      "topPicks": "Top Picks for You Today",
+      "top10": "Top 10 Films in Vietnam Today",
+      "action": "Action Films",
+      "romance": "Romance Films",
+      "awardWinning": "Award-Winning Films",
+      "netflixFilms": "Netflix Films"
+    },
+    "hero": {
+      "category": "FILM",
+      "title": "Inception",
+      "description": "A skilled thief who steals secrets through dreamscapes is offered a chance to regain his old life in exchange for a task considered impossible: inception."
+    }
+  }
+}

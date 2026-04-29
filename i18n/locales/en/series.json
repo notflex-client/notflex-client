@@ -1,0 +1,18 @@
+{
+  "series": {
+    "pageTitle": "Series",
+    "genrePlaceholder": "Genre",
+    "rows": {
+      "topPicks": "Top Picks for You Today",
+      "top10": "Top 10 Series in Vietnam Today",
+      "korean": "Korean Series",
+      "trending": "Trending Now",
+      "netflixOriginals": "Netflix Originals"
+    },
+    "hero": {
+      "category": "SERIES",
+      "title": "The Driver",
+      "description": "A mysterious taxi driver takes revenge on criminals who escaped the law by becoming a tool for customers seeking justice."
+    }
+  }
+}

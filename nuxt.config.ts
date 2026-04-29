@@ -42,7 +42,26 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@pinia/nuxt', '@nuxt/eslint', '@nuxtjs/tailwindcss'],
+  modules: ['@pinia/nuxt', '@nuxt/eslint', '@nuxtjs/tailwindcss', '@nuxtjs/i18n'],
+
+  i18n: {
+    locales: [
+      {
+        code: 'vi',
+        language: 'vi-VN',
+        files: ['vi/shared.json', 'vi/browse.json', 'vi/series.json', 'vi/films.json', 'vi/new-popular.json', 'vi/my-list.json', 'vi/browse-lang.json', 'vi/auth.json'],
+      },
+      {
+        code: 'en',
+        language: 'en-US',
+        files: ['en/shared.json', 'en/browse.json', 'en/series.json', 'en/films.json', 'en/new-popular.json', 'en/my-list.json', 'en/browse-lang.json', 'en/auth.json'],
+      },
+    ],
+    defaultLocale: 'vi',
+    langDir: 'locales',
+    strategy: 'no_prefix',
+    vueI18n: './i18n.config.ts',
+  },
 
   devServer: {
     port: 8386,

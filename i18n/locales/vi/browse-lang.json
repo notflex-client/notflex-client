@@ -1,0 +1,26 @@
+{
+  "browseLang": {
+    "pageTitle": "Duyệt tìm theo ngôn ngữ",
+    "filterLabel": "Điều chỉnh tùy chọn của bạn",
+    "originalLangPlaceholder": "Ngôn ngữ gốc",
+    "audioPlaceholder": "Âm thanh",
+    "empty": "Không tìm thấy nội dung phù hợp.",
+    "emptySub": "Thử thay đổi ngôn ngữ để xem thêm nội dung.",
+    "lang": {
+      "allLangs": "Tất cả ngôn ngữ",
+      "vi": "Tiếng Việt",
+      "en": "Tiếng Anh",
+      "ko": "Tiếng Hàn",
+      "ja": "Tiếng Nhật",
+      "zh": "Tiếng Trung",
+      "es": "Tiếng Tây Ban Nha",
+      "fr": "Tiếng Pháp",
+      "de": "Tiếng Đức",
+      "it": "Tiếng Ý",
+      "pt": "Tiếng Bồ Đào Nha",
+      "th": "Tiếng Thái",
+      "hi": "Tiếng Hin-đi",
+      "ar": "Tiếng Ả Rập"
+    }
+  }
+}

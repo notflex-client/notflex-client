@@ -116,25 +116,33 @@ $play-size: 44px;
   &-top10 {
     flex-direction: row;
     align-items: flex-end;
-    overflow: visible;
+    overflow: hidden;
   }
 
   &__rank {
     font-family: var(--font-family-logo);
-    font-size: 120px;
-    line-height: 0.85;
-    color: transparent;
-    -webkit-text-stroke: 3px var(--grey-600);
-    text-stroke: 3px var(--grey-600);
-    flex-shrink: 0;
-    margin-right: calc(-1 * var(--dm-20));
+    font-size: 278px;
+    line-height: 1;
+    color: var(--grey-900);
+    -webkit-text-stroke: 6px var(--grey-300);
+    text-stroke: 6px var(--grey-300);
+    flex: 0 0 150px;
+    text-align: right;
+    margin-right: -20px;
+    // Bebas Neue descender ≈ 56px → glyph bottom lệch 56px so với line-box bottom
+    // translateY bù lại để glyph bottom khớp với card bottom
+    transform: translateY(56px);
+    position: relative;
+    z-index: 0;
     user-select: none;
   }
 
   &-top10 &__thumb {
-    flex: 1;
-    min-width: 0;
+    flex: 0 0 133px;
     aspect-ratio: 2 / 3;
     border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
   }
 }

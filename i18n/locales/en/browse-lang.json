@@ -1,0 +1,26 @@
+{
+  "browseLang": {
+    "pageTitle": "Browse by Language",
+    "filterLabel": "Adjust your preferences",
+    "originalLangPlaceholder": "Original Language",
+    "audioPlaceholder": "Audio",
+    "empty": "No matching content found.",
+    "emptySub": "Try changing the language to see more content.",
+    "lang": {
+      "allLangs": "All Languages",
+      "vi": "Vietnamese",
+      "en": "English",
+      "ko": "Korean",
+      "ja": "Japanese",
+      "zh": "Chinese",
+      "es": "Spanish",
+      "fr": "French",
+      "de": "German",
+      "it": "Italian",
+      "pt": "Portuguese",
+      "th": "Thai",
+      "hi": "Hindi",
+      "ar": "Arabic"
+    }
+  }
+}
