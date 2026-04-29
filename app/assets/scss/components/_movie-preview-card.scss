@@ -1,6 +1,24 @@
 @use "../tools/token" as *;
 @use "../mixins/typography" as *;
 
+// ── Teleport wrapper + transition ────────────────────────────
+.mpc-wrapper {
+  pointer-events: auto;
+}
+
+.mpc-pop-enter-active,
+.mpc-pop-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform-origin: center top;
+}
+
+.mpc-pop-enter-from,
+.mpc-pop-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+// ── Card ─────────────────────────────────────────────────────
 .mpc {
   display: flex;
   flex-direction: column;

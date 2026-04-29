@@ -1,10 +1,53 @@
 ﻿<script setup lang="ts">
 import type { MovieBlockItem } from '~/components/ui/MovieBlock.vue'
+import type { FdmData } from '~/components/ui/FilmDetailModal.vue'
 
 definePageMeta({ path: '/browse' })
 
 const { t } = useI18n()
 const { lang } = useLocale()
+
+const showDetail = ref(false)
+const DEMO_FILM: FdmData = {
+  type: 'series',
+  title: 'House of Ninjas',
+  image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80',
+  year: '2024',
+  rating: 'TV-MA',
+  quality: 'HD',
+  isNew: true,
+  rank: '#2 in TV Shows Today',
+  description: 'Years after retiring from their formidable ninja lives, a dysfunctional family must return to shadowy missions to counteract a string of looming threats.',
+  cast: ['Kento Kaku', 'Yosuke Eguchi', 'Tae Kimura', 'Kengo Kora', 'Aju Makita'],
+  genres: ['TV Dramas', 'Japanese', 'TV Thrillers'],
+  tags: ['Dark', 'Suspenseful', 'Exciting'],
+  maturity: ['smoking', 'violence'],
+  seasons: [
+    {
+      value: 's1',
+      label: 'Season 1',
+      episodes: [
+        { number: 1, title: 'The Offer', duration: '55m', description: 'While Haru Tawara develops a crush on a mysterious young woman at work, an unusual opportunity arises at his father\'s financially struggling brewery.', image: `https://picsum.photos/seed/ep1/300/170` },
+        { number: 2, title: 'The Trail', duration: '52m', description: 'Haru accompanies Karen to investigate a whistleblower\'s apartment. Meanwhile, several other Tawaras are tempted to step out of their ordinary lives.', image: `https://picsum.photos/seed/ep2/300/170` },
+        { number: 3, title: 'The Flower', duration: '53m', description: 'Haru and Yoko\'s respective missions take unexpected turns. Nagi\'s mischievous adventures start attracting unwanted attention.', image: `https://picsum.photos/seed/ep3/300/170` },
+        { number: 4, title: 'The Resurrection', duration: '52m', description: 'Karen confides in Haru about a longstanding suspicion. In the meantime, Soichi receives a shocking phone call that keeps him up at night.', image: `https://picsum.photos/seed/ep4/300/170` },
+        { number: 5, title: 'The Confession', duration: '51m', description: 'As Riku probes into his family\'s secrets, information about Gentenkai — a peculiar cult — reminds the Tawaras of a tragedy from six years ago.', image: `https://picsum.photos/seed/ep5/300/170` },
+        { number: 6, title: 'The Stranger', duration: '55m', description: 'An unexpected reunion stirs up more questions about the Tawara household. Soichi and Yoko inch closer to a sinister conspiracy.', image: `https://picsum.photos/seed/ep6/300/170` },
+      ],
+    },
+  ],
+  moreLikeThis: Array.from({ length: 6 }, (_, i) => ({
+    image: `https://picsum.photos/seed/more${i}/300/170`,
+    rating: 'TV-MA',
+    year: '2024',
+    description: 'Before he was a protector, Kenshin was a fearsome assassin known as Battosai. But when he meets the gentle Tomoe Yukishiro, his story begins to change.',
+  })),
+  trailers: [
+    { image: `https://picsum.photos/seed/tr1/300/170`, title: 'Season 1 Trailer 1: House of Ninjas' },
+    { image: `https://picsum.photos/seed/tr2/300/170`, title: 'Season 1 Trailer 2: House of Ninjas' },
+    { image: `https://picsum.photos/seed/tr3/300/170`, title: 'Season 1 Trailer 3: House of Ninjas' },
+  ],
+}
 
 const PROFILES = [
   { value: 'james', name: 'James', image: 'https://i.pravatar.cc/150?img=11' },
@@ -175,7 +218,22 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => [
             :category="t('browse.hero.category')"
             :title="t('browse.hero.title')"
             :description="t('browse.hero.description')"
-          />
+          >
+            <template #actions>
+              <Button variant="light" size="large">
+                <template #leading-icon>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3l14 9-14 9V3Z"/></svg>
+                </template>
+                {{ t('action.play') }}
+              </Button>
+              <Button variant="ghost" size="large" @click="showDetail = true">
+                <template #leading-icon>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                </template>
+                {{ t('action.moreInfo') }}
+              </Button>
+            </template>
+          </TitleCard>
         </div>
         <div class="browse-page__rating" :aria-label="`Rating: ${t('browse.hero.rating')}`">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -203,6 +261,11 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => [
 
     <!-- ── Footer ────────────────────────────────────────── -->
     <AppFooter variant="home" v-model:lang="lang" />
+
+    <!-- ── Film Detail Modal ─────────────────────────────── -->
+    <Transition name="fdm-fade">
+      <FilmDetailModal v-if="showDetail" :data="DEMO_FILM" @close="showDetail = false" />
+    </Transition>
 
   </div>
 </template>

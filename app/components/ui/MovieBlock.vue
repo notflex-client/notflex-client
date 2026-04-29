@@ -3,12 +3,19 @@ import EmblaCarousel from 'embla-carousel'
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures'
 
 export interface MovieBlockItem {
-  image?:    string
-  title?:    string
-  badge?:    string    // "Recently Added" | "Leaving Soon"
-  rank?:     number    // top10 variant
-  progress?: number    // 0–100, continue variant
-  duration?: string    // "2h 18m", more-like-this variant
+  image?:       string
+  title?:       string
+  badge?:       string
+  rank?:        number
+  progress?:    number
+  duration?:    string
+  // preview card data
+  rating?:      string
+  seasons?:     string
+  quality?:     string
+  description?: string
+  tags?:        string[]
+  isNew?:       boolean
 }
 
 const props = defineProps({
@@ -23,6 +30,7 @@ const cardVariant = computed((): 'more-like-this' | 'top10' | 'continue' => {
   return 'more-like-this'
 })
 
+// ── Embla carousel ────────────────────────────────────────
 const emblaRef = ref<HTMLElement>()
 const canScrollPrev = ref(false)
 const canScrollNext = ref(true)
@@ -49,8 +57,76 @@ onMounted(() => {
   updateButtons()
 })
 
+// ── Preview card hover ────────────────────────────────────
+const PREVIEW_WIDTH = 320
+const SHOW_DELAY    = 500
+const HIDE_DELAY    = 150
+
+const hoveredIndex = ref<number | null>(null)
+const previewRect  = ref<DOMRect | null>(null)
+let showTimer: ReturnType<typeof setTimeout> | null = null
+let hideTimer: ReturnType<typeof setTimeout> | null = null
+
+const hoveredItem = computed(() =>
+  hoveredIndex.value !== null ? props.items[hoveredIndex.value] : null
+)
+
+function onSlideEnter(index: number, event: MouseEvent) {
+  clearTimers()
+  const el = event.currentTarget as HTMLElement
+  showTimer = setTimeout(() => {
+    hoveredIndex.value = index
+    previewRect.value = el.getBoundingClientRect()
+  }, SHOW_DELAY)
+}
+
+function onSlideLeave() {
+  clearTimers()
+  hideTimer = setTimeout(() => {
+    hoveredIndex.value = null
+    previewRect.value = null
+  }, HIDE_DELAY)
+}
+
+function onPreviewEnter() { clearTimers() }
+
+function onPreviewLeave() {
+  clearTimers()
+  hoveredIndex.value = null
+  previewRect.value = null
+}
+
+function clearTimers() {
+  if (showTimer) { clearTimeout(showTimer); showTimer = null }
+  if (hideTimer) { clearTimeout(hideTimer); hideTimer = null }
+}
+
 onUnmounted(() => {
   embla?.destroy()
+  clearTimers()
+})
+
+const previewStyle = computed(() => {
+  if (!previewRect.value) return {}
+  const rect = previewRect.value
+  const margin = 8
+
+  let left = rect.left + rect.width / 2 - PREVIEW_WIDTH / 2
+  if (left < margin) left = margin
+  if (left + PREVIEW_WIDTH > window.innerWidth - margin) {
+    left = window.innerWidth - margin - PREVIEW_WIDTH
+  }
+
+  // Preview image (16/9 of 320px = 180px) overlaps the card vertically
+  const top = rect.top - 16
+
+  return {
+    position: 'fixed' as const,
+    left:     `${left}px`,
+    top:      `${top}px`,
+    width:    `${PREVIEW_WIDTH}px`,
+    zIndex:   9999,
+  }
 })
 </script>
 
@@ -78,6 +154,8 @@ onUnmounted(() => {
             v-for="(item, i) in items"
             :key="i"
             class="movie-block__slide"
+            @mouseenter="onSlideEnter(i, $event)"
+            @mouseleave="onSlideLeave"
           >
             <MovieCard
               class="movie-block__item"
@@ -106,4 +184,27 @@ onUnmounted(() => {
       </button>
     </div>
   </section>
+
+  <!-- Preview card – teleported outside row overflow -->
+  <Teleport to="body">
+    <Transition name="mpc-pop">
+      <div
+        v-if="hoveredItem && previewRect"
+        class="mpc-wrapper"
+        :style="previewStyle"
+        @mouseenter="onPreviewEnter"
+        @mouseleave="onPreviewLeave"
+      >
+        <MoviePreviewCard
+          :image="hoveredItem.image ?? ''"
+          :rating="hoveredItem.rating ?? 'TV-MA'"
+          :seasons="hoveredItem.seasons ?? '1 Season'"
+          :quality="hoveredItem.quality ?? 'HD'"
+          :description="hoveredItem.description ?? 'An exciting story that will keep you on the edge of your seat.'"
+          :tags="hoveredItem.tags ?? ['Drama', 'Thriller']"
+          :is-new="hoveredItem.isNew ?? false"
+        />
+      </div>
+    </Transition>
+  </Teleport>
 </template>
