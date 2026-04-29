@@ -4,6 +4,12 @@ export default defineNuxtConfig({
   ssr: false,
   devtools: { enabled: true },
 
+  runtimeConfig: {
+    public: {
+      apiUrl: '',
+    },
+  },
+
   app: {
     head: {
       title: 'Notflex',
@@ -37,4 +43,8 @@ export default defineNuxtConfig({
   },
 
   modules: ['@pinia/nuxt', '@nuxt/eslint', '@nuxtjs/tailwindcss'],
+
+  devServer: {
+    port: 8386,
+  },
 })

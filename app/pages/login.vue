@@ -1,11 +1,31 @@
 <script setup lang="ts">
+definePageMeta({ authRequired: false })
+
+const { $api } = useNuxtApp()
+const authStore = useAuthStore()
+const { errorMsg, formErrors, setErrors, clearErrors } = useResponseError()
+
 const email    = ref('')
 const password = ref('')
 const remember = ref(false)
+const loading  = ref(false)
 const lang     = ref('en')
 
-function signIn() {
-  navigateTo('/browse')
+async function signIn() {
+  loading.value = true
+  clearErrors()
+  try {
+    const data: any = await $api('/auth/login', {
+      method: 'POST',
+      body: { email: email.value, password: password.value },
+    })
+    authStore.login(data.token, data.user)
+    navigateTo('/browse')
+  } catch (err: any) {
+    setErrors(err.data ?? err)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -27,9 +47,12 @@ function signIn() {
 
         <!-- Fields -->
         <div class="flex flex-col gap-4">
-          <InputField v-model="email" label="Email or phone number" type="email" autocomplete="email" />
-          <InputField v-model="password" label="Password" type="password" autocomplete="current-password" />
-          <Button variant="brand" size="large" :block="true" @click="signIn">Sign In</Button>
+          <InputField v-model="email" label="Email or phone number" type="email" autocomplete="email" :error="formErrors.email" />
+          <InputField v-model="password" label="Password" type="password" autocomplete="current-password" :error="formErrors.password" />
+          <p v-if="errorMsg" class="auth-card__api-error">{{ errorMsg }}</p>
+          <Button variant="brand" size="large" :block="true" :disabled="loading || !email || !password" @click="signIn">
+            {{ loading ? 'Signing in...' : 'Sign In' }}
+          </Button>
         </div>
 
         <!-- OR divider -->
@@ -81,6 +104,12 @@ function signIn() {
   display: flex;
   flex-direction: column;
   gap: token("dm-16");
+
+  &__api-error {
+    margin: 0;
+    font-size: 13px;
+    color: #e87c03;
+  }
 
   // ── OR divider ──────────────────────────────────────────
   &__or {

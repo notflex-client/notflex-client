@@ -1,4 +1,6 @@
 <script setup lang="ts">
+definePageMeta({ authRequired: false })
+
 const heroEmail = ref('')
 const faqEmail  = ref('')
 const lang      = ref('en')
@@ -57,7 +59,7 @@ function getStarted(emailVal: string) {
       </template>
       <template #action>
         <Dropdown v-model="lang" :options="LANG_OPTIONS" size="small" />
-        <Button variant="brand" size="small">Sign In</Button>
+        <Button variant="brand" size="small" @click="navigateTo('/login')">Sign In</Button>
       </template>
     </AppHeader>
 
