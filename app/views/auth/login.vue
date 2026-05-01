@@ -1,12 +1,11 @@
 <script setup lang="ts">
-definePageMeta({ path: '/login' })
+import type { AuthUser } from '~/stores/auth'
 
 const { t } = useI18n()
-definePageMeta({ authRequired: false })
 
 const { $api } = useNuxtApp()
 const authStore = useAuthStore()
-const { errorMsg, formErrors, setErrors, clearErrors } = useResponseError()
+const { setErrors, clearErrors } = useResponseError()
 
 const email    = ref('')
 const password = ref('')
@@ -18,14 +17,15 @@ async function signIn() {
   loading.value = true
   clearErrors()
   try {
-    const data: any = await $api('/auth/login', {
+    const data = await $api<{ token: string; user: AuthUser }>('/auth/login', {
       method: 'POST',
       body: { email: email.value, password: password.value },
     })
     authStore.login(data.token, data.user)
     navigateTo('/browse')
-  } catch (err: any) {
-    setErrors(err.data ?? err)
+  } catch (err: unknown) {
+    const e = err as { data?: unknown }
+    setErrors(e.data ?? err)
   } finally {
     loading.value = false
   }

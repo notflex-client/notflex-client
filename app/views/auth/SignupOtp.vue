@@ -3,6 +3,7 @@ definePageMeta({ path: '/signup-otp' })
 
 const { t } = useI18n()
 const { lang } = useLocale()
+const { $api } = useNuxtApp()
 const route    = useRoute()
 const email    = computed(() => (route.query.email as string) || '')
 const requestId = ref((route.query.id as string) || '')
@@ -31,13 +32,14 @@ async function submit() {
   submitLoading.value = true
   error.value = ''
   try {
-    await $fetch('/registration/verify-registration', {
+    await $api('/registration/verify', {
       method: 'POST',
       body: { id: requestId.value, verifyCode: otp.value },
     })
     navigateTo(`/signup-final?id=${requestId.value}`)
-  } catch (err: any) {
-    error.value = err.data?.message || t('otp.errorInvalid')
+  } catch (err: unknown) {
+    const e = err as { data?: { message?: string } }
+    error.value = e.data?.message || t('otp.errorInvalid')
   } finally {
     submitLoading.value = false
   }
@@ -49,14 +51,15 @@ async function resend() {
   error.value = ''
   otp.value = ''
   try {
-    const res = await $fetch<{ id: string }>('/registration/request', {
+    const res = await $api<{ id: string }>('/registration/request', {
       method: 'POST',
       body: { email: email.value },
     })
     requestId.value = res.id
     startCountdown()
-  } catch (err: any) {
-    error.value = err.data?.message || t('otp.errorResend')
+  } catch (err: unknown) {
+    const e = err as { data?: { message?: string } }
+    error.value = e.data?.message || t('otp.errorResend')
   } finally {
     resendLoading.value = false
   }

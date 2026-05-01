@@ -7,6 +7,7 @@ export default {
       {
         path: '/',
         component: () => import('~/views/index.vue'),
+        meta: { authRequired: false },
       },
       {
         path: '/who-is-watching',
@@ -37,20 +38,29 @@ export default {
         component: () => import('~/views/BrowseByLanguage.vue'),
       },
       {
+        path: '/watch/:id',
+        component: () => import('~/views/WatchPage.vue'),
+        meta: { authRequired: true },
+      },
+      {
         path: '/login',
         component: () => import('~/views/auth/login.vue'),
+        meta: { authRequired: false },
       },
       {
         path: '/signup',
-        component: () => import('~/views/auth/SignUp.vue'),
+        component: () => import('~/views/auth/Signup.vue'),
+        meta: { authRequired: false },
       },
       {
         path: '/signup-otp',
         component: () => import('~/views/auth/SignupOtp.vue'),
+        meta: { authRequired: false },
       },
       {
         path: '/signup-final',
         component: () => import('~/views/auth/SignupFinal.vue'),
+        meta: { authRequired: false },
       },
     ]
 

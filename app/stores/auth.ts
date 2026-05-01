@@ -10,7 +10,11 @@ export interface UserProfile {
 export interface AuthUser {
   id: string
   email: string
-  profiles: UserProfile[]
+  full_name: string
+  avatar_url?: string | null
+  role: string
+  is_active: boolean
+  profiles?: UserProfile[]
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -25,8 +29,8 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = t
     user.value = u
     localStorage.setItem('token', t)
-    if (u.profiles.length === 1) {
-      selectProfile(u.profiles[0])
+    if (u.profiles?.length === 1) {
+      selectProfile(u.profiles[0]!)
     }
   }
 

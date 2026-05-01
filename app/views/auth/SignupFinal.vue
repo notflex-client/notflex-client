@@ -1,8 +1,12 @@
 ﻿<script setup lang="ts">
+import type { AuthUser } from '~/stores/auth'
+
 definePageMeta({ path: '/signup-final' })
 
 const { t } = useI18n()
 const { lang } = useLocale()
+const { $api } = useNuxtApp()
+const authStore = useAuthStore()
 const route     = useRoute()
 const requestId = computed(() => (route.query.id as string) || '')
 
@@ -36,20 +40,25 @@ async function submit() {
 
   submitLoading.value = true
   try {
-    const res = await $fetch<{ token: string }>('/registration/confirm', {
+    const res = await $api<{ token: string; user?: AuthUser }>('/registration/confirm', {
       method: 'POST',
       body: {
         id:       requestId.value,
-        name:     name.value.trim(),
+        fullName: name.value.trim(),
         password: password.value,
       },
     })
-    if (res.token) localStorage.setItem('token', res.token)
+    if (res.user) {
+      authStore.login(res.token, res.user)
+    } else {
+      authStore.token = res.token
+      localStorage.setItem('token', res.token)
+    }
     navigateTo('/browse')
-  } catch (err: any) {
-    const data = err.data
+  } catch (err: unknown) {
+    const data = (err as { data?: { message?: string; errors?: { name?: string[]; password?: string[] } } }).data
     if (data?.errors) {
-      nameError.value    = data.errors.name?.[0]     || ''
+      nameError.value     = data.errors.name?.[0]     || ''
       passwordError.value = data.errors.password?.[0] || ''
     }
     error.value = data?.message || t('final.errorGeneric')

@@ -3,6 +3,7 @@ definePageMeta({ path: '/signup' })
 
 const { t } = useI18n()
 const { lang } = useLocale()
+const { $api } = useNuxtApp()
 const email = ref('')
 const error = ref('')
 const submitLoading = ref(false)
@@ -19,9 +20,14 @@ async function submit() {
   }
   submitLoading.value = true
   try {
-    navigateTo(`/signup-otp?email=${encodeURIComponent(email.value)}`)
-  } catch {
-    error.value = t('signup.errorGeneric')
+    const res = await $api<{ id: string }>('/registration/request', {
+      method: 'POST',
+      body: { email: email.value },
+    })
+    navigateTo(`/signup-otp?email=${encodeURIComponent(email.value)}&id=${res.id}`)
+  } catch (err: unknown) {
+    const e = err as { data?: { message?: string } }
+    error.value = e.data?.message || t('signup.errorGeneric')
   } finally {
     submitLoading.value = false
   }
@@ -72,7 +78,7 @@ async function submit() {
     </HeroBanner>
 
     <!-- ── Footer ─────────────────────────────────────────── -->
-    <AppFooter variant="auth" v-model:lang="lang" />
+    <AppFooter v-model:lang="lang" variant="auth" />
 
   </div>
 </template>
