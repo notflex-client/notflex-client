@@ -62,6 +62,10 @@ export default {
         component: () => import('~/views/auth/SignupFinal.vue'),
         meta: { authRequired: false },
       },
+      {
+        path: '/watch/:id',
+        component: () => import('~/views/WatchPage.vue'),
+      },
     ]
 
     if (import.meta.dev) {

@@ -66,6 +66,12 @@ const NAV_LINKS = computed(() => [
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80'
 
+const { data: heroMovie } = await useAsyncData('hero-movie', () =>
+  $fetch<{ items: { id: string }[] }>('http://localhost:8080/movies', { params: { page: 1 } })
+    .then(r => r.items?.[0] ?? null)
+    .catch(() => null)
+)
+
 function thumb(seed: number) {
   return `https://picsum.photos/seed/${seed}/300/170`
 }
@@ -220,7 +226,7 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => [
             :description="t('browse.hero.description')"
           >
             <template #actions>
-              <Button variant="light" size="large">
+              <Button variant="light" size="large" @click="navigateTo(`/watch/${heroMovie?.id ?? 'demo'}`)">
                 <template #leading-icon>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3l14 9-14 9V3Z"/></svg>
                 </template>
