@@ -52,6 +52,10 @@ export default {
         path: '/signup-final',
         component: () => import('~/views/auth/SignupFinal.vue'),
       },
+      {
+        path: '/watch/:id',
+        component: () => import('~/views/WatchPage.vue'),
+      },
     ]
 
     if (import.meta.dev) {

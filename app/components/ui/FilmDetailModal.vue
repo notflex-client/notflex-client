@@ -26,6 +26,7 @@ export interface FdmTrailer {
 }
 
 export interface FdmData {
+  id?:                  string
   type:                 'series' | 'movie'
   title:                string
   image:                string
@@ -49,8 +50,14 @@ export interface FdmData {
   trailers?:            FdmTrailer[]
 }
 
-const props = defineProps<{ data: FdmData }>()
-const emit  = defineEmits<{ close: [] }>()
+const props  = defineProps<{ data: FdmData }>()
+const emit   = defineEmits<{ close: [] }>()
+const router = useRouter()
+
+function play() {
+  emit('close')
+  router.push(`/watch/${props.data.id ?? 'demo'}`)
+}
 
 const isSeries = computed(() => props.data.type === 'series')
 
@@ -106,7 +113,7 @@ function onBackdropClick(e: MouseEvent) {
 
               <!-- Actions -->
               <div class="film-detail__actions">
-                <Button variant="light" size="medium" class="film-detail__play-btn">
+                <Button variant="light" size="medium" class="film-detail__play-btn" @click="play()">
                   <template #leading-icon>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <path d="M5 3l14 9-14 9V3Z"/>
