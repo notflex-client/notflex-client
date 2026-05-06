@@ -49,7 +49,7 @@ export default {
       },
       {
         path: '/signup',
-        component: () => import('~/views/auth/Signup.vue'),
+        component: () => import('~/views/auth/SignUp.vue'),
         meta: { authRequired: false },
       },
       {
