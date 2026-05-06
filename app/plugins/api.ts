@@ -2,7 +2,7 @@ export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
 
   const api = $fetch.create({
-    baseURL: config.public.apiUrl as string,
+    baseURL: (config.public.apiUrl as string) || 'http://localhost:8080',
 
     async onRequest({ options }) {
       const authStore = useAuthStore()

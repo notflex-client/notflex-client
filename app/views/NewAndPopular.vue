@@ -6,67 +6,38 @@ definePageMeta({ path: '/new-and-popular' })
 const { t } = useI18n()
 const { lang } = useLocale()
 
-function thumb(seed: number) {
-  return `https://picsum.photos/seed/${seed}/300/170`
-}
+const { listMovies, mapMovie } = useMovieCatalog()
+
+const { data: newMovies } = await useAsyncData('new-popular-new-movies', () =>
+  listMovies({ pageSize: 20, sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: topFilms } = await useAsyncData('new-popular-top-films', () =>
+  listMovies({ pageSize: 10, type: 'movie', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: topSeries } = await useAsyncData('new-popular-top-series', () =>
+  listMovies({ pageSize: 10, type: 'series', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: freshMovies } = await useAsyncData('new-popular-fresh-movies', () =>
+  listMovies({ pageSize: 20, tag: 'fresh-picks', sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: weekendMovies } = await useAsyncData('new-popular-weekend-movies', () =>
+  listMovies({ pageSize: 20, tag: 'weekend', sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
 
 // ── Mới trên Netflix ────────────────────────────────────────────────────────
-const NEW_ON_NETFLIX = computed<MovieBlockItem[]>(() => [
-  { image: thumb(810), badge: t('badge.newSeason') },
-  { image: thumb(811), badge: t('badge.newSeason') },
-  { image: thumb(812), badge: t('badge.newEpisode') },
-  { image: thumb(813) },
-  { image: thumb(814), badge: t('badge.newEpisode') },
-  { image: thumb(815) },
-  { image: thumb(816), badge: t('badge.newSeason') },
-  { image: thumb(817) },
-])
+const NEW_ON_NETFLIX = computed<MovieBlockItem[]>(() => newMovies.value?.items?.map(movie => ({ ...mapMovie(movie), badge: t('badge.recentlyAdded') })) ?? [])
 
 // ── Top 10 phim ─────────────────────────────────────────────────────────────
-const TOP10_FILMS = computed<MovieBlockItem[]>(() => [
-  { image: thumb(821), rank: 1,  badge: t('badge.newlyAdded') },
-  { image: thumb(822), rank: 2 },
-  { image: thumb(823), rank: 3,  badge: t('badge.newlyAdded') },
-  { image: thumb(824), rank: 4,  badge: t('badge.newlyAdded') },
-  { image: thumb(825), rank: 5 },
-  { image: thumb(826), rank: 6,  badge: t('badge.newlyAdded') },
-  { image: thumb(827), rank: 7 },
-  { image: thumb(828), rank: 8 },
-  { image: thumb(829), rank: 9 },
-  { image: thumb(830), rank: 10 },
-])
+const TOP10_FILMS = computed<MovieBlockItem[]>(() => topFilms.value?.items?.map((movie, index) => mapMovie(movie, index)) ?? [])
 
 // ── Top 10 series ────────────────────────────────────────────────────────────
-const TOP10_SERIES = computed<MovieBlockItem[]>(() => [
-  { image: thumb(831), rank: 1 },
-  { image: thumb(832), rank: 2,  badge: t('badge.newEpisode') },
-  { image: thumb(833), rank: 3 },
-  { image: thumb(834), rank: 4 },
-  { image: thumb(835), rank: 5 },
-  { image: thumb(836), rank: 6,  badge: t('badge.newEpisode') },
-  { image: thumb(837), rank: 7 },
-  { image: thumb(838), rank: 8 },
-  { image: thumb(839), rank: 9 },
-  { image: thumb(840), rank: 10 },
-])
+const TOP10_SERIES = computed<MovieBlockItem[]>(() => topSeries.value?.items?.map((movie, index) => mapMovie(movie, index)) ?? [])
 
 // ── Đáng chờ đợi ─────────────────────────────────────────────────────────────
-const COMING_SOON: MovieBlockItem[] = [
-  { image: thumb(841) },
-  { image: thumb(842) },
-  { image: thumb(843) },
-  { image: thumb(844) },
-  { image: thumb(845) },
-  { image: thumb(846) },
-  { image: thumb(847) },
-]
+const COMING_SOON = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
 
 // ── Ra mắt tuần tới ──────────────────────────────────────────────────────────
-const NEXT_WEEK: MovieBlockItem[] = [
-  { image: thumb(851) },
-  { image: thumb(852) },
-  { image: thumb(853) },
-]
+const NEXT_WEEK = computed<MovieBlockItem[]>(() => weekendMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
 </script>
 
 <template>

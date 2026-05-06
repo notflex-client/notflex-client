@@ -66,104 +66,41 @@ const NAV_LINKS = computed(() => [
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80'
 
-const { data: heroMovie } = await useAsyncData('hero-movie', () =>
-  $fetch<{ items: { id: string }[] }>('http://localhost:8080/movies', { params: { page: 1 } })
-    .then(r => r.items?.[0] ?? null)
-    .catch(() => null)
+const { listMovies, mapMovie } = useMovieCatalog()
+
+const { data: topMovies } = await useAsyncData('browse-top-movies', () =>
+  listMovies({ pageSize: 10, sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: newMovies } = await useAsyncData('browse-new-movies', () =>
+  listMovies({ pageSize: 20, sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: seriesMovies } = await useAsyncData('browse-series-movies', () =>
+  listMovies({ pageSize: 20, type: 'series', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: animationMovies } = await useAsyncData('browse-animation-movies', () =>
+  listMovies({ pageSize: 20, tag: 'animation', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: weekendMovies } = await useAsyncData('browse-weekend-movies', () =>
+  listMovies({ pageSize: 20, tag: 'weekend', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: acclaimedMovies } = await useAsyncData('browse-acclaimed-movies', () =>
+  listMovies({ pageSize: 20, tag: 'critically-acclaimed', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: freshMovies } = await useAsyncData('browse-fresh-movies', () =>
+  listMovies({ pageSize: 20, tag: 'fresh-picks', sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
 )
 
-function thumb(seed: number) {
-  return `https://picsum.photos/seed/${seed}/300/170`
-}
-
-const MATCHED = computed<MovieBlockItem[]>(() => [
-  { image: thumb(10), badge: t('badge.recentlyAdded') },
-  { image: thumb(20), badge: t('badge.leavingSoon') },
-  { image: thumb(30) },
-  { image: thumb(40), badge: t('badge.recentlyAdded') },
-  { image: thumb(50) },
-  { image: thumb(60), badge: t('badge.recentlyAdded') },
-])
-
-const NEW_ON_NETFLIX = computed<MovieBlockItem[]>(() => [
-  { image: thumb(11), badge: t('badge.recentlyAdded') },
-  { image: thumb(21), badge: t('badge.leavingSoon') },
-  { image: thumb(31) },
-  { image: thumb(41), badge: t('badge.recentlyAdded') },
-  { image: thumb(51) },
-  { image: thumb(61) },
-])
-
-const TOP_10 = computed<MovieBlockItem[]>(() => [
-  { image: thumb(12), badge: t('badge.recentlyAdded'), rank: 1 },
-  { image: thumb(22), badge: t('badge.recentlyAdded'), rank: 2 },
-  { image: thumb(32),                                          rank: 3 },
-  { image: thumb(42),                                          rank: 4 },
-  { image: thumb(52), badge: t('badge.recentlyAdded'), rank: 5 },
-  { image: thumb(62),                                          rank: 6 },
-  { image: thumb(72),                                          rank: 7 },
-])
-
-const CONTINUE: MovieBlockItem[] = [
-  { image: thumb(13), progress: 45 },
-  { image: thumb(23), progress: 20 },
-  { image: thumb(33), progress: 72 },
-  { image: thumb(43), progress: 10 },
-]
-
-const THINK_YOULL_LOVE = computed<MovieBlockItem[]>(() => [
-  { image: thumb(14), badge: t('badge.recentlyAdded') },
-  { image: thumb(24), badge: t('badge.recentlyAdded') },
-  { image: thumb(34), badge: t('badge.leavingSoon') },
-  { image: thumb(44), badge: t('badge.recentlyAdded') },
-  { image: thumb(54) },
-  { image: thumb(64), badge: t('badge.recentlyAdded') },
-])
-
-const ANIMATION = computed<MovieBlockItem[]>(() => [
-  { image: thumb(15), badge: t('badge.recentlyAdded') },
-  { image: thumb(25), badge: t('badge.recentlyAdded') },
-  { image: thumb(35), badge: t('badge.leavingSoon') },
-  { image: thumb(45), badge: t('badge.recentlyAdded') },
-  { image: thumb(55) },
-  { image: thumb(65) },
-])
-
-const INSPIRING = computed<MovieBlockItem[]>(() => [
-  { image: thumb(16) },
-  { image: thumb(26), badge: t('badge.leavingSoon') },
-  { image: thumb(36), badge: t('badge.leavingSoon') },
-  { image: thumb(46) },
-  { image: thumb(56), badge: t('badge.recentlyAdded') },
-  { image: thumb(66) },
-])
-
-const WATCH_ONE_WEEKEND = computed<MovieBlockItem[]>(() => [
-  { image: thumb(17), badge: t('badge.recentlyAdded') },
-  { image: thumb(27), badge: t('badge.leavingSoon') },
-  { image: thumb(37) },
-  { image: thumb(47), badge: t('badge.recentlyAdded') },
-  { image: thumb(57) },
-  { image: thumb(67) },
-])
-
-const CRITICALLY_ACCLAIMED = computed<MovieBlockItem[]>(() => [
-  { image: thumb(18), badge: t('badge.recentlyAdded') },
-  { image: thumb(28) },
-  { image: thumb(38), badge: t('badge.leavingSoon') },
-  { image: thumb(48) },
-  { image: thumb(58) },
-  { image: thumb(68) },
-])
-
-const FRESH_PICKS = computed<MovieBlockItem[]>(() => [
-  { image: thumb(19), badge: t('badge.recentlyAdded') },
-  { image: thumb(29) },
-  { image: thumb(39), badge: t('badge.leavingSoon') },
-  { image: thumb(49), badge: t('badge.recentlyAdded') },
-  { image: thumb(59) },
-  { image: thumb(69) },
-])
+const heroMovie = computed(() => topMovies.value?.items?.[0] ?? null)
+const MATCHED = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const NEW_ON_NETFLIX = computed<MovieBlockItem[]>(() => newMovies.value?.items?.map(movie => ({ ...mapMovie(movie), badge: t('badge.recentlyAdded') })) ?? [])
+const TOP_10 = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map((movie, index) => mapMovie(movie, index)) ?? [])
+const CONTINUE = computed<MovieBlockItem[]>(() => topMovies.value?.items?.slice(0, 4).map(movie => ({ ...mapMovie(movie), progress: 35 })) ?? [])
+const THINK_YOULL_LOVE = computed<MovieBlockItem[]>(() => seriesMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const ANIMATION = computed<MovieBlockItem[]>(() => animationMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const INSPIRING = computed<MovieBlockItem[]>(() => newMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const WATCH_ONE_WEEKEND = computed<MovieBlockItem[]>(() => weekendMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const CRITICALLY_ACCLAIMED = computed<MovieBlockItem[]>(() => acclaimedMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
 </script>
 
 <template>

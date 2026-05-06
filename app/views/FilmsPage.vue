@@ -9,9 +9,23 @@ const { lang } = useLocale()
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1400&q=80'
 
-function thumb(seed: number) {
-  return `https://picsum.photos/seed/${seed}/300/170`
-}
+const { listMovies, mapMovie } = useMovieCatalog()
+
+const { data: topMovies } = await useAsyncData('films-top-movies', () =>
+  listMovies({ pageSize: 10, type: 'movie', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: newMovies } = await useAsyncData('films-new-movies', () =>
+  listMovies({ pageSize: 20, type: 'movie', sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: actionMovies } = await useAsyncData('films-action-movies', () =>
+  listMovies({ pageSize: 20, type: 'movie', tag: 'action', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: romanceMovies } = await useAsyncData('films-romance-movies', () =>
+  listMovies({ pageSize: 20, type: 'movie', tag: 'romance', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: acclaimedMovies } = await useAsyncData('films-acclaimed-movies', () =>
+  listMovies({ pageSize: 20, type: 'movie', tag: 'critically-acclaimed', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
 
 // ── Genre list ──────────────────────────────────────────────────────────────
 const GENRES = computed<DropdownOption[]>(() => [
@@ -47,79 +61,22 @@ watch(selectedGenre, async (genreId) => {
   }
   genreLoading.value = true
   try {
-    const res = await $fetch<{ items: Array<{ thumbnail?: string; title?: string; badge?: string }> }>(
-      '/films',
-      { query: { genreId } }
-    )
-    genreItems.value = res.items.map(item => ({
-      image: item.thumbnail ?? '',
-      title: item.title ?? '',
-      badge: item.badge ?? '',
-    }))
+    const res = await listMovies({ pageSize: 20, type: 'movie', genre_id: genreId })
+    genreItems.value = res.items?.map(movie => mapMovie(movie)) ?? []
   } catch {
-    genreItems.value = Array.from({ length: 8 }, (_, i) => ({
-      image: thumb((genreId as unknown as number) * 10 + i + 1),
-    }))
+    genreItems.value = []
   } finally {
     genreLoading.value = false
   }
 })
 
 // ── Default rows ────────────────────────────────────────────────────────────
-const TOP_PICKS = computed<MovieBlockItem[]>(() => [
-  { image: thumb(711) },
-  { image: thumb(712), badge: t('badge.recentlyAdded') },
-  { image: thumb(713) },
-  { image: thumb(714), badge: t('badge.recentlyAdded') },
-  { image: thumb(715) },
-  { image: thumb(716), badge: t('badge.leavingSoon') },
-])
-
-const ACTION = computed<MovieBlockItem[]>(() => [
-  { image: thumb(721), badge: t('badge.recentlyAdded') },
-  { image: thumb(722) },
-  { image: thumb(723) },
-  { image: thumb(724), badge: t('badge.recentlyAdded') },
-  { image: thumb(725) },
-  { image: thumb(726), badge: t('badge.leavingSoon') },
-])
-
-const ROMANCE = computed<MovieBlockItem[]>(() => [
-  { image: thumb(731) },
-  { image: thumb(732), badge: t('badge.recentlyAdded') },
-  { image: thumb(733), badge: t('badge.leavingSoon') },
-  { image: thumb(734) },
-  { image: thumb(735), badge: t('badge.recentlyAdded') },
-  { image: thumb(736) },
-])
-
-const TOP_10: MovieBlockItem[] = [
-  { image: thumb(741), rank: 1 },
-  { image: thumb(742), rank: 2 },
-  { image: thumb(743), rank: 3 },
-  { image: thumb(744), rank: 4 },
-  { image: thumb(745), rank: 5 },
-  { image: thumb(746), rank: 6 },
-  { image: thumb(747), rank: 7 },
-]
-
-const AWARD_WINNING = computed<MovieBlockItem[]>(() => [
-  { image: thumb(751), badge: t('badge.recentlyAdded') },
-  { image: thumb(752) },
-  { image: thumb(753), badge: t('badge.recentlyAdded') },
-  { image: thumb(754) },
-  { image: thumb(755), badge: t('badge.leavingSoon') },
-  { image: thumb(756) },
-])
-
-const NETFLIX_FILMS = computed<MovieBlockItem[]>(() => [
-  { image: thumb(761), badge: t('badge.recentlyAdded') },
-  { image: thumb(762), badge: t('badge.recentlyAdded') },
-  { image: thumb(763) },
-  { image: thumb(764) },
-  { image: thumb(765), badge: t('badge.leavingSoon') },
-  { image: thumb(766) },
-])
+const TOP_PICKS = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const ACTION = computed<MovieBlockItem[]>(() => actionMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const ROMANCE = computed<MovieBlockItem[]>(() => romanceMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const TOP_10 = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map((movie, index) => mapMovie(movie, index)) ?? [])
+const AWARD_WINNING = computed<MovieBlockItem[]>(() => acclaimedMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const NETFLIX_FILMS = computed<MovieBlockItem[]>(() => newMovies.value?.items?.map(movie => ({ ...mapMovie(movie), badge: t('badge.recentlyAdded') })) ?? [])
 </script>
 
 <template>

@@ -9,9 +9,23 @@ const { lang } = useLocale()
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=1400&q=80'
 
-function thumb(seed: number) {
-  return `https://picsum.photos/seed/${seed}/300/170`
-}
+const { listMovies, mapMovie } = useMovieCatalog()
+
+const { data: topSeries } = await useAsyncData('series-top-movies', () =>
+  listMovies({ pageSize: 10, type: 'series', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: newSeries } = await useAsyncData('series-new-movies', () =>
+  listMovies({ pageSize: 20, type: 'series', sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: koreanSeries } = await useAsyncData('series-korean-movies', () =>
+  listMovies({ pageSize: 20, type: 'series', tag: 'korean', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: originalSeries } = await useAsyncData('series-originals-movies', () =>
+  listMovies({ pageSize: 20, type: 'series', tag: 'netflix-originals', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
+const { data: trendingSeries } = await useAsyncData('series-trending-movies', () =>
+  listMovies({ pageSize: 20, type: 'series', tag: 'trending', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
+)
 
 // ── Genre list ──────────────────────────────────────────────────────────────
 const GENRES = computed<DropdownOption[]>(() => [
@@ -44,70 +58,21 @@ watch(selectedGenre, async (genreId) => {
   }
   genreLoading.value = true
   try {
-    const res = await $fetch<{ items: Array<{ thumbnail?: string; title?: string; badge?: string }> }>(
-      '/series',
-      { query: { genreId } }
-    )
-    genreItems.value = res.items.map(item => ({
-      image: item.thumbnail ?? '',
-      title: item.title ?? '',
-      badge: item.badge ?? '',
-    }))
+    const res = await listMovies({ pageSize: 20, type: 'series', genre_id: genreId })
+    genreItems.value = res.items?.map(movie => mapMovie(movie)) ?? []
   } catch {
-    genreItems.value = Array.from({ length: 8 }, (_, i) => ({
-      image: thumb((genreId as unknown as number) * 10 + i + 1),
-    }))
+    genreItems.value = []
   } finally {
     genreLoading.value = false
   }
 })
 
 // ── Default rows ────────────────────────────────────────────────────────────
-const TOP_PICKS = computed<MovieBlockItem[]>(() => [
-  { image: thumb(101) },
-  { image: thumb(102), badge: t('badge.recentlyAdded') },
-  { image: thumb(103) },
-  { image: thumb(104), badge: t('badge.recentlyAdded') },
-  { image: thumb(105) },
-  { image: thumb(106), badge: t('badge.leavingSoon') },
-])
-
-const KOREAN = computed<MovieBlockItem[]>(() => [
-  { image: thumb(201), badge: t('badge.recentlyAdded') },
-  { image: thumb(202) },
-  { image: thumb(203), badge: t('badge.recentlyAdded') },
-  { image: thumb(204) },
-  { image: thumb(205), badge: t('badge.leavingSoon') },
-  { image: thumb(206) },
-])
-
-const NETFLIX_ORIGINALS = computed<MovieBlockItem[]>(() => [
-  { image: thumb(301), badge: t('badge.recentlyAdded') },
-  { image: thumb(302), badge: t('badge.recentlyAdded') },
-  { image: thumb(303) },
-  { image: thumb(304), badge: t('badge.recentlyAdded') },
-  { image: thumb(305) },
-  { image: thumb(306) },
-])
-
-const TOP_10: MovieBlockItem[] = [
-  { image: thumb(401), rank: 1 },
-  { image: thumb(402), rank: 2 },
-  { image: thumb(403), rank: 3 },
-  { image: thumb(404), rank: 4 },
-  { image: thumb(405), rank: 5 },
-  { image: thumb(406), rank: 6 },
-  { image: thumb(407), rank: 7 },
-]
-
-const TRENDING = computed<MovieBlockItem[]>(() => [
-  { image: thumb(501) },
-  { image: thumb(502), badge: t('badge.recentlyAdded') },
-  { image: thumb(503) },
-  { image: thumb(504) },
-  { image: thumb(505) },
-  { image: thumb(506), badge: t('badge.leavingSoon') },
-])
+const TOP_PICKS = computed<MovieBlockItem[]>(() => topSeries.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const KOREAN = computed<MovieBlockItem[]>(() => koreanSeries.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const NETFLIX_ORIGINALS = computed<MovieBlockItem[]>(() => originalSeries.value?.items?.map(movie => mapMovie(movie)) ?? [])
+const TOP_10 = computed<MovieBlockItem[]>(() => topSeries.value?.items?.map((movie, index) => mapMovie(movie, index)) ?? [])
+const TRENDING = computed<MovieBlockItem[]>(() => trendingSeries.value?.items?.map(movie => mapMovie(movie)) ?? [])
 </script>
 
 <template>

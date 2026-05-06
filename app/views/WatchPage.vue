@@ -2,6 +2,7 @@
 import Hls from 'hls.js'
 
 const route = useRoute()
+const router = useRouter()
 const { $api } = useNuxtApp()
 
 const movieId = route.params.id as string
@@ -9,19 +10,16 @@ const movieId = route.params.id as string
 interface Movie {
   id: string
   title: string
-  video_url: string
-  trailer_url?: string
-  duration_mins: number
+  video_url: string | null
+  trailer_url?: string | null
+  duration_mins?: number | null
 }
 
 const config = useRuntimeConfig()
-const apiBase = (config.public.apiUrl as string) || 'http://localhost:3000'
+const apiBase = (config.public.apiUrl as string) || 'http://localhost:8080'
 
-const movie = ref<Movie | null>(null)
 const videoEl = ref<HTMLVideoElement | null>(null)
 const hls = ref<Hls | null>(null)
-
-// Player state
 const playing = ref(false)
 const currentTime = ref(0)
 const duration = ref(0)
@@ -30,40 +28,28 @@ const muted = ref(false)
 const fullscreen = ref(false)
 const controlsVisible = ref(true)
 const playbackSpeed = ref(1)
+const speedMenuOpen = ref(false)
+
+function normalizeVideoUrl(url: string) {
+  if (!url) return ''
+  if (url.startsWith('/')) return `${apiBase}${url}`
+  return url
+}
 
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 let progressTimer: ReturnType<typeof setInterval> | null = null
 
-// ── Fetch movie ────────────────────────────────────────────────
-const { data, error } = await useAsyncData('movie', () =>
+const { data: movie, error } = await useAsyncData(`movie-${movieId}`, () =>
   $api<Movie>(`/movies/${movieId}`)
 )
-movie.value = data.value ?? null
 
-// ── HLS setup ─────────────────────────────────────────────────
+const sourceUrl = computed(() => normalizeVideoUrl(movie.value?.video_url || ''))
+const canPlayVideo = computed(() => /\.(m3u8|mp4)(\?|$)/i.test(sourceUrl.value))
+
 onMounted(() => {
-  if (!movie.value?.video_url) return
-  initHls(movie.value.video_url)
+  if (sourceUrl.value && canPlayVideo.value) initVideo(sourceUrl.value)
   startProgressTracking()
 })
-
-function initHls(url: string) {
-  const video = videoEl.value
-  if (!video) return
-
-  const proxyUrl = `${apiBase}/proxy/hls?url=${encodeURIComponent(url)}`
-
-  if (Hls.isSupported()) {
-    const hlsInstance = new Hls()
-    hls.value = hlsInstance
-    hlsInstance.loadSource(proxyUrl)
-    hlsInstance.attachMedia(video)
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play())
-  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = proxyUrl
-    video.play()
-  }
-}
 
 onUnmounted(() => {
   hls.value?.destroy()
@@ -71,22 +57,42 @@ onUnmounted(() => {
   if (progressTimer) clearInterval(progressTimer)
 })
 
-// ── Video event handlers ───────────────────────────────────────
+function initVideo(url: string) {
+  const video = videoEl.value
+  if (!video) return
+
+  const finalUrl = url.includes('.m3u8') ? `${apiBase}/proxy/hls?url=${encodeURIComponent(url)}` : url
+
+  if (url.includes('.m3u8') && Hls.isSupported()) {
+    const hlsInstance = new Hls()
+    hls.value = hlsInstance
+    hlsInstance.loadSource(finalUrl)
+    hlsInstance.attachMedia(video)
+    return
+  }
+
+  video.src = finalUrl
+}
+
 function onTimeUpdate() { currentTime.value = videoEl.value?.currentTime ?? 0 }
 function onDurationChange() { duration.value = videoEl.value?.duration ?? 0 }
 function onPlay() { playing.value = true }
 function onPause() { playing.value = false }
 
-// ── Controls ───────────────────────────────────────────────────
 function togglePlay() {
-  if (!videoEl.value) return
+  if (!videoEl.value || !canPlayVideo.value) return
   playing.value ? videoEl.value.pause() : videoEl.value.play()
 }
 
 function seek(val: number) {
-  if (!videoEl.value) return
+  if (!videoEl.value || !canPlayVideo.value) return
   videoEl.value.currentTime = val
   currentTime.value = val
+}
+
+function skip(seconds: number) {
+  if (!videoEl.value || !canPlayVideo.value) return
+  seek(Math.max(0, Math.min(duration.value, currentTime.value + seconds)))
 }
 
 function setVolume(val: number) {
@@ -96,13 +102,13 @@ function setVolume(val: number) {
 }
 
 function toggleMute() {
-  if (!videoEl.value) return
   muted.value = !muted.value
-  videoEl.value.muted = muted.value
+  if (videoEl.value) videoEl.value.muted = muted.value
 }
 
 function setSpeed(val: number) {
   playbackSpeed.value = val
+  speedMenuOpen.value = false
   if (videoEl.value) videoEl.value.playbackRate = val
 }
 
@@ -117,7 +123,6 @@ function toggleFullscreen() {
   }
 }
 
-// ── Auto-hide controls ─────────────────────────────────────────
 function showControls() {
   controlsVisible.value = true
   if (hideTimer) clearTimeout(hideTimer)
@@ -126,7 +131,6 @@ function showControls() {
   }, 3000)
 }
 
-// ── Progress tracking ──────────────────────────────────────────
 function startProgressTracking() {
   progressTimer = setInterval(() => {
     if (!playing.value || !videoEl.value) return
@@ -144,12 +148,11 @@ async function saveProgress() {
       method: 'POST',
       body: { movieId, watchDuration: watched, isCompleted: completed },
     })
-  } catch { /* ignore */ }
+  } catch {}
 }
 
-// ── Helpers ────────────────────────────────────────────────────
 function formatTime(secs: number) {
-  if (!secs || isNaN(secs)) return '0:00'
+  if (!secs || Number.isNaN(secs)) return '0:00'
   const h = Math.floor(secs / 3600)
   const m = Math.floor((secs % 3600) / 60)
   const s = Math.floor(secs % 60)
@@ -160,27 +163,26 @@ function formatTime(secs: number) {
 const speedSteps = [
   { value: 0.5, label: '0.5x' },
   { value: 0.75, label: '0.75x' },
-  { value: 1, label: '1x', sublabel: '(Bình thường)' },
+  { value: 1, label: '1x', sublabel: '(Normal)' },
   { value: 1.25, label: '1.25x' },
   { value: 1.5, label: '1.5x' },
 ]
 </script>
 
 <template>
-  <div
-    class="watch-page"
-    @mousemove="showControls"
-    @click="showControls"
-  >
-    <!-- Error -->
+  <div class="watch-page" @mousemove="showControls" @click="showControls">
     <div v-if="error || !movie" class="watch-page__error">
-      <p>Không thể tải phim. Vui lòng thử lại.</p>
-      <NuxtLink to="/browse">← Quay lại</NuxtLink>
+      <span class="h1-bold">Không thể tải phim</span>
+      <IconButton variant="overlay" aria-label="Back" @click="router.push('/browse')">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M19 12H5M5 12l7 7M5 12l7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </IconButton>
     </div>
 
     <template v-else>
-      <!-- HLS video -->
       <video
+        v-if="canPlayVideo"
         ref="videoEl"
         class="watch-page__video"
         @timeupdate="onTimeUpdate"
@@ -190,225 +192,307 @@ const speedSteps = [
         @click="togglePlay"
       />
 
+      <div v-else class="watch-page__brand">
+        <span class="watch-page__logo">N</span>
+        <span class="body-regular watch-page__no-video">Video URL phải là link .mp4 hoặc .m3u8</span>
+      </div>
+
       <Transition name="fade">
-        <div v-show="controlsVisible" class="watch-page__controls">
-
-          <!-- Top bar -->
-          <div class="controls__top">
-            <button class="controls__back" @click="$router.back()">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        <div v-show="controlsVisible" class="watch-page__chrome">
+          <div class="watch-page__topbar">
+            <IconButton variant="overlay" aria-label="Back" @click="router.back()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M19 12H5M5 12l7 7M5 12l7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-            </button>
-            <span class="controls__title">{{ movie.title }}</span>
+            </IconButton>
+
+            <IconButton variant="overlay" aria-label="Report" class="watch-page__report">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 20V5m0 0h10l-1.5 4L16 13H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </IconButton>
           </div>
 
-          <!-- Center play/pause -->
-          <div class="controls__center" @click="togglePlay">
-            <svg v-if="!playing" width="64" height="64" viewBox="0 0 24 24" fill="white">
-              <path d="M8 5v14l11-7z"/>
+          <IconButton v-if="canPlayVideo" variant="overlay" class="watch-page__center-action" aria-label="Play" @click.stop="togglePlay">
+            <svg v-if="!playing" width="72" height="72" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5v14l11-7z" />
             </svg>
-            <svg v-else width="64" height="64" viewBox="0 0 24 24" fill="white">
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            <svg v-else width="72" height="72" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M6 19h4V5H6v14Zm8-14v14h4V5h-4Z" />
             </svg>
-          </div>
+          </IconButton>
 
-          <!-- Bottom bar -->
-          <div class="controls__bottom">
-            <div class="controls__progress">
+          <div class="watch-page__bottom">
+            <div class="watch-page__progress-row">
               <Slider
                 :model-value="currentTime"
                 :min="0"
                 :max="duration || 100"
                 :step="1"
                 variant="progress"
+                :disabled="!canPlayVideo"
                 @update:model-value="seek"
               />
+              <span class="caption-1-medium watch-page__duration">{{ formatTime(duration) }}</span>
             </div>
 
-            <div class="controls__row">
-              <IconButton variant="overlay" size="medium" @click="togglePlay">
-                <template #default>
-                  <svg v-if="!playing" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                  <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                  </svg>
-                </template>
-              </IconButton>
+            <span class="caption-1-medium watch-page__episode">{{ movie.title }}</span>
 
-              <div class="controls__volume">
-                <IconButton variant="overlay" size="medium" @click="toggleMute">
-                  <template #default>
-                    <svg v-if="muted || volume === 0" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-                    </svg>
-                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-                    </svg>
-                  </template>
+            <div class="watch-page__controls">
+              <div class="watch-page__controls-left">
+                <IconButton variant="overlay" size="large" aria-label="Play" @click="togglePlay">
+                  <svg v-if="!playing" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  <svg v-else width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M6 19h4V5H6v14Zm8-14v14h4V5h-4Z" />
+                  </svg>
                 </IconButton>
-                <div class="controls__volume-slider">
-                  <Slider
-                    :model-value="muted ? 0 : volume"
-                    :min="0"
-                    :max="1"
-                    :step="0.05"
-                    variant="default"
-                    @update:model-value="setVolume"
-                  />
+
+                <IconButton variant="overlay" size="large" aria-label="Back 10 seconds" @click="skip(-10)">
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                    <path d="M12 6H7V1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M7.8 6.8A9 9 0 1 1 5 13.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <text x="8.2" y="17" fill="currentColor" font-size="7" font-weight="700">10</text>
+                  </svg>
+                </IconButton>
+
+                <IconButton variant="overlay" size="large" aria-label="Forward 10 seconds" @click="skip(10)">
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                    <path d="M16 6h5V1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M20.2 6.8A9 9 0 1 0 23 13.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <text x="9.2" y="17" fill="currentColor" font-size="7" font-weight="700">10</text>
+                  </svg>
+                </IconButton>
+
+                <div class="watch-page__volume">
+                  <IconButton variant="overlay" size="large" aria-label="Volume" @click="toggleMute">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                      <path v-if="!muted" d="M16 9a4 4 0 0 1 0 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                  </IconButton>
+                  <div class="watch-page__volume-slider">
+                    <Slider :model-value="muted ? 0 : volume" :min="0" :max="1" :step="0.05" @update:model-value="setVolume" />
+                  </div>
                 </div>
+
+                <span class="caption-1-medium watch-page__control-title">{{ movie.title }}</span>
               </div>
 
-              <span class="controls__time">
-                {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-              </span>
+              <div class="watch-page__controls-right">
+                <IconButton variant="overlay" size="large" aria-label="Next episode">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M6 5l9 7-9 7V5Zm11 0v14" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                  </svg>
+                </IconButton>
 
-              <div class="controls__right">
-                <SpeedIndicator
-                  :model-value="playbackSpeed"
-                  :steps="speedSteps"
-                  @update:model-value="setSpeed"
-                />
-                <IconButton variant="overlay" size="medium" @click="toggleFullscreen">
-                  <template #default>
-                    <svg v-if="!fullscreen" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                <IconButton variant="overlay" size="large" aria-label="Episodes">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 7h11v9H5V7Zm3-3h11v9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                  </svg>
+                </IconButton>
+
+                <div class="watch-page__speed">
+                  <IconButton variant="overlay" size="large" aria-label="Playback speed" @click="speedMenuOpen = !speedMenuOpen">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M5 16a7 7 0 1 1 14 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                      <path d="M12 16l4-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                      <circle cx="12" cy="16" r="1.5" fill="currentColor" />
                     </svg>
-                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
-                    </svg>
-                  </template>
+                  </IconButton>
+
+                  <Transition name="fade">
+                    <SpeedIndicator
+                      v-if="speedMenuOpen"
+                      class="watch-page__speed-panel"
+                      :model-value="playbackSpeed"
+                      :steps="speedSteps"
+                      @update:model-value="setSpeed"
+                    />
+                  </Transition>
+                </div>
+
+                <IconButton variant="overlay" size="large" aria-label="Fullscreen" @click="toggleFullscreen">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M8 4H4v4M16 4h4v4M8 20H4v-4M16 20h4v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
                 </IconButton>
               </div>
             </div>
           </div>
-
         </div>
       </Transition>
-
     </template>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
+@use "~/assets/scss/tools/token" as *;
+
 .watch-page {
   position: fixed;
   inset: 0;
+  z-index: 500;
+  overflow: hidden;
   background: #000;
+  color: #fff;
 
   &__video {
     width: 100%;
     height: 100%;
+    display: block;
     object-fit: contain;
+    background: #000;
+  }
+
+  &__brand,
+  &__error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__error {
-    display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #fff;
-    gap: 16px;
-
-    a { color: #e50914; }
+    gap: token("dm-24");
   }
 
-  &__controls {
+  &__logo {
+    color: #e50914;
+    font-size: clamp(120px, 14vw, 260px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.12em;
+    text-shadow: 0 0 40px rgba(229, 9, 20, 0.35);
+  }
+
+  &__no-video {
+    position: absolute;
+    bottom: 28%;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  &__chrome {
     position: absolute;
     inset: 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.7) 0%,
-      transparent 20%,
-      transparent 70%,
-      rgba(0,0,0,0.85) 100%
-    );
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent 24%, transparent 58%, rgba(0, 0, 0, 0.86));
     pointer-events: none;
-
-    > * { pointer-events: all; }
   }
-}
 
-.controls {
-  &__top {
+  &__chrome > * {
+    pointer-events: auto;
+  }
+
+  &__topbar {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 24px 32px 0;
+    padding: token("dm-24") token("dm-32");
   }
 
-  &__back {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    opacity: 0.85;
-    &:hover { opacity: 1; }
+  &__report {
+    margin-left: auto;
   }
 
-  &__title {
-    color: #fff;
-    font-size: 18px;
-    font-weight: 600;
-  }
-
-  &__center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    cursor: pointer;
-    opacity: 0.9;
-    &:hover { opacity: 1; }
+  &__center-action {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 112px;
+    height: 112px;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.18);
   }
 
   &__bottom {
-    padding: 0 32px 24px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: token("dm-12");
+    padding: 0 token("dm-32") token("dm-24");
   }
 
-  &__progress { width: 100%; }
+  &__progress-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: token("dm-12");
+  }
 
-  &__row {
+  &__duration,
+  &__episode,
+  &__control-title {
+    color: #fff;
+  }
+
+  &__episode {
+    align-self: center;
+  }
+
+  &__controls {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: token("dm-24");
+  }
+
+  &__controls-left,
+  &__controls-right {
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: #fff;
+    gap: token("dm-12");
+  }
+
+  &__controls-right {
+    justify-content: flex-end;
   }
 
   &__volume {
     display: flex;
     align-items: center;
-    gap: 4px;
-    &-slider { width: 80px; }
+    gap: token("dm-8");
   }
 
-  &__time {
-    font-size: 14px;
-    color: #fff;
+  &__volume-slider {
+    width: 96px;
+  }
+
+  &__control-title {
+    margin-left: token("dm-8");
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
-    margin-left: 4px;
   }
 
-  &__right {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  &__speed {
+    position: relative;
+  }
+
+  &__speed-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + #{token("dm-20")});
+    width: min(420px, 80vw);
+    padding: token("dm-16");
+    border-radius: token("dm-4");
+    background: rgba(31, 31, 31, 0.96);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   }
 }
 
 .fade-enter-active,
-.fade-leave-active { transition: opacity 0.3s ease; }
+.fade-leave-active {
+  transition: opacity 0.24s ease;
+}
+
 .fade-enter-from,
-.fade-leave-to { opacity: 0; }
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
