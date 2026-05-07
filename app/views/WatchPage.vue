@@ -45,6 +45,7 @@ const { data: movie, error } = await useAsyncData(`movie-${movieId}`, () =>
 
 const sourceUrl = computed(() => normalizeVideoUrl(movie.value?.video_url || ''))
 const canPlayVideo = computed(() => /\.(m3u8|mp4)(\?|$)/i.test(sourceUrl.value))
+const needsSubscription = computed(() => movie.value && !sourceUrl.value)
 
 onMounted(() => {
   if (sourceUrl.value && canPlayVideo.value) initVideo(sourceUrl.value)
@@ -194,7 +195,12 @@ const speedSteps = [
 
       <div v-else class="watch-page__brand">
         <span class="watch-page__logo">N</span>
-        <span class="body-regular watch-page__no-video">Video URL phải là link .mp4 hoặc .m3u8</span>
+        <template v-if="needsSubscription">
+          <span class="h1-bold watch-page__no-video">Nội dung Premium</span>
+          <span class="body-regular watch-page__no-video">Đăng ký gói Notflex để mở khóa phim này.</span>
+          <Button variant="brand" size="large" @click="navigateTo('/plans')">Chọn gói cước</Button>
+        </template>
+        <span v-else class="body-regular watch-page__no-video">Video URL phải là link .mp4 hoặc .m3u8</span>
       </div>
 
       <Transition name="fade">

@@ -43,6 +43,16 @@ export default {
         meta: { authRequired: true },
       },
       {
+        path: '/plans',
+        component: () => import('~/views/PlansPage.vue'),
+        meta: { authRequired: true },
+      },
+      {
+        path: '/billing',
+        component: () => import('~/views/BillingPage.vue'),
+        meta: { authRequired: true },
+      },
+      {
         path: '/login',
         component: () => import('~/views/auth/login.vue'),
         meta: { authRequired: false },

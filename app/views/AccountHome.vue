@@ -192,6 +192,7 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.m
     <div class="browse-page__content">
       <MovieBlock :title="t('browse.rows.matched')"          :items="MATCHED" />
       <MovieBlock :title="t('browse.rows.newOnNetflix')"     :items="NEW_ON_NETFLIX" />
+      <AiRecommendationSection />
       <MovieBlock :title="t('browse.rows.top10')"            variant="top10"    :items="TOP_10" />
       <MovieBlock :title="t('browse.rows.thinkYoullLove')"  :items="THINK_YOULL_LOVE" />
       <MovieBlock :title="t('browse.rows.continueWatching', { name: 'James' })" variant="continue" :items="CONTINUE" />
