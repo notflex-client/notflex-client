@@ -60,7 +60,7 @@ async function signIn() {
           <span class="caption-1-regular">OR</span>
         </div>
 
-        <Button variant="ghost" size="large" :block="true">{{ t('login.signInCode') }}</Button>
+        <Button variant="ghost" size="large" :block="true" @click="navigateTo('/login-code')">{{ t('login.signInCode') }}</Button>
 
         <a href="#" class="auth-card__forgot body-regular">{{ t('login.forgotPassword') }}</a>
 

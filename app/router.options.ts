@@ -58,6 +58,11 @@ export default {
         meta: { authRequired: false },
       },
       {
+        path: '/login-code',
+        component: () => import('~/views/auth/LoginCode.vue'),
+        meta: { authRequired: false },
+      },
+      {
         path: '/signup',
         component: () => import('~/views/auth/SignUp.vue'),
         meta: { authRequired: false },
