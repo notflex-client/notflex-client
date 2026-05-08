@@ -49,11 +49,29 @@ const DEMO_FILM: FdmData = {
   ],
 }
 
-const PROFILES = [
-  { value: 'james', name: 'James', image: 'https://i.pravatar.cc/150?img=11' },
-  { value: 'sarah', name: 'Sarah', image: 'https://i.pravatar.cc/150?img=47' },
-]
-const activeProfile = ref('james')
+const authStore = useAuthStore()
+
+const PROFILES = computed(() =>
+  authStore.profiles.length
+    ? authStore.profiles.map(p => ({ value: p.id, name: p.name, image: p.image }))
+    : [{ value: authStore.user?.id ?? 'me', name: authStore.user?.full_name ?? 'User', image: authStore.user?.avatar_url ?? '' }]
+)
+const activeProfile = computed(() => authStore.activeProfile?.id ?? PROFILES.value[0]?.value ?? '')
+
+function handleMenuAction(action: string) {
+  if (action === 'account') navigateTo('/account')
+  else if (action === 'manage-profiles') navigateTo('/who-is-watching')
+}
+
+function handleSignOut() {
+  authStore.logout()
+  navigateTo('/login')
+}
+
+function handleSelectProfile(value: string) {
+  const profile = authStore.profiles.find(p => p.id === value)
+  if (profile) authStore.selectProfile(profile)
+}
 
 const NAV_LINKS = computed(() => [
   { label: t('nav.home'),            active: true },
@@ -121,7 +139,7 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.m
         >{{ link.label }}</a>
       </template>
       <template #action>
-        <IconButton variant="ghost" size="small" :aria-label="t('action.search')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.search')" @click="navigateTo('/search')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/>
             <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -136,16 +154,16 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.m
         <AvatarPopover
           :profiles="PROFILES"
           :active-profile="activeProfile"
-          @select-profile="activeProfile = $event"
-          @sign-out="navigateTo('/login')"
+          @select-profile="handleSelectProfile"
+          @menu-action="handleMenuAction"
+          @sign-out="handleSignOut"
         >
-          <template #trigger="{ triggerProps }">
+          <template #trigger>
             <Avatar
               size="small"
               :show-arrow="true"
               :name="PROFILES.find(p => p.value === activeProfile)?.name ?? ''"
               :image="PROFILES.find(p => p.value === activeProfile)?.image ?? ''"
-              v-bind="(triggerProps as any)"
             />
           </template>
         </AvatarPopover>

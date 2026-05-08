@@ -2,13 +2,16 @@
 
 $popover-profile-size: 40px;
 
-// ── Root wrapper (trigger + teleported panel) ─────────────────
 .avatar-popover-root {
   display: inline-flex;
   position: relative;
 }
 
-// Fallback trigger (used only when no trigger slot is provided)
+.avatar-popover__trigger {
+  display: inline-flex;
+  cursor: pointer;
+}
+
 .avatar-popover__fallback-trigger {
   background: none;
   border: 1px solid token("grey-600");
@@ -22,8 +25,10 @@ $popover-profile-size: 40px;
 
 // ── Panel ─────────────────────────────────────────────────────
 .avatar-popover {
-  // Zag hides via data-state; reset display when open
-  &[data-state="closed"] { display: none; }
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10000;
   background-color: token("grey-900");
   border: 1px solid token("grey-700");
   border-radius: 4px;
@@ -31,7 +36,6 @@ $popover-profile-size: 40px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
 
-  // ── Profiles row ─────────────────────────────────────────
   &__profiles {
     display: flex;
     gap: token("dm-12");
@@ -47,10 +51,8 @@ $popover-profile-size: 40px;
     border: none;
     cursor: pointer;
     padding: 0;
-    height: auto;
-    border-radius: 0;
 
-    &:hover &-frame {
+    &:hover .avatar-popover__profile-frame {
       filter: brightness(0.65);
     }
   }
@@ -89,14 +91,12 @@ $popover-profile-size: 40px;
     white-space: nowrap;
   }
 
-  // ── Separator ────────────────────────────────────────────
   &__sep {
     height: 1px;
     background-color: token("grey-700");
     margin: 0;
   }
 
-  // ── Menu list ────────────────────────────────────────────
   &__menu {
     list-style: none;
     margin: 0;
@@ -127,22 +127,31 @@ $popover-profile-size: 40px;
     color: inherit;
   }
 
-  // ── Sign out ─────────────────────────────────────────────
   &__sign-out {
     display: block;
     width: 100%;
-    height: auto;
     padding: token("dm-12") token("dm-16");
     background: none;
     border: none;
-    border-radius: 0;
     cursor: pointer;
     text-align: center;
     color: token("color-text-secondary");
     transition: color 0.1s ease;
+    font: inherit;
 
     &:hover {
       color: token("color-text-primary");
     }
   }
+}
+
+// ── Transition ────────────────────────────────────────────────
+.popover-fade-enter-active,
+.popover-fade-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.popover-fade-enter-from,
+.popover-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
