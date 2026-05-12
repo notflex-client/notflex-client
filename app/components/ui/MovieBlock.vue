@@ -3,6 +3,7 @@ import EmblaCarousel from 'embla-carousel'
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures'
 
 export interface MovieBlockItem {
+  id?:          string
   image?:       string
   title?:       string
   badge?:       string
@@ -23,6 +24,10 @@ const props = defineProps({
   variant: { type: String as PropType<'default' | 'first' | 'top10' | 'continue'>, default: 'default' },
   items:   { type: Array as PropType<MovieBlockItem[]>, default: () => [] },
 })
+
+function handlePlay(item: MovieBlockItem) {
+  if (item.id) navigateTo(`/watch/${item.id}`)
+}
 
 const cardVariant = computed((): 'more-like-this' | 'top10' | 'continue' => {
   if (props.variant === 'top10') return 'top10'
@@ -156,6 +161,7 @@ const previewStyle = computed(() => {
             class="movie-block__slide"
             @mouseenter="onSlideEnter(i, $event)"
             @mouseleave="onSlideLeave"
+            @click="handlePlay(item)"
           >
             <MovieCard
               class="movie-block__item"
@@ -203,6 +209,7 @@ const previewStyle = computed(() => {
           :description="hoveredItem.description ?? 'An exciting story that will keep you on the edge of your seat.'"
           :tags="hoveredItem.tags ?? ['Drama', 'Thriller']"
           :is-new="hoveredItem.isNew ?? false"
+          @play="handlePlay(hoveredItem)"
         />
       </div>
     </Transition>
