@@ -1,58 +1,23 @@
 ﻿<script setup lang="ts">
-import type { DropdownOption } from '~/components/ui/Dropdown.vue'
-
-definePageMeta({ path: '/my-list' })
+definePageMeta({ path: '/my-list', authRequired: true })
 
 const { t } = useI18n()
 const { lang } = useLocale()
+const { listFavorites, removeFavorite } = useFavorites()
 
-// ── Genre filter ────────────────────────────────────────────────────────────
-const GENRES = computed<DropdownOption[]>(() => [
-  { value: 'all',   label: t('genre.all') },
-  { value: '28',    label: t('genre.action') },
-  { value: '12',    label: t('genre.adventure') },
-  { value: '16',    label: t('genre.animation') },
-  { value: '35',    label: t('genre.comedy') },
-  { value: '18',    label: t('genre.drama') },
-  { value: '27',    label: t('genre.horror') },
-  { value: '10749', label: t('genre.romance') },
-  { value: '878',   label: t('genre.scifi') },
-  { value: '53',    label: t('genre.thriller') },
-  { value: '99',    label: t('genre.documentary') },
-])
+const { data: favoritesData, refresh } = await useAsyncData('my-list-favorites', () =>
+  listFavorites({ pageSize: 50 }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 })),
+)
 
-interface ListItem {
-  id:        string
-  image:     string
-  title?:    string
-  badge?:    string
-  genreId?:  string
-}
+const favorites = computed(() => favoritesData.value?.items ?? [])
+const loading = ref(false)
 
-const selectedGenre = ref<string>('all')
-const items         = ref<ListItem[]>([])
-const loading       = ref(false)
-
-async function fetchList(genreId: string) {
-  loading.value = true
+async function onRemove(movieId: string) {
   try {
-    const query = genreId !== 'all' ? { genreId } : {}
-    const res = await $fetch<{ items: ListItem[] }>('/my-list', { query })
-    items.value = res.items
-  } catch {
-    items.value = Array.from({ length: 12 }, (_, i) => ({
-      id:    String(i + 1),
-      image: `https://picsum.photos/seed/${900 + i}/300/170`,
-      badge: i % 4 === 0 ? t('badge.newSeason') : i % 5 === 0 ? t('badge.newEpisode') : '',
-    }))
-  } finally {
-    loading.value = false
-  }
+    await removeFavorite(movieId)
+    await refresh()
+  } catch {}
 }
-
-onMounted(() => fetchList('all'))
-
-watch(selectedGenre, (val) => fetchList(val))
 </script>
 
 <template>
@@ -91,13 +56,6 @@ watch(selectedGenre, (val) => fetchList(val))
     <!-- ── Page header ─────────────────────────────────────────── -->
     <div class="mylist-page__header">
       <span class="title-1-bold mylist-page__title">{{ t('myList.pageTitle') }}</span>
-      <Dropdown
-        v-model="selectedGenre"
-        :options="GENRES"
-        :placeholder="t('myList.genrePlaceholder')"
-        size="small"
-        class="mylist-page__genre-dropdown"
-      />
     </div>
 
     <!-- ── Grid ────────────────────────────────────────────────── -->
@@ -107,20 +65,30 @@ watch(selectedGenre, (val) => fetchList(val))
         <div v-for="n in 12" :key="n" class="mylist-page__skeleton" />
       </div>
 
-      <div v-else-if="!items.length" class="mylist-page__empty">
+      <div v-else-if="!favorites.length" class="mylist-page__empty">
         <span class="body-regular mylist-page__empty-text">{{ t('myList.empty') }}</span>
         <span class="caption-1-regular mylist-page__empty-sub">{{ t('myList.emptySub') }}</span>
       </div>
 
       <div v-else class="mylist-page__grid">
-        <MovieCard
-          v-for="item in items"
-          :key="item.id"
-          variant="more-like-this"
-          :image="item.image"
-          :title="item.title ?? ''"
-          :badge="item.badge ?? ''"
-        />
+        <div
+          v-for="fav in favorites"
+          :key="fav.movie_id"
+          class="mylist-page__item"
+        >
+          <NuxtLink :to="`/watch/${fav.movie_id}`">
+            <MovieCard
+              variant="more-like-this"
+              :image="fav.movie?.poster_url || fav.movie?.banner_url || ''"
+              :title="fav.movie?.title ?? ''"
+            />
+          </NuxtLink>
+          <button class="mylist-page__remove" :aria-label="t('myList.remove')" @click="onRemove(fav.movie_id)">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -226,5 +194,31 @@ $gap: token("dm-4");
   &__empty-text { color: token("color-text-primary"); }
 
   &__empty-sub  { color: token("color-text-secondary"); }
+
+  &__item {
+    position: relative;
+
+    &:hover .mylist-page__remove { opacity: 1; }
+  }
+
+  &__remove {
+    position: absolute;
+    top: token("dm-8");
+    right: token("dm-8");
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid token("grey-600");
+    color: token("color-text-primary");
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+
+    &:hover { background: rgba(229, 9, 20, 0.9); }
+  }
 }
 </style>

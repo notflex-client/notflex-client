@@ -7,12 +7,30 @@ const { $api } = useNuxtApp()
 
 const movieId = route.params.id as string
 
+interface Subtitle {
+  id: string
+  language: string
+  label: string
+  subtitle_url: string
+  format: string
+}
+
+interface AudioTrack {
+  id: string
+  language: string
+  label: string
+  audio_url: string
+  is_default: boolean
+}
+
 interface Movie {
   id: string
   title: string
   video_url: string | null
   trailer_url?: string | null
   duration_mins?: number | null
+  subtitles?: Subtitle[]
+  audio_tracks?: AudioTrack[]
 }
 
 const config = useRuntimeConfig()
@@ -29,6 +47,9 @@ const fullscreen = ref(false)
 const controlsVisible = ref(true)
 const playbackSpeed = ref(1)
 const speedMenuOpen = ref(false)
+const selectedSubtitle = ref<string>('off')
+const selectedAudio = ref<string>('')
+const tracksMenuOpen = ref(false)
 
 function normalizeVideoUrl(url: string) {
   if (!url) return ''
@@ -43,9 +64,61 @@ const { data: movie, error } = await useAsyncData(`movie-${movieId}`, () =>
   $api<Movie>(`/movies/${movieId}`)
 )
 
+const { listFavorites, addFavorite, removeFavorite } = useFavorites()
+const isFavorite = ref(false)
+const favoriteLoading = ref(false)
+
+const { data: favoritesData } = await useAsyncData(`watch-favorites-${movieId}`, () =>
+  listFavorites({ pageSize: 50 }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 })),
+)
+isFavorite.value = !!favoritesData.value?.items?.some(f => f.movie_id === movieId)
+
+async function toggleFavorite() {
+  if (favoriteLoading.value) return
+  favoriteLoading.value = true
+  try {
+    if (isFavorite.value) {
+      await removeFavorite(movieId)
+      isFavorite.value = false
+    } else {
+      await addFavorite(movieId)
+      isFavorite.value = true
+    }
+  } catch {} finally {
+    favoriteLoading.value = false
+  }
+}
+
 const sourceUrl = computed(() => normalizeVideoUrl(movie.value?.video_url || ''))
 const canPlayVideo = computed(() => /\.(m3u8|mp4)(\?|$)/i.test(sourceUrl.value))
 const needsSubscription = computed(() => movie.value && !sourceUrl.value)
+
+const subtitles = computed(() => movie.value?.subtitles ?? [])
+const audioTracks = computed(() => movie.value?.audio_tracks ?? [])
+const hasTracks = computed(() => subtitles.value.length > 0 || audioTracks.value.length > 0)
+
+const activeSubtitleUrl = computed(() => {
+  const s = subtitles.value.find(s => s.id === selectedSubtitle.value)
+  return s ? normalizeVideoUrl(s.subtitle_url) : ''
+})
+
+watch(audioTracks, (tracks) => {
+  if (!selectedAudio.value && tracks.length) {
+    const def = tracks.find(t => t.is_default) ?? tracks[0]
+    if (def) selectedAudio.value = def.id
+  }
+}, { immediate: true })
+
+watch(selectedSubtitle, (id) => {
+  if (!videoEl.value) return
+  const tracks = videoEl.value.textTracks
+  for (let i = 0; i < tracks.length; i++) {
+    const t = tracks[i]
+    if (!t) continue
+    const sub = subtitles.value[i]
+    t.mode = sub && sub.id === id ? 'showing' : 'disabled'
+  }
+})
 
 onMounted(() => {
   if (sourceUrl.value && canPlayVideo.value) initVideo(sourceUrl.value)
@@ -186,12 +259,23 @@ const speedSteps = [
         v-if="canPlayVideo"
         ref="videoEl"
         class="watch-page__video"
+        crossorigin="anonymous"
         @timeupdate="onTimeUpdate"
         @durationchange="onDurationChange"
         @play="onPlay"
         @pause="onPause"
         @click="togglePlay"
-      />
+      >
+        <track
+          v-for="sub in subtitles"
+          :key="sub.id"
+          kind="subtitles"
+          :src="normalizeVideoUrl(sub.subtitle_url)"
+          :srclang="sub.language"
+          :label="sub.label || sub.language"
+          :default="sub.id === selectedSubtitle"
+        />
+      </video>
 
       <div v-else class="watch-page__brand">
         <span class="watch-page__logo">N</span>
@@ -212,11 +296,27 @@ const speedSteps = [
               </svg>
             </IconButton>
 
-            <IconButton variant="overlay" aria-label="Report" class="watch-page__report">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M6 20V5m0 0h10l-1.5 4L16 13H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </IconButton>
+            <div class="watch-page__topbar-right">
+              <IconButton
+                variant="overlay"
+                :aria-label="isFavorite ? 'Remove from list' : 'Add to list'"
+                :disabled="favoriteLoading"
+                @click.stop="toggleFavorite"
+              >
+                <svg v-if="isFavorite" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </IconButton>
+
+              <IconButton variant="overlay" aria-label="Report" class="watch-page__report">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M6 20V5m0 0h10l-1.5 4L16 13H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </IconButton>
+            </div>
           </div>
 
           <IconButton v-if="canPlayVideo" variant="overlay" class="watch-page__center-action" aria-label="Play" @click.stop="togglePlay">
@@ -287,6 +387,58 @@ const speedSteps = [
               </div>
 
               <div class="watch-page__controls-right">
+                <div class="watch-page__tracks">
+                  <IconButton variant="overlay" size="large" aria-label="Subtitles and audio" @click.stop="tracksMenuOpen = !tracksMenuOpen">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M3 6h18v12H3V6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                      <path d="M6 14h4M14 14h4M6 11h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                  </IconButton>
+
+                  <Transition name="fade">
+                    <div v-if="tracksMenuOpen" class="watch-page__tracks-panel" @click.stop>
+                      <div class="watch-page__tracks-section">
+                        <span class="watch-page__tracks-title caption-1-medium">Audio</span>
+                        <button
+                          v-if="!audioTracks.length"
+                          class="watch-page__tracks-item is-active"
+                          disabled
+                        >
+                          Original
+                        </button>
+                        <button
+                          v-for="track in audioTracks"
+                          :key="track.id"
+                          class="watch-page__tracks-item"
+                          :class="{ 'is-active': selectedAudio === track.id }"
+                          @click="selectedAudio = track.id; tracksMenuOpen = false"
+                        >
+                          {{ track.label || track.language }}
+                        </button>
+                      </div>
+                      <div class="watch-page__tracks-section">
+                        <span class="watch-page__tracks-title caption-1-medium">Subtitles</span>
+                        <button
+                          class="watch-page__tracks-item"
+                          :class="{ 'is-active': selectedSubtitle === 'off' }"
+                          @click="selectedSubtitle = 'off'; tracksMenuOpen = false"
+                        >
+                          Off
+                        </button>
+                        <button
+                          v-for="sub in subtitles"
+                          :key="sub.id"
+                          class="watch-page__tracks-item"
+                          :class="{ 'is-active': selectedSubtitle === sub.id }"
+                          @click="selectedSubtitle = sub.id; tracksMenuOpen = false"
+                        >
+                          {{ sub.label || sub.language }}
+                        </button>
+                      </div>
+                    </div>
+                  </Transition>
+                </div>
+
                 <IconButton variant="overlay" size="large" aria-label="Next episode">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M6 5l9 7-9 7V5Zm11 0v14" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
@@ -401,8 +553,15 @@ const speedSteps = [
     padding: token("dm-24") token("dm-32");
   }
 
-  &__report {
+  &__topbar-right {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: token("dm-8");
+  }
+
+  &__report {
+    margin-left: 0;
   }
 
   &__center-action {
@@ -457,6 +616,57 @@ const speedSteps = [
 
   &__controls-right {
     justify-content: flex-end;
+  }
+
+  &__tracks {
+    position: relative;
+  }
+
+  &__tracks-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + token("dm-8"));
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid token("grey-700");
+    border-radius: 8px;
+    padding: token("dm-12") 0;
+    min-width: 220px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: token("dm-8");
+    z-index: 10;
+  }
+
+  &__tracks-section {
+    display: flex;
+    flex-direction: column;
+
+    & + & {
+      border-top: 1px solid token("grey-700");
+      padding-top: token("dm-8");
+      margin-top: token("dm-4");
+    }
+  }
+
+  &__tracks-title {
+    padding: token("dm-4") token("dm-16") token("dm-8");
+    color: token("color-text-secondary");
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  &__tracks-item {
+    background: none;
+    border: none;
+    text-align: left;
+    padding: token("dm-8") token("dm-16");
+    color: token("color-text-primary");
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover { background: rgba(255, 255, 255, 0.08); }
+    &.is-active { color: token("color-action-brand"); font-weight: 700; }
   }
 
   &__volume {

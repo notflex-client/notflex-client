@@ -53,6 +53,27 @@ export interface FdmData {
 const props  = defineProps<{ data: FdmData }>()
 const emit   = defineEmits<{ close: [] }>()
 const router = useRouter()
+const authStore = useAuthStore()
+const { addFavorite, removeFavorite } = useFavorites()
+
+const isFavorite = ref(false)
+const favoriteLoading = ref(false)
+
+async function toggleFavorite() {
+  if (!props.data.id || !authStore.isLoggedIn || favoriteLoading.value) return
+  favoriteLoading.value = true
+  try {
+    if (isFavorite.value) {
+      await removeFavorite(props.data.id)
+      isFavorite.value = false
+    } else {
+      await addFavorite(props.data.id)
+      isFavorite.value = true
+    }
+  } catch {} finally {
+    favoriteLoading.value = false
+  }
+}
 
 function play() {
   emit('close')
@@ -121,8 +142,11 @@ function onBackdropClick(e: MouseEvent) {
                   </template>
                   Play
                 </Button>
-                <IconButton variant="outline" shape="circle" size="medium" aria-label="Add to list">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <IconButton variant="outline" shape="circle" size="medium" :aria-label="isFavorite ? 'Remove from list' : 'Add to list'" :disabled="favoriteLoading" @click="toggleFavorite">
+                  <svg v-if="isFavorite" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
                     <path d="M12 5v14M5 12h14"/>
                   </svg>
                 </IconButton>
