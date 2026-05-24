@@ -82,8 +82,8 @@ const activeProfile = ref('jennifer')
         :active-profile="activeProfile"
         @select-profile="activeProfile = $event"
       >
-        <template #trigger="{ triggerProps }">
-          <Avatar size="small" name="Jennifer" show-arrow v-bind="triggerProps" />
+        <template #trigger>
+          <Avatar size="small" name="Jennifer" show-arrow />
         </template>
       </AvatarPopover>
     </div>

@@ -23,6 +23,14 @@
     "leavingSoon": "Sắp hết",
     "top10": "TOP 10"
   },
+  "search": {
+    "placeholder": "Tìm kiếm phim, series...",
+    "button": "Tìm",
+    "loading": "Đang tìm kiếm...",
+    "resultCount": "Tìm thấy {count} kết quả cho \"{keyword}\"",
+    "noResults": "Không tìm thấy kết quả cho \"{keyword}\"",
+    "hint": "Nhập tên phim để tìm kiếm"
+  },
   "genre": {
     "all": "Tất cả",
     "action": "Hành động",

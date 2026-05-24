@@ -23,6 +23,14 @@
     "leavingSoon": "Leaving Soon",
     "top10": "TOP 10"
   },
+  "search": {
+    "placeholder": "Search movies, series...",
+    "button": "Search",
+    "loading": "Searching...",
+    "resultCount": "Found {count} results for \"{keyword}\"",
+    "noResults": "No results found for \"{keyword}\"",
+    "hint": "Type a movie name to search"
+  },
   "genre": {
     "all": "All",
     "action": "Action",
