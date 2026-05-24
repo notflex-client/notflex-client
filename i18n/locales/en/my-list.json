@@ -3,6 +3,8 @@
     "pageTitle": "My List",
     "genrePlaceholder": "Genre",
     "empty": "Your list is empty.",
-    "emptySub": "Add your favorite movies and series to watch later."
+    "emptySub": "Add your favorite movies and series to watch later.",
+    "remove": "Remove from list",
+    "add": "Add to list"
   }
 }
