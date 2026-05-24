@@ -1,0 +1,27 @@
+{
+  "account": {
+    "eyebrow": "Tài khoản",
+    "title": "Cài đặt tài khoản",
+    "home": "Trang chủ",
+    "billing": "Thanh toán",
+    "tabProfile": "Hồ sơ",
+    "tabPassword": "Mật khẩu",
+    "profileTitle": "Thông tin hồ sơ",
+    "profileDesc": "Cập nhật tên hiển thị và ảnh đại diện của bạn.",
+    "fullNameLabel": "Họ và tên",
+    "avatarLabel": "URL ảnh đại diện",
+    "passwordTitle": "Đổi mật khẩu",
+    "passwordDesc": "Chọn một mật khẩu mạnh và không dùng ở nơi khác.",
+    "currentPasswordLabel": "Mật khẩu hiện tại",
+    "newPasswordLabel": "Mật khẩu mới",
+    "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+    "show": "Hiện",
+    "hide": "Ẩn",
+    "save": "Lưu thay đổi",
+    "saving": "Đang lưu...",
+    "changePassword": "Đổi mật khẩu",
+    "savedProfile": "Cập nhật hồ sơ thành công.",
+    "savedPassword": "Đổi mật khẩu thành công. Các thiết bị khác đã bị đăng xuất.",
+    "errorMismatch": "Mật khẩu mới không khớp."
+  }
+}

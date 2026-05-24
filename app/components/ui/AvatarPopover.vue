@@ -64,7 +64,7 @@ const api = computed(() => menu.connect(service, normalizeProps))
 
     <!-- ── Panel ────────────────────────────────────────── -->
     <Teleport to="body">
-      <div v-bind="api.getPositionerProps()">
+      <div class="avatar-popover-positioner" v-bind="api.getPositionerProps()">
         <div class="avatar-popover" v-bind="api.getContentProps()">
 
           <!-- Profiles -->

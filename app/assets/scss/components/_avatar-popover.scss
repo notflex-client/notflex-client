@@ -20,10 +20,17 @@ $popover-profile-size: 40px;
   font-size: 12px;
 }
 
+// Positioner (Teleported to body) — needs z-index above hero banner badges
+.avatar-popover-positioner {
+  z-index: 1000;
+}
+
 // ── Panel ─────────────────────────────────────────────────────
 .avatar-popover {
   // Zag hides via data-state; reset display when open
   &[data-state="closed"] { display: none; }
+  position: relative;
+  z-index: 1000;
   background-color: token("grey-900");
   border: 1px solid token("grey-700");
   border-radius: 4px;

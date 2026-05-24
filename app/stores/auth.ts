@@ -34,7 +34,13 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function logout() {
+  async function logout() {
+    if (token.value) {
+      const { $api } = useNuxtApp()
+      try {
+        await $api('/auth/logout', { method: 'DELETE' })
+      } catch {}
+    }
     token.value = null
     user.value = null
     activeProfile.value = null

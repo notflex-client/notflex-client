@@ -55,6 +55,17 @@ const PROFILES = [
 ]
 const activeProfile = ref('james')
 
+const authStore = useAuthStore()
+
+function onMenuAction(action: string) {
+  if (action === 'account') navigateTo('/account')
+}
+
+async function onSignOut() {
+  await authStore.logout()
+  navigateTo('/login')
+}
+
 const NAV_LINKS = computed(() => [
   { label: t('nav.home'),            active: true },
   { label: t('nav.series'),          href: '/series' },
@@ -137,7 +148,8 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.m
           :profiles="PROFILES"
           :active-profile="activeProfile"
           @select-profile="activeProfile = $event"
-          @sign-out="navigateTo('/login')"
+          @menu-action="onMenuAction"
+          @sign-out="onSignOut"
         >
           <template #trigger="{ triggerProps }">
             <Avatar

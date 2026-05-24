@@ -1,0 +1,27 @@
+{
+  "account": {
+    "eyebrow": "Account",
+    "title": "Account settings",
+    "home": "Home",
+    "billing": "Billing",
+    "tabProfile": "Profile",
+    "tabPassword": "Password",
+    "profileTitle": "Profile information",
+    "profileDesc": "Update your display name and avatar.",
+    "fullNameLabel": "Full name",
+    "avatarLabel": "Avatar URL",
+    "passwordTitle": "Change password",
+    "passwordDesc": "Choose a strong password you don't use elsewhere.",
+    "currentPasswordLabel": "Current password",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm new password",
+    "show": "Show",
+    "hide": "Hide",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "changePassword": "Change password",
+    "savedProfile": "Profile updated successfully.",
+    "savedPassword": "Password changed successfully. Other devices have been signed out.",
+    "errorMismatch": "New passwords do not match."
+  }
+}

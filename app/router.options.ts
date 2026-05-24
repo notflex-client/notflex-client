@@ -53,28 +53,44 @@ export default {
         meta: { authRequired: true },
       },
       {
+        path: '/account',
+        component: () => import('~/views/AccountSettings.vue'),
+        meta: { authRequired: true },
+      },
+      {
         path: '/login',
         component: () => import('~/views/auth/login.vue'),
-        meta: { authRequired: false },
+        meta: { authRequired: false, guestOnly: true },
+      },
+      {
+        path: '/login-code',
+        component: () => import('~/views/auth/LoginCode.vue'),
+        meta: { authRequired: false, guestOnly: true },
+      },
+      {
+        path: '/forgot-password',
+        component: () => import('~/views/auth/ForgotPassword.vue'),
+        meta: { authRequired: false, guestOnly: true },
+      },
+      {
+        path: '/reset-password/:token',
+        component: () => import('~/views/auth/ResetPassword.vue'),
+        meta: { authRequired: false, guestOnly: true },
       },
       {
         path: '/signup',
         component: () => import('~/views/auth/SignUp.vue'),
-        meta: { authRequired: false },
+        meta: { authRequired: false, guestOnly: true },
       },
       {
         path: '/signup-otp',
         component: () => import('~/views/auth/SignupOtp.vue'),
-        meta: { authRequired: false },
+        meta: { authRequired: false, guestOnly: true },
       },
       {
         path: '/signup-final',
         component: () => import('~/views/auth/SignupFinal.vue'),
-        meta: { authRequired: false },
-      },
-      {
-        path: '/watch/:id',
-        component: () => import('~/views/WatchPage.vue'),
+        meta: { authRequired: false, guestOnly: true },
       },
     ]
 

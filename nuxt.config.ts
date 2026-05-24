@@ -49,12 +49,12 @@ export default defineNuxtConfig({
       {
         code: 'vi',
         language: 'vi-VN',
-        files: ['vi/shared.json', 'vi/browse.json', 'vi/series.json', 'vi/films.json', 'vi/new-popular.json', 'vi/my-list.json', 'vi/browse-lang.json', 'vi/auth.json'],
+        files: ['vi/shared.json', 'vi/browse.json', 'vi/series.json', 'vi/films.json', 'vi/new-popular.json', 'vi/my-list.json', 'vi/browse-lang.json', 'vi/auth.json', 'vi/account.json'],
       },
       {
         code: 'en',
         language: 'en-US',
-        files: ['en/shared.json', 'en/browse.json', 'en/series.json', 'en/films.json', 'en/new-popular.json', 'en/my-list.json', 'en/browse-lang.json', 'en/auth.json'],
+        files: ['en/shared.json', 'en/browse.json', 'en/series.json', 'en/films.json', 'en/new-popular.json', 'en/my-list.json', 'en/browse-lang.json', 'en/auth.json', 'en/account.json'],
       },
     ],
     defaultLocale: 'vi',

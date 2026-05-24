@@ -5,7 +5,7 @@ const { t } = useI18n()
 
 const { $api } = useNuxtApp()
 const authStore = useAuthStore()
-const { setErrors, clearErrors } = useResponseError()
+const { errorMsg, setErrors, clearErrors } = useResponseError()
 
 const email    = ref('')
 const password = ref('')
@@ -19,7 +19,7 @@ async function signIn() {
   try {
     const data = await $api<{ token: string; user: AuthUser }>('/auth/login', {
       method: 'POST',
-      body: { email: email.value, password: password.value },
+      body: { email: email.value, password: password.value, remember: remember.value },
     })
     authStore.login(data.token, data.user)
     navigateTo('/browse')
@@ -52,7 +52,8 @@ async function signIn() {
         <div class="flex flex-col gap-4">
           <InputField v-model="email" :label="t('login.emailLabel')" type="email" autocomplete="email" />
           <InputField v-model="password" :label="t('login.passwordLabel')" type="password" autocomplete="current-password" />
-          <Button variant="brand" size="large" :block="true" @click="signIn">{{ t('login.signIn') }}</Button>
+          <p v-if="errorMsg" class="auth-card__api-error">{{ errorMsg }}</p>
+          <Button variant="brand" size="large" :block="true" :disabled="loading" @click="signIn">{{ t('login.signIn') }}</Button>
         </div>
 
         <!-- OR divider -->
@@ -60,9 +61,9 @@ async function signIn() {
           <span class="caption-1-regular">OR</span>
         </div>
 
-        <Button variant="ghost" size="large" :block="true">{{ t('login.signInCode') }}</Button>
+        <Button variant="ghost" size="large" :block="true" @click="navigateTo('/login-code')">{{ t('login.signInCode') }}</Button>
 
-        <a href="#" class="auth-card__forgot body-regular">{{ t('login.forgotPassword') }}</a>
+        <NuxtLink to="/forgot-password" class="auth-card__forgot body-regular">{{ t('login.forgotPassword') }}</NuxtLink>
 
         <Checkbox v-model="remember" :label="t('login.rememberMe')" />
 

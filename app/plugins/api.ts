@@ -15,7 +15,7 @@ export default defineNuxtPlugin(() => {
       switch (response.status) {
         case 401: {
           const authStore = useAuthStore()
-          authStore.logout()
+          await authStore.logout()
           navigateTo('/login')
           break
         }
