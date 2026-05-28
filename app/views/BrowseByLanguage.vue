@@ -1,100 +1,131 @@
-﻿<script setup lang="ts">
-import type { DropdownOption } from '~/components/ui/Dropdown.vue'
+<script setup lang="ts">
+import type { CatalogMovie } from '~/composables/use-movie-catalog'
+import type { MovieBlockItem } from '~/components/ui/MovieBlock.vue'
 
 definePageMeta({ path: '/browse-by-language' })
 
 const { t } = useI18n()
 const { lang } = useLocale()
+const { mapMovie } = useMovieCatalog()
 
-// ── Language options ────────────────────────────────────────────────────────
-const ORIGINAL_LANGS = computed<DropdownOption[]>(() => [
-  { value: 'all', label: t('browseLang.lang.allLangs') },
-  { value: 'en',  label: t('browseLang.lang.en') },
-  { value: 'ko',  label: t('browseLang.lang.ko') },
-  { value: 'ja',  label: t('browseLang.lang.ja') },
-  { value: 'zh',  label: t('browseLang.lang.zh') },
-  { value: 'es',  label: t('browseLang.lang.es') },
-  { value: 'fr',  label: t('browseLang.lang.fr') },
-  { value: 'de',  label: t('browseLang.lang.de') },
-  { value: 'it',  label: t('browseLang.lang.it') },
-  { value: 'pt',  label: t('browseLang.lang.pt') },
-  { value: 'th',  label: t('browseLang.lang.th') },
-  { value: 'hi',  label: t('browseLang.lang.hi') },
-  { value: 'ar',  label: t('browseLang.lang.ar') },
-])
+const runtimeConfig = useRuntimeConfig()
+const apiBase = (runtimeConfig.public.apiUrl as string) || 'http://localhost:8080'
 
-const AUDIO_LANGS = computed<DropdownOption[]>(() => [
-  { value: 'vi',  label: t('browseLang.lang.vi') },
-  { value: 'en',  label: t('browseLang.lang.en') },
-  { value: 'ko',  label: t('browseLang.lang.ko') },
-  { value: 'ja',  label: t('browseLang.lang.ja') },
-  { value: 'zh',  label: t('browseLang.lang.zh') },
-  { value: 'fr',  label: t('browseLang.lang.fr') },
-  { value: 'es',  label: t('browseLang.lang.es') },
-])
+// ── Languages ──────────────────────────────────────────────────
+const LANGUAGES = [
+  { code: 'en', label: 'English',    flag: '🇺🇸' },
+  { code: 'ko', label: '한국어',       flag: '🇰🇷' },
+  { code: 'ja', label: '日本語',       flag: '🇯🇵' },
+  { code: 'zh', label: '中文',         flag: '🇨🇳' },
+  { code: 'es', label: 'Español',    flag: '🇪🇸' },
+  { code: 'fr', label: 'Français',   flag: '🇫🇷' },
+  { code: 'de', label: 'Deutsch',    flag: '🇩🇪' },
+  { code: 'it', label: 'Italiano',   flag: '🇮🇹' },
+  { code: 'pt', label: 'Português',  flag: '🇧🇷' },
+  { code: 'th', label: 'ภาษาไทย',     flag: '🇹🇭' },
+  { code: 'hi', label: 'हिन्दी',        flag: '🇮🇳' },
+  { code: 'ar', label: 'العربية',     flag: '🇸🇦' },
+  { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
+]
 
-// ── Filter state ────────────────────────────────────────────────────────────
-const originalLang = ref<string>('all')
-const audioLang    = ref<string>('en')
+// ── Filter state ───────────────────────────────────────────────
+const selectedLang = ref<string | null>(null)
+const page         = ref(1)
+const PAGE_SIZE    = 24
 
-const { listMovies } = useMovieCatalog()
+watch(selectedLang, () => { page.value = 1 })
 
-interface BrowseItem {
-  id:     string
-  image:  string
-  title?: string
-  badge?: string
+const selectedLabel = computed(() =>
+  selectedLang.value ? LANGUAGES.find(l => l.code === selectedLang.value)?.label ?? '' : 'All Languages'
+)
+
+// ── Movies ─────────────────────────────────────────────────────
+const { data: moviesData, pending } = await useAsyncData(
+  'browse-lang-movies',
+  () => $fetch<{ items: CatalogMovie[], itemCount: number, pageCount: number }>(
+    `${apiBase}/movies`,
+    {
+      query: {
+        sort: 'top',
+        page: page.value,
+        pageSize: PAGE_SIZE,
+        ...(selectedLang.value && { language: selectedLang.value }),
+      },
+    }
+  ).catch(() => ({ items: [], itemCount: 0, pageCount: 0 })),
+  { watch: [page, selectedLang] }
+)
+
+const movies     = computed(() => moviesData.value?.items?.map(m => mapMovie(m)) ?? [])
+const totalCount = computed(() => moviesData.value?.itemCount ?? 0)
+const totalPages = computed(() => moviesData.value?.pageCount ?? 0)
+
+// ── Preview ────────────────────────────────────────────────────
+const PREVIEW_WIDTH = 320
+const SHOW_DELAY    = 500
+const HIDE_DELAY    = 150
+
+const hoveredIndex = ref<number | null>(null)
+const previewRect  = ref<DOMRect | null>(null)
+let showTimer: ReturnType<typeof setTimeout> | null = null
+let hideTimer: ReturnType<typeof setTimeout> | null = null
+
+const hoveredItem = computed<MovieBlockItem | null>(() =>
+  hoveredIndex.value !== null ? movies.value[hoveredIndex.value] ?? null : null
+)
+
+function onCardEnter(index: number, e: MouseEvent) {
+  clearHoverTimers()
+  const el = e.currentTarget as HTMLElement
+  showTimer = setTimeout(() => {
+    hoveredIndex.value = index
+    previewRect.value  = el.getBoundingClientRect()
+  }, SHOW_DELAY)
 }
+function onCardLeave() {
+  clearHoverTimers()
+  hideTimer = setTimeout(() => { hoveredIndex.value = null; previewRect.value = null }, HIDE_DELAY)
+}
+function onPreviewEnter() { clearHoverTimers() }
+function onPreviewLeave() { clearHoverTimers(); hoveredIndex.value = null; previewRect.value = null }
+function clearHoverTimers() {
+  if (showTimer) { clearTimeout(showTimer); showTimer = null }
+  if (hideTimer) { clearTimeout(hideTimer); hideTimer = null }
+}
+onUnmounted(clearHoverTimers)
 
-const items   = ref<BrowseItem[]>([])
-const loading = ref(false)
-
-async function fetchItems() {
-  loading.value = true
-  try {
-    const params: Record<string, string | number> = { pageSize: 30, sort: 'top' }
-    if (originalLang.value !== 'all') params.language = originalLang.value
-
-    const res = await listMovies(params)
-    items.value = (res.items ?? []).map(m => ({
-      id: m.id,
-      image: m.poster_url || m.banner_url || '',
-      title: m.title,
-    }))
-  } catch {
-    items.value = []
-  } finally {
-    loading.value = false
+const previewStyle = computed(() => {
+  if (!previewRect.value) return {}
+  const rect = previewRect.value
+  const margin = 8
+  let left = rect.left + rect.width / 2 - PREVIEW_WIDTH / 2
+  if (left < margin) left = margin
+  if (left + PREVIEW_WIDTH > window.innerWidth - margin) left = window.innerWidth - margin - PREVIEW_WIDTH
+  return {
+    position: 'fixed' as const,
+    left: `${left}px`,
+    top:  `${rect.top - 16}px`,
+    width: `${PREVIEW_WIDTH}px`,
+    zIndex: 9999,
   }
-}
-
-onMounted(fetchItems)
-watch(originalLang, fetchItems)
+})
 </script>
 
 <template>
-  <div class="browse-lang-page">
+  <div class="blp">
 
-    <!-- ── Header ──────────────────────────────────────────────── -->
+    <!-- Header -->
     <AppHeader transparent sticky>
-      <template #logo>
-        <span class="browse-lang-page__logo">NOTFLEX</span>
-      </template>
+      <template #logo><span class="blp__logo">NOTFLEX</span></template>
       <template #navigation>
-        <a href="/browse"             class="browse-lang-page__nav-link">{{ t('nav.home') }}</a>
-        <a href="/series"             class="browse-lang-page__nav-link">{{ t('nav.series') }}</a>
-        <a href="/films"              class="browse-lang-page__nav-link">{{ t('nav.films') }}</a>
-        <a href="/new-and-popular"    class="browse-lang-page__nav-link">{{ t('nav.newAndPopular') }}</a>
-        <a href="/my-list"            class="browse-lang-page__nav-link">{{ t('nav.myList') }}</a>
-        <a href="/browse-by-language" class="browse-lang-page__nav-link is-active">{{ t('nav.browseByLanguage') }}</a>
+        <a href="/browse"             class="blp__nav-link">{{ t('nav.home') }}</a>
+        <a href="/series"             class="blp__nav-link">{{ t('nav.series') }}</a>
+        <a href="/films"              class="blp__nav-link">{{ t('nav.films') }}</a>
+        <a href="/new-and-popular"    class="blp__nav-link">{{ t('nav.newAndPopular') }}</a>
+        <a href="/my-list"            class="blp__nav-link">{{ t('nav.myList') }}</a>
+        <a href="/browse-by-language" class="blp__nav-link is-active">{{ t('nav.browseByLanguage') }}</a>
       </template>
       <template #action>
-        <IconButton variant="ghost" size="small" :aria-label="t('action.search')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </IconButton>
         <IconButton variant="ghost" size="small" :aria-label="t('action.notifications')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -105,76 +136,116 @@ watch(originalLang, fetchItems)
       </template>
     </AppHeader>
 
-    <!-- ── Page header: title + language filters ───────────────── -->
-    <div class="browse-lang-page__header">
-      <span class="title-1-bold browse-lang-page__title">{{ t('browseLang.pageTitle') }}</span>
-
-      <div class="browse-lang-page__filters">
-        <span class="small-body-regular browse-lang-page__filter-label">
-          {{ t('browseLang.filterLabel') }}
+    <!-- Toolbar -->
+    <div class="blp__toolbar">
+      <div class="blp__toolbar-top">
+        <h1 class="title-1-bold blp__heading">Browse by Language</h1>
+        <span v-if="!pending" class="caption-1-regular blp__count">
+          {{ totalCount.toLocaleString() }} titles
+          <template v-if="selectedLang"> in {{ selectedLabel }}</template>
         </span>
-        <Dropdown
-          v-model="originalLang"
-          :options="ORIGINAL_LANGS"
-          :placeholder="t('browseLang.originalLangPlaceholder')"
-          size="small"
-          class="browse-lang-page__dropdown"
-        />
-        <Dropdown
-          v-model="audioLang"
-          :options="AUDIO_LANGS"
-          :placeholder="t('browseLang.audioPlaceholder')"
-          size="small"
-          class="browse-lang-page__dropdown"
-        />
-      </div>
-    </div>
-
-    <!-- ── Grid ────────────────────────────────────────────────── -->
-    <div class="browse-lang-page__body">
-
-      <div v-if="loading" class="browse-lang-page__grid">
-        <div v-for="n in 18" :key="n" class="browse-lang-page__skeleton" />
       </div>
 
-      <div v-else-if="!items.length" class="browse-lang-page__empty">
-        <span class="body-regular">{{ t('browseLang.empty') }}</span>
-        <span class="caption-1-regular browse-lang-page__empty-sub">{{ t('browseLang.emptySub') }}</span>
-      </div>
-
-      <div v-else class="browse-lang-page__grid">
-        <NuxtLink
-          v-for="item in items"
-          :key="item.id"
-          :to="`/watch/${item.id}`"
+      <!-- Language pills -->
+      <div class="blp__pills">
+        <button
+          class="blp__pill"
+          :class="{ 'is-active': selectedLang === null }"
+          @click="selectedLang = null"
         >
-          <MovieCard
-            variant="more-like-this"
-            :image="item.image"
-            :title="item.title ?? ''"
-            :badge="item.badge ?? ''"
-          />
-        </NuxtLink>
+          🌐 All
+        </button>
+        <button
+          v-for="l in LANGUAGES"
+          :key="l.code"
+          class="blp__pill"
+          :class="{ 'is-active': selectedLang === l.code }"
+          @click="selectedLang = l.code"
+        >
+          {{ l.flag }} {{ l.label }}
+        </button>
       </div>
-
     </div>
 
-    <!-- ── Footer ──────────────────────────────────────────────── -->
+    <!-- Grid -->
+    <div class="blp__content">
+      <!-- Skeleton -->
+      <div v-if="pending" class="blp__grid">
+        <div v-for="n in PAGE_SIZE" :key="n" class="blp__skeleton" />
+      </div>
+
+      <template v-else-if="movies.length">
+        <div class="blp__grid">
+          <div
+            v-for="(movie, i) in movies"
+            :key="movie.id"
+            class="blp__card"
+            @mouseenter="onCardEnter(i, $event)"
+            @mouseleave="onCardLeave"
+            @click="movie.id && navigateTo(`/watch/${movie.id}`)"
+          >
+            <MovieCard variant="more-like-this" :image="movie.image ?? ''" :title="movie.title ?? ''" />
+          </div>
+        </div>
+
+        <div v-if="totalPages > 1" class="blp__pagination">
+          <button class="blp__page-btn" :disabled="page <= 1" @click="page--">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <span class="caption-1-medium blp__page-info">{{ page }} / {{ totalPages }}</span>
+          <button class="blp__page-btn" :disabled="page >= totalPages" @click="page++">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </template>
+
+      <div v-else class="blp__empty">
+        <span class="body-regular blp__empty-text">No titles found for this language.</span>
+        <button v-if="selectedLang" class="blp__reset-btn" @click="selectedLang = null">
+          Show all languages
+        </button>
+      </div>
+    </div>
+
     <AppFooter variant="home" v-model:lang="lang" />
 
+    <!-- Preview -->
+    <Teleport to="body">
+      <Transition name="mpc-pop">
+        <div
+          v-if="hoveredItem && previewRect"
+          :style="previewStyle"
+          @mouseenter="onPreviewEnter"
+          @mouseleave="onPreviewLeave"
+        >
+          <MoviePreviewCard
+            :image="hoveredItem.image ?? ''"
+            :title="hoveredItem.title ?? ''"
+            :rating="hoveredItem.rating ?? ''"
+            :seasons="hoveredItem.duration ?? ''"
+            quality="HD"
+            :description="hoveredItem.description ?? ''"
+            :tags="hoveredItem.tags ?? []"
+            :is-new="hoveredItem.isNew ?? false"
+            @play="hoveredItem.id && navigateTo(`/watch/${hoveredItem.id}`)"
+          />
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <style lang="scss" scoped>
 @use "~/assets/scss/tools/token" as *;
-@use "~/assets/scss/tools/mq" as *;
 @use "~/assets/scss/mixins/typography" as *;
 
-$px: token("dm-48");
-
-.browse-lang-page {
-  background-color: token("color-background-base");
+.blp {
   min-height: 100vh;
+  background-color: token("color-background-base");
 
   &__logo {
     font-family: token("font-family-logo");
@@ -189,67 +260,82 @@ $px: token("dm-48");
     text-decoration: none;
     white-space: nowrap;
     transition: color 0.15s ease;
-
     &:hover     { color: token("color-text-primary"); }
-    &.is-active {
-      font-weight: var(--font-weight-medium);
-      color: token("color-text-primary");
-    }
+    &.is-active { font-weight: var(--font-weight-medium); color: token("color-text-primary"); }
   }
 
-  &__header {
-    padding: token("dm-80") $px token("dm-32");
+  // ── Toolbar ───────────────────────────────────────────────────
+  &__toolbar {
+    padding: 96px token("layout-margin") token("dm-24");
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: token("dm-24");
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: token("dm-20");
   }
 
-  &__title { color: token("color-text-primary"); }
-
-  &__filters {
+  &__toolbar-top {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: token("dm-12");
-    flex-shrink: 0;
   }
 
-  &__filter-label { color: token("color-text-secondary"); }
+  &__heading { color: token("color-text-primary"); }
+  &__count   { color: token("color-text-secondary"); }
 
-  &__dropdown {
-    width: auto;
-    flex-shrink: 0;
+  // ── Language pills ─────────────────────────────────────────────
+  &__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: token("dm-12");
+    padding-bottom: token("dm-20");
+  }
 
-    :deep(.dropdown__trigger) {
-      width: auto;
-      min-width: 150px;
-      white-space: nowrap;
+  &__pill {
+    padding: 7px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    background: none;
+    color: token("color-text-secondary");
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+
+    &:hover { color: token("color-text-primary"); border-color: rgba(255, 255, 255, 0.3); }
+
+    &.is-active {
+      background: token("color-text-primary");
+      color: token("color-background-base");
+      border-color: token("color-text-primary");
     }
   }
 
-  &__body {
-    padding: 0 $px token("dm-48");
+  // ── Grid ──────────────────────────────────────────────────────
+  &__content {
+    padding: 0 token("layout-margin") token("dm-64");
   }
 
   &__grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: token("dm-4");
+    gap: token("dm-12");
 
-    @include down(desktop) { grid-template-columns: repeat(4, 1fr); }
-    @include down(tablet)  { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 1280px) { grid-template-columns: repeat(5, 1fr); }
+    @media (max-width: 1024px) { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 720px)  { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  &__card {
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: transform 0.18s ease;
+    &:hover { transform: scale(1.05); }
   }
 
   &__skeleton {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 2 / 3;
     border-radius: 4px;
-    background: linear-gradient(
-      90deg,
-      token("grey-700") 25%,
-      token("grey-600") 50%,
-      token("grey-700") 75%
-    );
+    background: linear-gradient(90deg, token("grey-700") 25%, token("grey-600") 50%, token("grey-700") 75%);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
   }
@@ -259,14 +345,61 @@ $px: token("dm-48");
     100% { background-position: -200% 0; }
   }
 
-  &__empty {
-    padding: token("dm-64") 0;
+  // ── Pagination ─────────────────────────────────────────────────
+  &__pagination {
     display: flex;
-    flex-direction: column;
-    gap: token("dm-8");
-    color: token("color-text-primary");
+    align-items: center;
+    justify-content: center;
+    gap: token("dm-16");
+    padding-top: token("dm-40");
   }
 
-  &__empty-sub { color: token("color-text-secondary"); }
+  &__page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: token("color-text-primary");
+    cursor: pointer;
+    transition: background 0.15s ease;
+    &:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
+    &:disabled             { opacity: 0.3; cursor: default; }
+  }
+
+  &__page-info { color: token("color-text-secondary"); }
+
+  // ── Empty ─────────────────────────────────────────────────────
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: token("dm-16");
+    padding: token("dm-80") 0;
+  }
+
+  &__empty-text { color: token("color-text-secondary"); }
+
+  &__reset-btn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: token("color-text-secondary");
+    font-size: 13px;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    &:hover { color: token("color-text-primary"); border-color: rgba(255, 255, 255, 0.4); }
+  }
+}
+
+.mpc-pop-enter-active { animation: mpc-pop-in 0.18s ease; }
+.mpc-pop-leave-active { animation: mpc-pop-in 0.12s ease reverse; }
+@keyframes mpc-pop-in {
+  from { opacity: 0; transform: scale(0.92) translateY(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 </style>

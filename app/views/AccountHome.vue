@@ -1,6 +1,7 @@
 ﻿<script setup lang="ts">
 import type { MovieBlockItem } from '~/components/ui/MovieBlock.vue'
 import type { FdmData } from '~/components/ui/FilmDetailModal.vue'
+import type { CatalogMovie } from '~/composables/use-movie-catalog'
 
 definePageMeta({ path: '/browse' })
 
@@ -87,12 +88,15 @@ function normalizeImageUrl(url: string | undefined | null) {
   return `${apiBase}${url}`
 }
 
+interface Tag { id: number; name: string; slug: string }
+interface TagRow { tag: Tag; items: MovieBlockItem[] }
+
 const { listMovies, mapMovie } = useMovieCatalog()
 const { listBanners } = useBanners()
 const { listWatchHistory, progressPercent } = useWatchHistory()
 
 const { data: banners } = await useAsyncData('browse-banners', () =>
-  listBanners().catch(() => []),
+  listBanners('browse').catch(() => []),
 )
 
 const { data: watchHistory } = await useAsyncData('browse-watch-history', () =>
@@ -102,24 +106,24 @@ const { data: watchHistory } = await useAsyncData('browse-watch-history', () =>
 const { data: topMovies } = await useAsyncData('browse-top-movies', () =>
   listMovies({ pageSize: 10, sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
 )
-const { data: newMovies } = await useAsyncData('browse-new-movies', () =>
-  listMovies({ pageSize: 20, sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-const { data: seriesMovies } = await useAsyncData('browse-series-movies', () =>
-  listMovies({ pageSize: 20, type: 'series', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-const { data: animationMovies } = await useAsyncData('browse-animation-movies', () =>
-  listMovies({ pageSize: 20, tag: 'animation', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-const { data: weekendMovies } = await useAsyncData('browse-weekend-movies', () =>
-  listMovies({ pageSize: 20, tag: 'weekend', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-const { data: acclaimedMovies } = await useAsyncData('browse-acclaimed-movies', () =>
-  listMovies({ pageSize: 20, tag: 'critically-acclaimed', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-const { data: freshMovies } = await useAsyncData('browse-fresh-movies', () =>
-  listMovies({ pageSize: 20, tag: 'fresh-picks', sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
+
+const { data: tagRows } = await useAsyncData('browse-tag-rows-v2', async () => {
+  const tags = await $fetch<Tag[]>(`${apiBase}/tags`).catch(() => [] as Tag[])
+  if (!tags.length) return [] as TagRow[]
+  const results = await Promise.all(
+    tags.map(tag =>
+      $fetch<{ items: CatalogMovie[] }>(`${apiBase}/movies`, {
+        query: { tag: tag.slug, pageSize: 20, sort: 'top' },
+      }).catch(() => ({ items: [] }))
+    )
+  )
+  return tags
+    .map((tag, i) => ({
+      tag,
+      items: (results[i]?.items ?? []).map(movie => mapMovie(movie)),
+    }))
+    .filter(row => row.items.length > 0)
+})
 
 const featuredBanner = computed(() => banners.value?.[0] ?? null)
 const heroMovie = computed(() => topMovies.value?.items?.[0] ?? null)
@@ -133,9 +137,8 @@ const heroCategory = computed(() => {
   if (movie?.type === 'movie') return 'PHIM'
   return t('browse.hero.category')
 })
-const MATCHED = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const NEW_ON_NETFLIX = computed<MovieBlockItem[]>(() => newMovies.value?.items?.map(movie => ({ ...mapMovie(movie), badge: t('badge.recentlyAdded') })) ?? [])
-const TOP_10 = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map((movie, index) => mapMovie(movie, index)) ?? [])
+
+
 const CONTINUE = computed<MovieBlockItem[]>(() => {
   const items = watchHistory.value ?? []
   const unique = new Map<string, typeof items[number]>()
@@ -149,12 +152,6 @@ const CONTINUE = computed<MovieBlockItem[]>(() => {
     progress: progressPercent(item),
   }))
 })
-const THINK_YOULL_LOVE = computed<MovieBlockItem[]>(() => seriesMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const ANIMATION = computed<MovieBlockItem[]>(() => animationMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const INSPIRING = computed<MovieBlockItem[]>(() => newMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const WATCH_ONE_WEEKEND = computed<MovieBlockItem[]>(() => weekendMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const CRITICALLY_ACCLAIMED = computed<MovieBlockItem[]>(() => acclaimedMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
 </script>
 
 <template>
@@ -245,17 +242,16 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.m
 
     <!-- ── Movie rows ─────────────────────────────────────── -->
     <div class="browse-page__content">
-      <MovieBlock :title="t('browse.rows.matched')"          :items="MATCHED" />
-      <MovieBlock :title="t('browse.rows.newOnNetflix')"     :items="NEW_ON_NETFLIX" />
       <AiRecommendationSection />
-      <MovieBlock :title="t('browse.rows.top10')"            variant="top10"    :items="TOP_10" />
-      <MovieBlock :title="t('browse.rows.thinkYoullLove')"  :items="THINK_YOULL_LOVE" />
+      <MovieBlock
+        v-for="row in (tagRows ?? [])"
+        :key="row.tag.id"
+        :title="row.tag.name"
+        :variant="row.tag.slug === 'top-10' ? 'top10' : 'default'"
+        :items="row.items"
+      />
       <MovieBlock :title="t('browse.rows.continueWatching', { name: 'James' })" variant="continue" :items="CONTINUE" />
-      <MovieBlock :title="t('browse.rows.animation')"        :items="ANIMATION" />
-      <MovieBlock :title="t('browse.rows.inspiring')"        :items="INSPIRING" />
-      <MovieBlock :title="t('browse.rows.watchOneWeekend')"  :items="WATCH_ONE_WEEKEND" />
-      <MovieBlock :title="t('browse.rows.criticallyAcclaimed')" :items="CRITICALLY_ACCLAIMED" />
-      <MovieBlock :title="t('browse.rows.freshPicks')"       :items="FRESH_PICKS" />
+      
     </div>
 
     <!-- ── Footer ────────────────────────────────────────── -->

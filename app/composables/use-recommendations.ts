@@ -5,12 +5,18 @@ export function useRecommendations() {
   const authStore = useAuthStore()
 
   async function listRecommendations() {
+    if (!import.meta.client) {
+      // Skip on SSR — token not available server-side
+      return { items: [], source: 'pending' }
+    }
+
     if (authStore.isLoggedIn) {
       try {
         const res = await $api<{ items: CatalogMovieList['items'], source: string, cached?: boolean }>('/recommendations/me')
         return { items: res.items ?? [], source: res.source }
       } catch {}
     }
+
     try {
       const res = await $api<{ items: CatalogMovieList['items'], source: string }>('/recommendations')
       return { items: res.items ?? [], source: res.source }

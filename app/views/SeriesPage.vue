@@ -7,9 +7,29 @@ definePageMeta({ path: '/series' })
 const { t } = useI18n()
 const { lang } = useLocale()
 
-const HERO_IMAGE = 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=1400&q=80'
+const FALLBACK_HERO_IMAGE = 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=1400&q=80'
 
 const { listMovies, mapMovie } = useMovieCatalog()
+const { listBanners } = useBanners()
+
+const runtimeConfig = useRuntimeConfig()
+const apiBase = (runtimeConfig.public.apiUrl as string) || 'http://localhost:8080'
+
+function normalizeImageUrl(url: string | undefined | null) {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  return `${apiBase}${url}`
+}
+
+const { data: banners } = await useAsyncData('series-banners', () =>
+  listBanners('series').catch(() => [])
+)
+
+const featuredBanner = computed(() => banners.value?.[0] ?? null)
+const heroImage       = computed(() => normalizeImageUrl(featuredBanner.value?.image_url) || FALLBACK_HERO_IMAGE)
+const heroTitle       = computed(() => featuredBanner.value?.title || t('series.hero.title'))
+const heroDescription = computed(() => featuredBanner.value?.description || t('series.hero.description'))
+const heroTargetId    = computed(() => featuredBanner.value?.movie_id ?? null)
 
 const { data: topSeries } = await useAsyncData('series-top-movies', () =>
   listMovies({ pageSize: 10, type: 'series', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
@@ -109,7 +129,7 @@ const TRENDING = computed<MovieBlockItem[]>(() => trendingSeries.value?.items?.m
     </AppHeader>
 
     <!-- ── Hero ────────────────────────────────────────────────── -->
-    <HeroBanner variant="home" :image="HERO_IMAGE">
+    <HeroBanner variant="home" :image="heroImage">
       <div class="series-page__hero-body">
 
         <div class="series-page__hero-top">
@@ -136,11 +156,16 @@ const TRENDING = computed<MovieBlockItem[]>(() => trendingSeries.value?.items?.m
           <TitleCard
             size="full"
             :category="t('series.hero.category')"
-            :title="t('series.hero.title')"
-            :description="t('series.hero.description')"
+            :title="heroTitle"
+            :description="heroDescription"
           >
             <template #actions>
-              <Button variant="light" size="small">
+              <Button
+                variant="light"
+                size="small"
+                :disabled="!heroTargetId"
+                @click="heroTargetId && navigateTo(`/watch/${heroTargetId}`)"
+              >
                 <template #leading-icon>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M5 3l14 9-14 9V3Z"/>

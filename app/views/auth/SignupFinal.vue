@@ -54,7 +54,7 @@ async function submit() {
       authStore.token = res.token
       localStorage.setItem('token', res.token)
     }
-    navigateTo('/browse')
+    navigateTo('/plans?from=signup')
   } catch (err: unknown) {
     const data = (err as { data?: { message?: string, errors?: { name?: string[], password?: string[] } } }).data
     if (data?.errors) {

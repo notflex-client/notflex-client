@@ -8,15 +8,18 @@ export interface Banner {
   description: string
   image_url: string
   link_url: string
+  page: string
   position: number
   is_active: boolean
 }
 
+export type BannerPage = 'browse' | 'films' | 'series' | 'new-and-popular'
+
 export function useBanners() {
   const { $api } = useNuxtApp()
 
-  async function listBanners() {
-    return $api<Banner[]>('/banners')
+  async function listBanners(page?: BannerPage) {
+    return $api<Banner[]>('/banners', { params: page ? { page } : undefined })
   }
 
   return { listBanners }

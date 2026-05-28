@@ -4,6 +4,7 @@ import type { SubscriptionPlan } from '~/components/subscription/PlanCard.vue'
 const { $api } = useNuxtApp()
 const route = useRoute()
 
+const fromSignup = computed(() => route.query.from === 'signup')
 const checkoutLoading = ref(false)
 const canceledMsg = ref('')
 
@@ -44,7 +45,7 @@ async function openCheckout(plan: SubscriptionPlan) {
 
 <template>
   <main class="plans-page">
-    <AppHeader sticky>
+    <AppHeader v-if="!fromSignup" sticky>
       <template #logo>
         <span class="plans-page__logo">NOTFLEX</span>
       </template>
@@ -55,9 +56,16 @@ async function openCheckout(plan: SubscriptionPlan) {
     </AppHeader>
 
     <section class="plans-page__hero">
-      <span class="caption-2-regular plans-page__eyebrow">Subscription</span>
-      <h1 class="h1-bold">Chọn gói xem phim premium</h1>
-      <p class="body-regular">Mở khóa toàn bộ nội dung premium, lịch sử xem và gợi ý AI cá nhân hóa cho tài khoản Notflex của bạn.</p>
+      
+      <h1 class="h1-bold">
+        {{ fromSignup ? 'Bước cuối cùng — chọn gói của bạn' : 'Chọn gói xem phim premium' }}
+      </h1>
+      <p class="body-regular">
+        {{ fromSignup
+          ? 'Đăng ký gói để mở khóa toàn bộ nội dung premium không giới hạn. Có thể bỏ qua và xem miễn phí ngay bây giờ.'
+          : 'Mở khóa toàn bộ nội dung premium, lịch sử xem và gợi ý AI cá nhân hóa cho tài khoản Notflex của bạn.'
+        }}
+      </p>
     </section>
 
     <p v-if="canceledMsg" class="plans-page__notice">
@@ -73,6 +81,12 @@ async function openCheckout(plan: SubscriptionPlan) {
         @select="openCheckout"
       />
     </section>
+
+    <div v-if="fromSignup" class="plans-page__skip">
+      <button class="plans-page__skip-btn" @click="navigateTo('/browse')">
+        Quyết định sau
+      </button>
+    </div>
   </main>
 </template>
 
@@ -83,6 +97,10 @@ async function openCheckout(plan: SubscriptionPlan) {
   min-height: 100vh;
   background: radial-gradient(circle at top, rgba(229, 9, 20, 0.24), transparent 34%), token("color-background-base");
   color: token("color-text-primary");
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   &__logo {
     font-family: token("font-family-logo");
@@ -97,37 +115,60 @@ async function openCheckout(plan: SubscriptionPlan) {
   }
 
   &__hero {
+    width: 100%;
     max-width: 860px;
-    padding: 128px token("layout-margin") token("dm-32");
+    padding: token("dm-40") token("layout-margin") token("dm-40");
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: token("dm-16");
   }
 
-  &__eyebrow {
-    color: token("color-action-brand");
-    text-transform: uppercase;
-  }
-
   &__hero p {
+    max-width: 560px;
     color: token("color-text-secondary");
   }
 
   &__notice {
-    max-width: 860px;
-    margin: 0 token("layout-margin") token("dm-16");
+    width: 100%;
+    max-width: 960px;
+    margin-bottom: token("dm-16");
     padding: token("dm-12") token("dm-16");
     border-radius: 8px;
     background: rgba(232, 124, 3, 0.15);
     border: 1px solid rgba(232, 124, 3, 0.4);
     color: #e87c03;
+    text-align: center;
   }
 
   &__list {
+    width: 100%;
+    max-width: 960px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: token("dm-20");
-    padding: 0 token("layout-margin") token("dm-64");
+    padding: 0 token("layout-margin") token("dm-32");
+  }
+
+  &__skip {
+    padding-bottom: token("dm-64");
+  }
+
+  &__skip-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: token("color-text-secondary");
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-size: 14px;
+    padding: token("dm-8") token("dm-12");
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: token("color-text-primary");
+    }
   }
 }
 </style>
