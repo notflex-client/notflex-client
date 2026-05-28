@@ -46,7 +46,7 @@ interface Movie {
 }
 
 const config = useRuntimeConfig()
-const apiBase = (config.public.apiUrl as string) || 'http://localhost:8080'
+const apiBase = ((config.public.apiUrl as string) || 'http://localhost:3000').replace(/^http:\/\/(?!localhost)/, 'https://')
 
 const videoEl = ref<HTMLVideoElement | null>(null)
 const hls = ref<Hls | null>(null)
