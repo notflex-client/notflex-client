@@ -1,107 +1,130 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
+import type { CatalogMovie } from '~/composables/use-movie-catalog'
 import type { MovieBlockItem } from '~/components/ui/MovieBlock.vue'
-import type { DropdownOption } from '~/components/ui/Dropdown.vue'
 
 definePageMeta({ path: '/films' })
 
 const { t } = useI18n()
 const { lang } = useLocale()
+const { mapMovie } = useMovieCatalog()
 
-const HERO_IMAGE = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1400&q=80'
+interface Genre { id: number; name: string }
+interface Tag   { id: number; name: string; slug: string }
 
-const { listMovies, mapMovie } = useMovieCatalog()
+const runtimeConfig = useRuntimeConfig()
+const apiBase = (runtimeConfig.public.apiUrl as string) || 'http://localhost:8080'
 
-const { data: topMovies } = await useAsyncData('films-top-movies', () =>
-  listMovies({ pageSize: 10, type: 'movie', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-const { data: newMovies } = await useAsyncData('films-new-movies', () =>
-  listMovies({ pageSize: 20, type: 'movie', sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-const { data: actionMovies } = await useAsyncData('films-action-movies', () =>
-  listMovies({ pageSize: 20, type: 'movie', tag: 'action', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-const { data: romanceMovies } = await useAsyncData('films-romance-movies', () =>
-  listMovies({ pageSize: 20, type: 'movie', tag: 'romance', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-const { data: acclaimedMovies } = await useAsyncData('films-acclaimed-movies', () =>
-  listMovies({ pageSize: 20, type: 'movie', tag: 'critically-acclaimed', sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
-)
-
-// ── Genre list ──────────────────────────────────────────────────────────────
-const GENRES = computed<DropdownOption[]>(() => [
-  { value: '28',    label: t('genre.action') },
-  { value: '12',    label: t('genre.adventure') },
-  { value: '16',    label: t('genre.animation') },
-  { value: '35',    label: t('genre.comedy') },
-  { value: '80',    label: t('genre.crime') },
-  { value: '99',    label: t('genre.documentary') },
-  { value: '18',    label: t('genre.drama') },
-  { value: '10751', label: t('genre.family') },
-  { value: '14',    label: t('genre.fantasy') },
-  { value: '27',    label: t('genre.horror') },
-  { value: '10749', label: t('genre.romance') },
-  { value: '878',   label: t('genre.scifi') },
-  { value: '53',    label: t('genre.thriller') },
-  { value: '10752', label: t('genre.war') },
+// ── Genres & Tags ─────────────────────────────────────────────
+const [{ data: genresData }, { data: tagsData }] = await Promise.all([
+  useAsyncData('films-genres', () => $fetch<Genre[]>(`${apiBase}/genres`).catch(() => [] as Genre[])),
+  useAsyncData('films-tags',   () => $fetch<Tag[]>(`${apiBase}/tags`).catch(() => [] as Tag[])),
 ])
+const genres = computed(() => genresData.value ?? [])
+const tags   = computed(() => tagsData.value   ?? [])
 
-// ── Genre filter state ──────────────────────────────────────────────────────
-const selectedGenre      = ref<string | null>(null)
-const genreItems         = ref<MovieBlockItem[]>([])
-const genreLoading       = ref(false)
+// ── Filters ───────────────────────────────────────────────────
+const route           = useRoute()
+const initKeyword     = (route.query.keyword as string) || ''
+const search          = ref(initKeyword)
+const committedSearch = ref(initKeyword)
+const selectedGenre   = ref<number | null>(null)
+const selectedTag     = ref<string | null>(null)
+const page            = ref(1)
+const PAGE_SIZE       = 24
 
-const selectedGenreLabel = computed(
-  () => GENRES.value.find(g => g.value === selectedGenre.value)?.label ?? ''
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+watch(search, (val) => {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => { committedSearch.value = val; page.value = 1 }, 400)
+})
+watch([selectedGenre, selectedTag], () => { page.value = 1 })
+
+// ── Movies ────────────────────────────────────────────────────
+const { data: moviesData, pending } = await useAsyncData(
+  'films-movies',
+  () => $fetch<{ items: CatalogMovie[], itemCount: number, pageCount: number, page: number }>(
+    `${apiBase}/movies`,
+    {
+      query: {
+        type: 'movie', page: page.value, pageSize: PAGE_SIZE, sort: 'top',
+        ...(committedSearch.value && { keyword:  committedSearch.value }),
+        ...(selectedGenre.value   && { genre_id: selectedGenre.value }),
+        ...(selectedTag.value     && { tag:      selectedTag.value }),
+      },
+    }
+  ).catch(() => ({ items: [], itemCount: 0, pageCount: 0, page: 1 })),
+  { watch: [page, committedSearch, selectedGenre, selectedTag] }
 )
 
-watch(selectedGenre, async (genreId) => {
-  if (!genreId) {
-    genreItems.value = []
-    return
-  }
-  genreLoading.value = true
-  try {
-    const res = await listMovies({ pageSize: 20, type: 'movie', genre_id: genreId })
-    genreItems.value = res.items?.map(movie => mapMovie(movie)) ?? []
-  } catch {
-    genreItems.value = []
-  } finally {
-    genreLoading.value = false
-  }
-})
+const movies     = computed(() => moviesData.value?.items?.map(m => mapMovie(m)) ?? [])
+const totalCount = computed(() => moviesData.value?.itemCount ?? 0)
+const totalPages = computed(() => moviesData.value?.pageCount ?? 0)
 
-// ── Default rows ────────────────────────────────────────────────────────────
-const TOP_PICKS = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const ACTION = computed<MovieBlockItem[]>(() => actionMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const ROMANCE = computed<MovieBlockItem[]>(() => romanceMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const TOP_10 = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map((movie, index) => mapMovie(movie, index)) ?? [])
-const AWARD_WINNING = computed<MovieBlockItem[]>(() => acclaimedMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
-const NETFLIX_FILMS = computed<MovieBlockItem[]>(() => newMovies.value?.items?.map(movie => ({ ...mapMovie(movie), badge: t('badge.recentlyAdded') })) ?? [])
+const hasFilters = computed(() =>
+  !!committedSearch.value || selectedGenre.value !== null || selectedTag.value !== null
+)
+function clearFilters() {
+  search.value = ''; committedSearch.value = ''
+  selectedGenre.value = null; selectedTag.value = null; page.value = 1
+}
+
+// ── Preview card ──────────────────────────────────────────────
+const PREVIEW_WIDTH = 320
+const SHOW_DELAY    = 500
+const HIDE_DELAY    = 150
+
+const hoveredIndex = ref<number | null>(null)
+const previewRect  = ref<DOMRect | null>(null)
+let showTimer: ReturnType<typeof setTimeout> | null = null
+let hideTimer: ReturnType<typeof setTimeout> | null = null
+
+const hoveredItem = computed<MovieBlockItem | null>(() =>
+  hoveredIndex.value !== null ? movies.value[hoveredIndex.value] ?? null : null
+)
+
+function onCardEnter(index: number, e: MouseEvent) {
+  clearHoverTimers()
+  const el = e.currentTarget as HTMLElement
+  showTimer = setTimeout(() => { hoveredIndex.value = index; previewRect.value = el.getBoundingClientRect() }, SHOW_DELAY)
+}
+function onCardLeave() {
+  clearHoverTimers()
+  hideTimer = setTimeout(() => { hoveredIndex.value = null; previewRect.value = null }, HIDE_DELAY)
+}
+function onPreviewEnter() { clearHoverTimers() }
+function onPreviewLeave() { clearHoverTimers(); hoveredIndex.value = null; previewRect.value = null }
+function clearHoverTimers() {
+  if (showTimer) { clearTimeout(showTimer); showTimer = null }
+  if (hideTimer) { clearTimeout(hideTimer); hideTimer = null }
+}
+onUnmounted(clearHoverTimers)
+
+const previewStyle = computed(() => {
+  if (!previewRect.value) return {}
+  const rect = previewRect.value
+  const margin = 8
+  let left = rect.left + rect.width / 2 - PREVIEW_WIDTH / 2
+  if (left < margin) left = margin
+  if (left + PREVIEW_WIDTH > window.innerWidth - margin) left = window.innerWidth - margin - PREVIEW_WIDTH
+  return { position: 'fixed' as const, left: `${left}px`, top: `${rect.top - 16}px`, width: `${PREVIEW_WIDTH}px`, zIndex: 9999 }
+})
 </script>
 
 <template>
   <div class="films-page">
 
-    <!-- ── Header ──────────────────────────────────────────────── -->
+    <!-- Header -->
     <AppHeader transparent sticky>
-      <template #logo>
-        <span class="films-page__logo">NOTFLEX</span>
-      </template>
+      <template #logo><span class="films-page__logo">NOTFLEX</span></template>
       <template #navigation>
-        <a href="/browse"          class="films-page__nav-link">{{ t('nav.home') }}</a>
-        <a href="/series"          class="films-page__nav-link">{{ t('nav.series') }}</a>
-        <a href="/films"           class="films-page__nav-link is-active">{{ t('nav.films') }}</a>
-        <a href="/new-and-popular" class="films-page__nav-link">{{ t('nav.newAndPopular') }}</a>
-        <a href="/my-list"         class="films-page__nav-link">{{ t('nav.myList') }}</a>
+        <a href="/browse"             class="films-page__nav-link">{{ t('nav.home') }}</a>
+        <a href="/series"             class="films-page__nav-link">{{ t('nav.series') }}</a>
+        <a href="/films"              class="films-page__nav-link is-active">{{ t('nav.films') }}</a>
+        <a href="/new-and-popular"    class="films-page__nav-link">{{ t('nav.newAndPopular') }}</a>
+        <a href="/my-list"            class="films-page__nav-link">{{ t('nav.myList') }}</a>
         <a href="/browse-by-language" class="films-page__nav-link">{{ t('nav.browseByLanguage') }}</a>
       </template>
       <template #action>
-        <IconButton variant="ghost" size="small" :aria-label="t('action.search')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </IconButton>
         <IconButton variant="ghost" size="small" :aria-label="t('action.notifications')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -112,88 +135,112 @@ const NETFLIX_FILMS = computed<MovieBlockItem[]>(() => newMovies.value?.items?.m
       </template>
     </AppHeader>
 
-    <!-- ── Hero ────────────────────────────────────────────────── -->
-    <HeroBanner variant="home" :image="HERO_IMAGE">
-      <div class="films-page__hero-body">
-
-        <div class="films-page__hero-top">
-          <template v-if="selectedGenre">
-            <button class="films-page__breadcrumb body-regular" @click="selectedGenre = null">{{ t('films.pageTitle') }}</button>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <span class="title-1-bold films-page__page-title">{{ selectedGenreLabel }}</span>
-          </template>
-          <template v-else>
-            <span class="title-1-bold films-page__page-title">{{ t('films.pageTitle') }}</span>
-            <Dropdown
-              v-model="selectedGenre"
-              :options="GENRES"
-              :placeholder="t('films.genrePlaceholder')"
-              size="small"
-              class="films-page__genre-dropdown"
-            />
-          </template>
-        </div>
-
-        <div class="films-page__hero-bottom">
-          <TitleCard
-            size="full"
-            :category="t('films.hero.category')"
-            :title="t('films.hero.title')"
-            :description="t('films.hero.description')"
-          >
-            <template #actions>
-              <Button variant="light" size="small">
-                <template #leading-icon>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M5 3l14 9-14 9V3Z"/>
-                  </svg>
-                </template>
-                {{ t('action.play') }}
-              </Button>
-              <Button variant="secondary" size="small">
-                <template #leading-icon>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M12 11v5M12 8.5V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                  </svg>
-                </template>
-                {{ t('action.moreInfo') }}
-              </Button>
-            </template>
-          </TitleCard>
-        </div>
-
+    <!-- Toolbar -->
+    <div class="films-page__toolbar">
+      <div class="films-page__toolbar-left">
+        <h1 class="title-1-bold films-page__heading">Movies</h1>
+        <span v-if="!pending" class="caption-1-regular films-page__count">
+          {{ totalCount.toLocaleString() }} titles
+        </span>
       </div>
-    </HeroBanner>
 
-    <!-- ── Content ─────────────────────────────────────────────── -->
-    <div class="films-page__content">
-
-      <template v-if="selectedGenre">
-        <div v-if="genreLoading" class="films-page__loading">
-          <span class="body-regular films-page__loading-text">{{ t('action.loading') }}</span>
+      <div class="films-page__filters">
+        <div class="films-page__search-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="films-page__search-icon" aria-hidden="true">
+            <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <input v-model="search" class="films-page__search-input" placeholder="Search..." type="search">
         </div>
-        <MovieBlock
-          v-else-if="genreItems.length"
-          :title="selectedGenreLabel"
-          :items="genreItems"
+
+        <Dropdown
+          v-model="selectedGenre"
+          :options="genres.map(g => ({ label: g.name, value: g.id }))"
+          placeholder="Genre"
+          size="small"
+          class="films-page__dropdown"
         />
-      </template>
 
-      <MovieBlock :title="t('films.rows.topPicks')"     :items="TOP_PICKS" />
-      <MovieBlock :title="t('films.rows.top10')"        variant="top10" :items="TOP_10" />
-      <MovieBlock :title="t('films.rows.action')"       :items="ACTION" />
-      <MovieBlock :title="t('films.rows.romance')"      :items="ROMANCE" />
-      <MovieBlock :title="t('films.rows.awardWinning')" :items="AWARD_WINNING" />
-      <MovieBlock :title="t('films.rows.netflixFilms')" :items="NETFLIX_FILMS" />
+        <Dropdown
+          v-model="selectedTag"
+          :options="tags.map(tg => ({ label: tg.name, value: tg.slug }))"
+          placeholder="Tag"
+          size="small"
+          class="films-page__dropdown"
+        />
 
+        <button v-if="hasFilters" class="films-page__clear-btn" @click="clearFilters">
+          Clear
+        </button>
+      </div>
     </div>
 
-    <!-- ── Footer ──────────────────────────────────────────────── -->
+    <!-- Grid -->
+    <div class="films-page__content">
+      <div v-if="pending" class="films-page__state">
+        <span class="body-regular films-page__state-text">Loading...</span>
+      </div>
+
+      <template v-else-if="movies.length">
+        <div class="films-page__grid">
+          <div
+            v-for="(movie, i) in movies"
+            :key="movie.id"
+            class="films-page__card"
+            @mouseenter="onCardEnter(i, $event)"
+            @mouseleave="onCardLeave"
+            @click="movie.id && navigateTo(`/watch/${movie.id}`)"
+          >
+            <MovieCard variant="more-like-this" :image="movie.image ?? ''" :title="movie.title ?? ''" />
+          </div>
+        </div>
+
+        <div v-if="totalPages > 1" class="films-page__pagination">
+          <button class="films-page__page-btn" :disabled="page <= 1" @click="page--">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <span class="caption-1-medium films-page__page-info">{{ page }} / {{ totalPages }}</span>
+          <button class="films-page__page-btn" :disabled="page >= totalPages" @click="page++">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </template>
+
+      <div v-else class="films-page__state">
+        <span class="body-regular films-page__state-text">No movies found.</span>
+        <button v-if="hasFilters" class="films-page__clear-btn" @click="clearFilters">Clear filters</button>
+      </div>
+    </div>
+
     <AppFooter variant="home" v-model:lang="lang" />
 
+    <!-- Preview -->
+    <Teleport to="body">
+      <Transition name="mpc-pop">
+        <div
+          v-if="hoveredItem && previewRect"
+          :style="previewStyle"
+          @mouseenter="onPreviewEnter"
+          @mouseleave="onPreviewLeave"
+        >
+          <MoviePreviewCard
+            :image="hoveredItem.image ?? ''"
+            :title="hoveredItem.title ?? ''"
+            :rating="hoveredItem.rating ?? ''"
+            :seasons="hoveredItem.duration ?? ''"
+            quality="HD"
+            :description="hoveredItem.description ?? ''"
+            :tags="hoveredItem.tags ?? []"
+            :is-new="hoveredItem.isNew ?? false"
+            @play="hoveredItem.id && navigateTo(`/watch/${hoveredItem.id}`)"
+          />
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -202,6 +249,7 @@ const NETFLIX_FILMS = computed<MovieBlockItem[]>(() => newMovies.value?.items?.m
 @use "~/assets/scss/mixins/typography" as *;
 
 .films-page {
+  min-height: 100vh;
   background-color: token("color-background-base");
 
   &__logo {
@@ -217,78 +265,163 @@ const NETFLIX_FILMS = computed<MovieBlockItem[]>(() => newMovies.value?.items?.m
     text-decoration: none;
     white-space: nowrap;
     transition: color 0.15s ease;
-
     &:hover     { color: token("color-text-primary"); }
-    &.is-active {
-      font-weight: var(--font-weight-medium);
-      color: token("color-text-primary");
-    }
+    &.is-active { font-weight: var(--font-weight-medium); color: token("color-text-primary"); }
   }
 
-  :deep(.hero-banner) { align-items: stretch; }
-
-  :deep(.hero-banner__content) {
-    max-width: none;
-    padding: token("dm-24") token("dm-48") token("dm-56");
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  &__hero-body { display: contents; }
-
-  &__hero-top {
+  // ── Toolbar ───────────────────────────────────────────────────
+  &__toolbar {
     display: flex;
     align-items: center;
-    gap: token("dm-12");
+    justify-content: space-between;
+    gap: token("dm-16");
+    padding: 96px token("layout-margin") token("dm-24");
   }
 
-  &__breadcrumb {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: token("color-text-secondary");
-    transition: color 0.15s ease;
-    &:hover { color: var(--white); }
-  }
-
-  &__page-title { color: var(--white); }
-
-  &__genre-dropdown {
-    width: auto;
+  &__toolbar-left {
+    display: flex;
+    align-items: baseline;
+    gap: token("dm-10");
     flex-shrink: 0;
+  }
+
+  &__heading { color: token("color-text-primary"); }
+  &__count   { color: token("color-text-secondary"); }
+
+  &__filters {
+    display: flex;
+    align-items: center;
+    gap: token("dm-8");
+  }
+
+  // ── Search ────────────────────────────────────────────────────
+  &__search-wrap {
+    position: relative;
+    width: 220px;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: token("color-text-secondary");
+    pointer-events: none;
+  }
+
+  &__search-input {
+    width: 100%;
+    padding: 7px 10px 7px 30px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: token("color-text-primary");
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+
+    &::placeholder { color: token("color-text-secondary"); }
+    &:focus        { border-color: rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.10); }
+    &::-webkit-search-cancel-button { display: none; }
+  }
+
+  // ── Dropdowns ─────────────────────────────────────────────────
+  &__dropdown {
+    flex-shrink: 0;
+    width: auto !important;
 
     :deep(.dropdown__trigger) {
       width: auto;
-      min-width: 120px;
-      border: 1px solid rgba(255, 255, 255, 0.55);
-      background-color: rgba(0, 0, 0, 0.3);
-      color: var(--white);
-      white-space: nowrap;
-
-      &:hover:not(:disabled) { background-color: rgba(0, 0, 0, 0.5); }
+      min-width: 110px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      color: token("color-text-primary");
+      &:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
     }
-
     :deep(.dropdown__value),
-    :deep(.dropdown__chevron) { color: var(--white); }
+    :deep(.dropdown__chevron) { color: token("color-text-primary"); }
   }
 
-  &__hero-bottom { max-width: 520px; }
+  &__clear-btn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    cursor: pointer;
+    color: token("color-text-secondary");
+    font-size: 12px;
+    padding: 6px 12px;
+    white-space: nowrap;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    &:hover { color: token("color-text-primary"); border-color: rgba(255, 255, 255, 0.3); }
+  }
 
+  // ── Grid ─────────────────────────────────────────────────────
   &__content {
-    padding: token("dm-16") 0 token("dm-48");
+    padding: 0 token("layout-margin") token("dm-64");
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    padding: token("dm-36") 0;
+    gap: token("dm-12");
+
+    @media (max-width: 1280px) { grid-template-columns: repeat(5, 1fr); }
+    @media (max-width: 1024px) { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 720px)  { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  &__card {
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: transform 0.18s ease;
+    &:hover { transform: scale(1.05); }
+  }
+
+  // ── Pagination ────────────────────────────────────────────────
+  &__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: token("dm-16");
+    padding-top: token("dm-40");
+  }
+
+  &__page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: token("color-text-primary");
+    cursor: pointer;
+    transition: background 0.15s ease;
+    &:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
+    &:disabled             { opacity: 0.3; cursor: default; }
+  }
+
+  &__page-info { color: token("color-text-secondary"); }
+
+  // ── States ────────────────────────────────────────────────────
+  &__state {
     display: flex;
     flex-direction: column;
-    gap: token("dm-24");
+    align-items: center;
+    gap: token("dm-16");
+    padding: token("dm-80") 0;
   }
+  &__state-text { color: token("color-text-secondary"); }
+}
 
-  &__loading {
-    display: flex;
-    justify-content: center;
-    padding: token("dm-24") 0;
-  }
-
-  &__loading-text { color: token("color-text-secondary"); }
+.mpc-pop-enter-active { animation: mpc-pop-in 0.18s ease; }
+.mpc-pop-leave-active { animation: mpc-pop-in 0.12s ease reverse; }
+@keyframes mpc-pop-in {
+  from { opacity: 0; transform: scale(0.92) translateY(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 </style>

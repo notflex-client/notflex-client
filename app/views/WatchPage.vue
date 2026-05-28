@@ -23,14 +23,26 @@ interface AudioTrack {
   is_default: boolean
 }
 
+interface Episode {
+  id: string
+  season_number: number
+  episode_number: number
+  title: string
+  video_url: string | null
+  duration_mins: number | null
+}
+
 interface Movie {
   id: string
   title: string
+  type: 'movie' | 'series'
+  is_premium: boolean
   video_url: string | null
   trailer_url?: string | null
   duration_mins?: number | null
   subtitles?: Subtitle[]
   audio_tracks?: AudioTrack[]
+  episodes?: Episode[]
 }
 
 const config = useRuntimeConfig()
@@ -89,9 +101,73 @@ async function toggleFavorite() {
   }
 }
 
-const sourceUrl = computed(() => normalizeVideoUrl(movie.value?.video_url || ''))
+const episodeIdParam = route.query.episodeId as string | undefined
+
+const allEpisodes = computed(() =>
+  [...(movie.value?.episodes ?? [])].sort((a, b) =>
+    a.season_number !== b.season_number
+      ? a.season_number - b.season_number
+      : a.episode_number - b.episode_number
+  )
+)
+
+const activeEpisode = ref<Episode | null>(null)
+if (movie.value?.type === 'series') {
+  const eps = allEpisodes.value
+  activeEpisode.value = (episodeIdParam ? eps.find(e => e.id === episodeIdParam) : null) ?? eps[0] ?? null
+}
+
+const nextEpisodeItem = computed(() => {
+  if (!activeEpisode.value) return null
+  const eps = allEpisodes.value
+  const idx = eps.findIndex(e => e.id === activeEpisode.value!.id)
+  return idx >= 0 && idx < eps.length - 1 ? eps[idx + 1] : null
+})
+
+const seasonGroups = computed(() => {
+  const map = new Map<number, Episode[]>()
+  for (const ep of allEpisodes.value) {
+    if (!map.has(ep.season_number)) map.set(ep.season_number, [])
+    map.get(ep.season_number)!.push(ep)
+  }
+  return [...map.entries()].sort(([a], [b]) => a - b)
+})
+
+const episodesMenuOpen = ref(false)
+
+const episodeLabel = computed(() => {
+  if (!activeEpisode.value) return movie.value?.title ?? ''
+  const ep = activeEpisode.value
+  return `S${ep.season_number} E${ep.episode_number} · ${ep.title}`
+})
+
+function selectEpisode(ep: Episode) {
+  if (activeEpisode.value?.id === ep.id) { episodesMenuOpen.value = false; return }
+  activeEpisode.value = ep
+  episodesMenuOpen.value = false
+  playing.value = false
+  currentTime.value = 0
+  duration.value = 0
+  hls.value?.destroy()
+  hls.value = null
+  nextTick(() => {
+    const url = normalizeVideoUrl(ep.video_url || '')
+    if (url && /\.(m3u8|mp4)(\?|$)/i.test(url)) initVideo(url)
+  })
+}
+
+function goToNextEpisode() {
+  if (nextEpisodeItem.value) selectEpisode(nextEpisodeItem.value)
+}
+
+const effectiveVideoUrl = computed(() => {
+  if (movie.value?.type === 'series') return activeEpisode.value?.video_url ?? null
+  return movie.value?.video_url ?? null
+})
+
+const sourceUrl = computed(() => normalizeVideoUrl(effectiveVideoUrl.value || ''))
 const canPlayVideo = computed(() => /\.(m3u8|mp4)(\?|$)/i.test(sourceUrl.value))
-const needsSubscription = computed(() => movie.value && !sourceUrl.value)
+const needsSubscription = computed(() => movie.value?.is_premium && !effectiveVideoUrl.value)
 
 const subtitles = computed(() => movie.value?.subtitles ?? [])
 const audioTracks = computed(() => movie.value?.audio_tracks ?? [])
@@ -342,7 +418,7 @@ const speedSteps = [
               <span class="caption-1-medium watch-page__duration">{{ formatTime(duration) }}</span>
             </div>
 
-            <span class="caption-1-medium watch-page__episode">{{ movie.title }}</span>
+            <span class="caption-1-medium watch-page__episode">{{ episodeLabel }}</span>
 
             <div class="watch-page__controls">
               <div class="watch-page__controls-left">
@@ -439,17 +515,45 @@ const speedSteps = [
                   </Transition>
                 </div>
 
-                <IconButton variant="overlay" size="large" aria-label="Next episode">
+                <IconButton
+                  v-if="movie.type === 'series'"
+                  variant="overlay"
+                  size="large"
+                  aria-label="Next episode"
+                  :disabled="!nextEpisodeItem"
+                  @click="goToNextEpisode"
+                >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M6 5l9 7-9 7V5Zm11 0v14" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
                   </svg>
                 </IconButton>
 
-                <IconButton variant="overlay" size="large" aria-label="Episodes">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M5 7h11v9H5V7Zm3-3h11v9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
-                  </svg>
-                </IconButton>
+                <div v-if="movie.type === 'series'" class="watch-page__episodes">
+                  <IconButton variant="overlay" size="large" aria-label="Episodes" @click.stop="episodesMenuOpen = !episodesMenuOpen">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M5 7h11v9H5V7Zm3-3h11v9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                    </svg>
+                  </IconButton>
+
+                  <Transition name="fade">
+                    <div v-if="episodesMenuOpen" class="watch-page__episodes-panel" @click.stop>
+                      <div v-for="[season, eps] in seasonGroups" :key="season" class="watch-page__episodes-season">
+                        <span class="watch-page__tracks-title caption-1-medium">Season {{ season }}</span>
+                        <button
+                          v-for="ep in eps"
+                          :key="ep.id"
+                          class="watch-page__tracks-item watch-page__episode-btn"
+                          :class="{ 'is-active': activeEpisode?.id === ep.id }"
+                          @click="selectEpisode(ep)"
+                        >
+                          <span class="watch-page__episode-num">{{ ep.episode_number }}</span>
+                          <span class="watch-page__episode-title">{{ ep.title }}</span>
+                          <span v-if="ep.duration_mins" class="watch-page__episode-dur">{{ ep.duration_mins }}m</span>
+                        </button>
+                      </div>
+                    </div>
+                  </Transition>
+                </div>
 
                 <div class="watch-page__speed">
                   <IconButton variant="overlay" size="large" aria-label="Playback speed" @click="speedMenuOpen = !speedMenuOpen">
@@ -684,6 +788,66 @@ const speedSteps = [
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  &__episodes {
+    position: relative;
+  }
+
+  &__episodes-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + token("dm-8"));
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid token("grey-700");
+    border-radius: 8px;
+    padding: token("dm-12") 0;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: token("dm-4");
+    z-index: 10;
+  }
+
+  &__episodes-season {
+    display: flex;
+    flex-direction: column;
+
+    & + & {
+      border-top: 1px solid token("grey-700");
+      padding-top: token("dm-4");
+      margin-top: token("dm-4");
+    }
+  }
+
+  &__episode-btn {
+    display: flex;
+    align-items: center;
+    gap: token("dm-10");
+  }
+
+  &__episode-num {
+    width: 24px;
+    text-align: right;
+    color: token("color-text-secondary");
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  &__episode-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__episode-dur {
+    color: token("color-text-secondary");
+    font-size: 12px;
+    flex-shrink: 0;
   }
 
   &__speed {

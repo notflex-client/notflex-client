@@ -25,9 +25,7 @@ const showTitle = computed(() =>
 const showProgress = computed(() =>
   props.variant === 'continue' && props.progress > 0
 )
-const showBadge = computed(() =>
-  props.variant === 'top10' && !!props.badge
-)
+const showBadge = computed(() => !!props.badge)
 const isTop10 = computed(() => props.variant === 'top10')
 </script>
 
@@ -55,6 +53,9 @@ const isTop10 = computed(() => props.variant === 'top10')
       <svg v-if="showNetflixN" class="movie-card__n" viewBox="0 0 111 152" fill="none" aria-hidden="true">
         <path d="M0 0h28.5l54 139.5V0H111v152H83L28.5 12V152H0V0Z" fill="#E50914"/>
       </svg>
+
+      <!-- Badge (any non-top10 variant) -->
+      <Badge v-if="showBadge" variant="hot" size="small" class="movie-card__badge">{{ badge }}</Badge>
 
       <!-- Duration badge top-right (more-like-this / episode) -->
       <span v-if="showDuration" class="movie-card__duration">{{ duration }}</span>
