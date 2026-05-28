@@ -2,35 +2,40 @@
 import type { SubscriptionPlan } from '~/components/subscription/PlanCard.vue'
 
 const { $api } = useNuxtApp()
-const authStore = useAuthStore()
+const route = useRoute()
 
-const selectedPlan = ref<SubscriptionPlan | null>(null)
-const checkoutOpen = ref(false)
 const checkoutLoading = ref(false)
+const canceledMsg = ref('')
 
-const { data: plansData, refresh: refreshPlans } = await useAsyncData('subscription-plans', () =>
-  $api<SubscriptionPlan[]>('/subscription/plans').catch(() => [])
+const { data: plansData } = await useAsyncData('subscription-plans', () =>
+  $api<SubscriptionPlan[]>('/subscription/plans').catch(() => []),
 )
-const { data: subscriptionData, refresh: refreshSubscription } = await useAsyncData('my-subscription', () =>
-  $api<{ subscription: any | null; status: string }>('/subscription/me').catch(() => ({ subscription: null, status: 'free' }))
+const { data: subscriptionData } = await useAsyncData('my-subscription', () =>
+  $api<{ subscription: any | null, status: string }>('/subscription/me').catch(() => ({ subscription: null, status: 'free' })),
 )
 
 const plans = computed(() => plansData.value ?? [])
 const activePlanId = computed(() => subscriptionData.value?.subscription?.plan_id ?? 0)
 
-function openCheckout(plan: SubscriptionPlan) {
-  selectedPlan.value = plan
-  checkoutOpen.value = true
-}
+onMounted(() => {
+  if (route.query.status === 'canceled') {
+    canceledMsg.value = 'Thanh toán đã bị hủy. Bạn có thể thử lại bất cứ lúc nào.'
+  }
+})
 
-async function checkout(payload: { plan_id: number; payment_method: string }) {
+async function openCheckout(plan: SubscriptionPlan) {
   checkoutLoading.value = true
+  canceledMsg.value = ''
   try {
-    await $api('/subscription/checkout', { method: 'POST', body: payload })
-    const profile = await $api<any>('/auth/me')
-    authStore.updateUser(profile)
-    await Promise.all([refreshPlans(), refreshSubscription()])
-    checkoutOpen.value = false
+    const res = await $api<{ url: string }>('/subscription/stripe-checkout', {
+      method: 'POST',
+      body: { plan_id: plan.id },
+    })
+    if (res.url) {
+      window.location.href = res.url
+    }
+  } catch (err: any) {
+    canceledMsg.value = err?.data?.message ?? 'Không thể tạo phiên thanh toán. Vui lòng thử lại.'
   } finally {
     checkoutLoading.value = false
   }
@@ -55,8 +60,12 @@ async function checkout(payload: { plan_id: number; payment_method: string }) {
       <p class="body-regular">Mở khóa toàn bộ nội dung premium, lịch sử xem và gợi ý AI cá nhân hóa cho tài khoản Notflex của bạn.</p>
     </section>
 
+    <p v-if="canceledMsg" class="plans-page__notice">
+      {{ canceledMsg }}
+    </p>
+
     <section class="plans-page__list">
-      <SubscriptionPlanCard
+      <PlanCard
         v-for="plan in plans"
         :key="plan.id"
         :plan="plan"
@@ -64,14 +73,6 @@ async function checkout(payload: { plan_id: number; payment_method: string }) {
         @select="openCheckout"
       />
     </section>
-
-    <CheckoutModal
-      :open="checkoutOpen"
-      :plan="selectedPlan"
-      :loading="checkoutLoading"
-      @close="checkoutOpen = false"
-      @checkout="checkout"
-    />
   </main>
 </template>
 
@@ -110,6 +111,16 @@ async function checkout(payload: { plan_id: number; payment_method: string }) {
 
   &__hero p {
     color: token("color-text-secondary");
+  }
+
+  &__notice {
+    max-width: 860px;
+    margin: 0 token("layout-margin") token("dm-16");
+    padding: token("dm-12") token("dm-16");
+    border-radius: 8px;
+    background: rgba(232, 124, 3, 0.15);
+    border: 1px solid rgba(232, 124, 3, 0.4);
+    color: #e87c03;
   }
 
   &__list {

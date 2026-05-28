@@ -8,7 +8,7 @@ const { data } = await useAsyncData('ai-recommendations', () =>
 
 const items = computed(() => data.value?.items?.map(movie => ({
   ...mapMovie(movie),
-  badge: data.value?.source === 'mock-content-based' ? 'AI Match' : 'Top pick',
+  badge: data.value?.source === 'ai-gemini' ? 'AI Match' : data.value?.source === 'mock-content-based' ? 'For you' : 'Top pick',
 })) ?? [])
 </script>
 

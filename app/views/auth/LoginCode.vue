@@ -37,8 +37,7 @@ async function requestCode() {
     step.value = 'otp'
     startCountdown()
   } catch (err: unknown) {
-    const e = err as { data?: unknown }
-    setErrors(e.data ?? err)
+    setErrors((err as { data?: unknown }).data ?? err)
   } finally {
     submitLoading.value = false
   }
@@ -52,15 +51,14 @@ async function confirmCode() {
   submitLoading.value = true
   clearErrors()
   try {
-    const data = await $api<{ token: string; user: AuthUser }>('/auth/login-code/confirm', {
+    const data = await $api<{ token: string, user: AuthUser }>('/auth/login-code/confirm', {
       method: 'POST',
       body: { id: requestId.value, verifyCode: otp.value },
     })
     authStore.login(data.token, data.user)
     navigateTo('/browse')
   } catch (err: unknown) {
-    const e = err as { data?: unknown }
-    setErrors(e.data ?? err)
+    setErrors((err as { data?: unknown }).data ?? err)
   } finally {
     submitLoading.value = false
   }
@@ -79,8 +77,7 @@ async function resend() {
     requestId.value = res.id
     startCountdown()
   } catch (err: unknown) {
-    const e = err as { data?: unknown }
-    setErrors(e.data ?? err)
+    setErrors((err as { data?: unknown }).data ?? err)
   } finally {
     resendLoading.value = false
   }
@@ -111,76 +108,92 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
     </AppHeader>
 
     <HeroBanner variant="auth" image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80">
-      <div class="auth-card">
+      <AuthCard
+        v-if="step === 'email'"
+        :title="t('loginCode.title')"
+        :description="t('loginCode.description')"
+      >
+        <InputField
+          v-model="email"
+          :label="t('loginCode.emailLabel')"
+          type="email"
+          autocomplete="email"
+          :error="formErrors.email"
+          @keydown.enter="requestCode"
+        >
+          <template #icon>
+            <Icon name="lucide:mail" />
+          </template>
+        </InputField>
 
-        <template v-if="step === 'email'">
-          <span class="title-2-bold">{{ t('loginCode.title') }}</span>
-          <p class="body-regular auth-card__desc">{{ t('loginCode.description') }}</p>
+        <p v-if="errorMsg" class="auth-card__api-error">
+          {{ errorMsg }}
+        </p>
 
-          <div class="flex flex-col gap-4">
-            <InputField
-              v-model="email"
-              :label="t('loginCode.emailLabel')"
-              type="email"
-              autocomplete="email"
-              :error="formErrors.email"
-              @keydown.enter="requestCode"
-            />
-            <p v-if="errorMsg" class="auth-card__api-error">{{ errorMsg }}</p>
-            <Button variant="brand" size="large" :block="true" :disabled="submitLoading" @click="requestCode">
-              {{ submitLoading ? t('loginCode.sending') : t('loginCode.sendCode') }}
-            </Button>
-          </div>
+        <Button variant="brand" size="large" :block="true" :disabled="submitLoading" @click="requestCode">
+          {{ submitLoading ? t('loginCode.sending') : t('loginCode.sendCode') }}
+        </Button>
 
-          <NuxtLink to="/login" class="auth-card__back-link body-regular">{{ t('loginCode.backToLogin') }}</NuxtLink>
-        </template>
+        <NuxtLink to="/login" class="auth-card__forgot">
+          {{ t('loginCode.backToLogin') }}
+        </NuxtLink>
+      </AuthCard>
 
-        <template v-else>
-          <span class="title-2-bold">{{ t('loginCode.otpTitle') }}</span>
-          <p class="body-regular auth-card__desc">
-            {{ t('loginCode.sentTo') }}<br>
-            <span class="auth-card__email">{{ email }}</span>
-          </p>
+      <AuthCard
+        v-else
+        :title="t('loginCode.otpTitle')"
+      >
+        <p class="auth-card__notice">
+          {{ t('loginCode.sentTo') }}<br>
+          <span class="auth-card__email">{{ email }}</span>
+        </p>
 
-          <div class="flex flex-col gap-4">
-            <InputField
-              v-model="otp"
-              :label="t('loginCode.codeLabel')"
-              type="text"
-              autocomplete="one-time-code"
-              :error="formErrors.verifyCode"
-              @keydown.enter="confirmCode"
-            />
-            <p v-if="errorMsg" class="auth-card__api-error">{{ errorMsg }}</p>
-            <Button
-              variant="brand"
-              size="large"
-              :block="true"
-              :disabled="submitLoading || otp.length !== 6"
-              @click="confirmCode"
-            >
-              {{ submitLoading ? t('loginCode.verifying') : t('loginCode.signIn') }}
-            </Button>
-          </div>
+        <InputField
+          v-model="otp"
+          :label="t('loginCode.codeLabel')"
+          type="text"
+          autocomplete="one-time-code"
+          :error="formErrors.verifyCode"
+          @keydown.enter="confirmCode"
+        >
+          <template #icon>
+            <Icon name="lucide:lock" />
+          </template>
+        </InputField>
 
-          <span class="caption-1-regular auth-card__resend">
+        <p v-if="errorMsg" class="auth-card__api-error">
+          {{ errorMsg }}
+        </p>
+
+        <Button
+          variant="brand"
+          size="large"
+          :block="true"
+          :disabled="submitLoading || otp.length !== 6"
+          @click="confirmCode"
+        >
+          {{ submitLoading ? t('loginCode.verifying') : t('loginCode.signIn') }}
+        </Button>
+
+        <template #footer>
+          <span>
             {{ t('loginCode.noCode') }}
             <button
-              class="auth-card__resend-btn caption-1-regular"
+              class="auth-card__link auth-card__resend-btn"
               :disabled="countdown > 0 || resendLoading"
               @click="resend"
             >
               {{ countdown > 0 ? t('loginCode.resendIn', { s: countdown }) : t('loginCode.resend') }}
             </button>
           </span>
-
-          <span class="caption-1-regular auth-card__back">
+          <span>
             {{ t('loginCode.wrongEmail') }}
-            <button class="auth-card__link-btn" @click="changeEmail">{{ t('loginCode.changeEmail') }}</button>
+            <button class="auth-card__link auth-card__resend-btn" @click="changeEmail">
+              {{ t('loginCode.changeEmail') }}
+            </button>
           </span>
         </template>
-
-      </div>
+      </AuthCard>
     </HeroBanner>
 
     <AppFooter variant="auth" v-model:lang="lang" />
@@ -197,77 +210,12 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
   letter-spacing: 2px;
 }
 
-.auth-card {
-  background-color: rgba(0, 0, 0, 0.75);
-  border-radius: 4px;
-  padding: token("dm-48") token("dm-64");
-  max-width: 450px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: token("dm-16");
-
-  &__desc {
-    color: token("color-text-secondary");
-    text-align: center;
-    line-height: 1.6;
-    margin: 0;
-  }
-
-  &__email {
-    color: token("color-text-primary");
-    font-weight: 700;
-  }
-
-  &__api-error {
-    margin: 0;
-    color: #e87c03;
-  }
-
-  &__back-link {
-    text-align: center;
-    color: token("color-text-secondary");
-    text-decoration: none;
-    &:hover { color: token("color-text-primary"); }
-  }
-
-  &__resend {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: token("dm-4");
-    flex-wrap: wrap;
-    color: token("color-text-secondary");
-    text-align: center;
-  }
-
-  &__resend-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: token("color-text-primary");
-    text-decoration: underline;
-
-    &:disabled {
-      color: token("color-text-secondary");
-      text-decoration: none;
-      cursor: default;
-    }
-  }
-
-  &__back {
-    text-align: center;
-    color: token("color-text-secondary");
-  }
-
-  &__link-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: token("color-text-primary");
-    text-decoration: underline;
-  }
+.auth-card__resend-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  &:disabled { color: token("color-text-secondary"); cursor: default; text-decoration: none; }
 }
 </style>

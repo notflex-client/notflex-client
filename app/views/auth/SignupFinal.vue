@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import type { AuthUser } from '~/stores/auth'
 
 definePageMeta({ path: '/signup-final' })
@@ -20,10 +20,10 @@ const error           = ref('')
 const submitLoading   = ref(false)
 
 async function submit() {
-  nameError.value    = ''
+  nameError.value     = ''
   passwordError.value = ''
-  confirmError.value = ''
-  error.value        = ''
+  confirmError.value  = ''
+  error.value         = ''
 
   if (!name.value.trim()) {
     nameError.value = t('final.errorName')
@@ -40,7 +40,7 @@ async function submit() {
 
   submitLoading.value = true
   try {
-    const res = await $api<{ token: string; user?: AuthUser }>('/registration/confirm', {
+    const res = await $api<{ token: string, user?: AuthUser }>('/registration/confirm', {
       method: 'POST',
       body: {
         id:       requestId.value,
@@ -56,7 +56,7 @@ async function submit() {
     }
     navigateTo('/browse')
   } catch (err: unknown) {
-    const data = (err as { data?: { message?: string; errors?: { name?: string[]; password?: string[] } } }).data
+    const data = (err as { data?: { message?: string, errors?: { name?: string[], password?: string[] } } }).data
     if (data?.errors) {
       nameError.value     = data.errors.name?.[0]     || ''
       passwordError.value = data.errors.password?.[0] || ''
@@ -69,86 +69,85 @@ async function submit() {
 
 watch([name, password, confirmPassword], () => {
   if (nameError.value || passwordError.value || confirmError.value || error.value) {
-    nameError.value    = ''
+    nameError.value     = ''
     passwordError.value = ''
-    confirmError.value = ''
-    error.value        = ''
+    confirmError.value  = ''
+    error.value         = ''
   }
 })
 </script>
 
 <template>
   <div>
-
-    <!-- ── Header ─────────────────────────────────────────── -->
     <AppHeader transparent sticky>
       <template #logo>
         <span class="auth-logo">NOTFLEX</span>
       </template>
     </AppHeader>
 
-    <!-- ── Auth Hero ──────────────────────────────────────── -->
     <HeroBanner variant="auth" image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80">
-      <div class="auth-card">
+      <AuthCard :title="t('final.title')">
+        <InputField
+          v-model="name"
+          :label="t('final.nameLabel')"
+          autocomplete="name"
+          :error="nameError"
+        >
+          <template #icon>
+            <Icon name="lucide:user" />
+          </template>
+        </InputField>
 
-        <span class="title-2-bold">{{ t('final.title') }}</span>
+        <InputField
+          v-model="password"
+          :label="t('final.passwordLabel')"
+          type="password"
+          autocomplete="new-password"
+          :error="passwordError"
+        >
+          <template #icon>
+            <Icon name="lucide:lock" />
+          </template>
+        </InputField>
 
-        <div class="flex flex-col gap-4">
-          <InputField
-            v-model="name"
-            :label="t('final.nameLabel')"
-            type="text"
-            autocomplete="name"
-            :error="nameError"
-          />
+        <InputField
+          v-model="confirmPassword"
+          :label="t('final.confirmLabel')"
+          type="password"
+          autocomplete="new-password"
+          :error="confirmError"
+        >
+          <template #icon>
+            <Icon name="lucide:lock" />
+          </template>
+        </InputField>
 
-          <InputField
-            v-model="password"
-            type="password"
-            :label="t('final.passwordLabel')"
-            autocomplete="new-password"
-            :error="passwordError"
-          />
+        <p v-if="error" class="auth-card__api-error">
+          {{ error }}
+        </p>
 
-          <InputField
-            v-model="confirmPassword"
-            type="password"
-            :label="t('final.confirmLabel')"
-            autocomplete="new-password"
-            :error="confirmError"
-          />
+        <Button variant="brand" size="large" :block="true" :disabled="submitLoading" @click="submit">
+          {{ submitLoading ? t('final.creating') : t('final.create') }}
+        </Button>
 
-          <span v-if="error" class="caption-1-regular auth-card__error">{{ error }}</span>
+        <template #footer>
+          <span>
+            {{ t('final.alreadyHave') }}
+            <NuxtLink to="/login" class="auth-card__link">{{ t('final.signIn') }}</NuxtLink>
+          </span>
+        </template>
 
-          <Button
-            variant="brand"
-            size="large"
-            :block="true"
-            :disabled="submitLoading"
-            @click="submit"
-          >
-            {{ submitLoading ? t('final.creating') : t('final.create') }}
-          </Button>
-        </div>
-
-        <span class="caption-2-regular auth-card__terms">
+        <template #disclaimer>
           {{ t('final.terms') }}
-          <a href="#" class="auth-card__terms-link">{{ t('final.termsLink') }}</a>
+          <a href="#" class="auth-card__link">{{ t('final.termsLink') }}</a>
           {{ t('final.and') }}
-          <a href="#" class="auth-card__terms-link">{{ t('final.privacyLink') }}</a>{{ t('final.termsEnd') }}
-        </span>
-
-        <span class="caption-1-regular auth-card__new">
-          {{ t('final.alreadyHave') }}
-          <NuxtLink to="/login" class="auth-card__signup-link">{{ t('final.signIn') }}</NuxtLink>
-        </span>
-
-      </div>
+          <a href="#" class="auth-card__link">{{ t('final.privacyLink') }}</a>
+          {{ t('final.termsEnd') }}
+        </template>
+      </AuthCard>
     </HeroBanner>
 
-    <!-- ── Footer ─────────────────────────────────────────── -->
     <AppFooter variant="auth" v-model:lang="lang" />
-
   </div>
 </template>
 
@@ -160,40 +159,5 @@ watch([name, password, confirmPassword], () => {
   font-size: 28px;
   color: token("color-action-brand");
   letter-spacing: 2px;
-}
-
-.auth-card {
-  background-color: rgba(0, 0, 0, 0.75);
-  border-radius: 4px;
-  padding: token("dm-48") token("dm-64");
-  max-width: 450px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: token("dm-16");
-
-  &__error {
-    color: token("color-action-brand");
-    text-align: center;
-  }
-
-  &__terms {
-    color: token("color-text-secondary");
-    text-align: center;
-    opacity: 0.7;
-  }
-
-  &__terms-link {
-    color: token("color-text-secondary");
-    &:hover { text-decoration: underline; }
-  }
-
-  &__new { color: token("color-text-secondary"); }
-
-  &__signup-link {
-    color: token("color-text-primary");
-    text-decoration: none;
-    &:hover { text-decoration: underline; }
-  }
 }
 </style>

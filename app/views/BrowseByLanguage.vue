@@ -37,6 +37,8 @@ const AUDIO_LANGS = computed<DropdownOption[]>(() => [
 const originalLang = ref<string>('all')
 const audioLang    = ref<string>('en')
 
+const { listMovies } = useMovieCatalog()
+
 interface BrowseItem {
   id:     string
   image:  string
@@ -50,25 +52,24 @@ const loading = ref(false)
 async function fetchItems() {
   loading.value = true
   try {
-    const query: Record<string, string> = { audioLang: audioLang.value }
-    if (originalLang.value !== 'all') query.originalLang = originalLang.value
+    const params: Record<string, string | number> = { pageSize: 30, sort: 'top' }
+    if (originalLang.value !== 'all') params.language = originalLang.value
 
-    const res = await $fetch<{ items: BrowseItem[] }>('/browse/by-language', { query })
-    items.value = res.items
-  } catch {
-    const seed = originalLang.value === 'all' ? 0 : originalLang.value.charCodeAt(0)
-    items.value = Array.from({ length: 18 }, (_, i) => ({
-      id:    String(i + 1),
-      image: `https://picsum.photos/seed/${seed * 7 + 950 + i}/300/170`,
-      badge: i % 5 === 1 ? t('badge.top10') : '',
+    const res = await listMovies(params)
+    items.value = (res.items ?? []).map(m => ({
+      id: m.id,
+      image: m.poster_url || m.banner_url || '',
+      title: m.title,
     }))
+  } catch {
+    items.value = []
   } finally {
     loading.value = false
   }
 }
 
 onMounted(fetchItems)
-watch([originalLang, audioLang], fetchItems)
+watch(originalLang, fetchItems)
 </script>
 
 <template>
@@ -142,14 +143,18 @@ watch([originalLang, audioLang], fetchItems)
       </div>
 
       <div v-else class="browse-lang-page__grid">
-        <MovieCard
+        <NuxtLink
           v-for="item in items"
           :key="item.id"
-          variant="more-like-this"
-          :image="item.image"
-          :title="item.title ?? ''"
-          :badge="item.badge ?? ''"
-        />
+          :to="`/watch/${item.id}`"
+        >
+          <MovieCard
+            variant="more-like-this"
+            :image="item.image"
+            :title="item.title ?? ''"
+            :badge="item.badge ?? ''"
+          />
+        </NuxtLink>
       </div>
 
     </div>

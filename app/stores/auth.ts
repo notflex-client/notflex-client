@@ -35,17 +35,22 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logout() {
-    if (token.value) {
-      const { $api } = useNuxtApp()
-      try {
-        await $api('/auth/logout', { method: 'DELETE' })
-      } catch {}
-    }
+    const previousToken = token.value
     token.value = null
     user.value = null
     activeProfile.value = null
     localStorage.removeItem('token')
     localStorage.removeItem('profileId')
+
+    if (previousToken) {
+      try {
+        await $fetch('/auth/logout', {
+          baseURL: (useRuntimeConfig().public.apiUrl as string) || 'http://localhost:8080',
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${previousToken}` },
+        })
+      } catch {}
+    }
   }
 
   function updateUser(u: AuthUser) {

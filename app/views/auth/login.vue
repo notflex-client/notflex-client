@@ -17,7 +17,7 @@ async function signIn() {
   loading.value = true
   clearErrors()
   try {
-    const data = await $api<{ token: string; user: AuthUser }>('/auth/login', {
+    const data = await $api<{ token: string, user: AuthUser }>('/auth/login', {
       method: 'POST',
       body: { email: email.value, password: password.value, remember: remember.value },
     })
@@ -34,122 +34,86 @@ async function signIn() {
 
 <template>
   <div>
-
-    <!-- ── Header: logo only ──────────────────────────────── -->
     <AppHeader transparent sticky>
       <template #logo>
-        <span class="login-logo">NOTFLEX</span>
+        <span class="auth-logo">NOTFLEX</span>
       </template>
     </AppHeader>
 
-    <!-- ── Auth Hero ──────────────────────────────────────── -->
     <HeroBanner variant="auth" image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80">
-      <div class="auth-card">
+      <AuthCard :title="t('login.title')">
+        <InputField
+          v-model="email"
+          :label="t('login.emailLabel')"
+          type="email"
+          autocomplete="email"
+        >
+          <template #icon>
+            <Icon name="lucide:mail" />
+          </template>
+        </InputField>
 
-        <span class="title-2-bold">{{ t('login.title') }}</span>
+        <InputField
+          v-model="password"
+          :label="t('login.passwordLabel')"
+          type="password"
+          autocomplete="current-password"
+        >
+          <template #icon>
+            <Icon name="lucide:lock" />
+          </template>
+        </InputField>
 
-        <!-- Fields -->
-        <div class="flex flex-col gap-4">
-          <InputField v-model="email" :label="t('login.emailLabel')" type="email" autocomplete="email" />
-          <InputField v-model="password" :label="t('login.passwordLabel')" type="password" autocomplete="current-password" />
-          <p v-if="errorMsg" class="auth-card__api-error">{{ errorMsg }}</p>
-          <Button variant="brand" size="large" :block="true" :disabled="loading" @click="signIn">{{ t('login.signIn') }}</Button>
-        </div>
+        <p v-if="errorMsg" class="auth-card__api-error">
+          {{ errorMsg }}
+        </p>
 
-        <!-- OR divider -->
+        <Button variant="brand" size="large" :block="true" :disabled="loading" @click="signIn">
+          {{ loading ? '...' : t('login.signIn') }}
+        </Button>
+
         <div class="auth-card__or">
           <span class="caption-1-regular">OR</span>
         </div>
 
-        <Button variant="ghost" size="large" :block="true" @click="navigateTo('/login-code')">{{ t('login.signInCode') }}</Button>
+        <Button variant="ghost" size="large" :block="true" class="auth-card__outline-btn" @click="navigateTo('/login-code')">
+          <template #leading-icon>
+            <Icon name="lucide:qr-code" size="18" />
+          </template>
+          {{ t('login.signInCode') }}
+        </Button>
 
-        <NuxtLink to="/forgot-password" class="auth-card__forgot body-regular">{{ t('login.forgotPassword') }}</NuxtLink>
+        <NuxtLink to="/forgot-password" class="auth-card__forgot body-regular">
+          {{ t('login.forgotPassword') }}
+        </NuxtLink>
 
         <Checkbox v-model="remember" :label="t('login.rememberMe')" />
 
-        <span class="caption-1-regular auth-card__new">
-          {{ t('login.newToNetflix') }}
-          <NuxtLink to="/signup" class="auth-card__signup-link">{{ t('login.signUpNow') }}</NuxtLink>
-        </span>
+        <template #footer>
+          <span>
+            {{ t('login.newToNetflix') }}
+            <NuxtLink to="/signup" class="auth-card__link">{{ t('login.signUpNow') }}</NuxtLink>
+          </span>
+        </template>
 
-        <span class="caption-2-regular auth-card__captcha">
+        <template #disclaimer>
           {{ t('login.recaptcha') }}
-          <a href="#" class="auth-card__captcha-link">{{ t('login.learnMore') }}</a>
-        </span>
-
-      </div>
+          <a href="#" class="auth-card__link">{{ t('login.learnMore') }}</a>
+        </template>
+      </AuthCard>
     </HeroBanner>
 
-    <!-- ── Footer ─────────────────────────────────────────── -->
     <AppFooter variant="auth" v-model:lang="lang" />
-
   </div>
 </template>
 
 <style lang="scss" scoped>
 @use "~/assets/scss/tools/token" as *;
 
-.login-logo {
+.auth-logo {
   font-family: token("font-family-logo");
   font-size: 28px;
   color: token("color-action-brand");
   letter-spacing: 2px;
-}
-
-.auth-card {
-  background-color: rgba(0, 0, 0, 0.75);
-  border-radius: 4px;
-  padding: token("dm-48") token("dm-64");
-  max-width: 450px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: token("dm-16");
-
-  &__api-error {
-    margin: 0;
-    font-size: 13px;
-    color: #e87c03;
-  }
-
-  &__or {
-    display: flex;
-    align-items: center;
-    gap: token("dm-8");
-    color: token("color-text-secondary");
-
-    &::before,
-    &::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background-color: token("grey-600");
-    }
-  }
-
-  &__forgot {
-    text-align: center;
-    color: token("color-text-secondary");
-    text-decoration: none;
-    &:hover { color: token("color-text-primary"); }
-  }
-
-  &__new { color: token("color-text-secondary"); }
-
-  &__signup-link {
-    color: token("color-text-primary");
-    text-decoration: none;
-    &:hover { text-decoration: underline; }
-  }
-
-  &__captcha {
-    color: token("color-text-secondary");
-    opacity: 0.7;
-  }
-
-  &__captcha-link {
-    color: token("color-text-secondary");
-    &:hover { text-decoration: underline; }
-  }
 }
 </style>

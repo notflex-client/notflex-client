@@ -11,10 +11,13 @@ export default defineNuxtPlugin(() => {
       }
     },
 
-    async onResponseError({ response }) {
+    async onResponseError({ request, response }) {
+      const url = typeof request === 'string' ? request : request.url
       switch (response.status) {
         case 401: {
+          if (url.includes('/auth/logout')) return
           const authStore = useAuthStore()
+          if (!authStore.token) return
           await authStore.logout()
           navigateTo('/login')
           break
