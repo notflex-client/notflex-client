@@ -50,6 +50,34 @@
     .has-toggle & {
       padding-right: 56px;
     }
+
+    .has-icon & {
+      padding-left: 48px;
+    }
+  }
+
+  // ── Left icon ─────────────────────────────────────────────
+  &__icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #d4d4d4;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    z-index: 1;
+
+    svg { display: block; width: 100%; height: 100%; }
+    .iconify { display: block; width: 20px; height: 20px; }
+  }
+
+  &__wrap:focus-within &__icon {
+    color: var(--white);
   }
 
   // ── Floating label ────────────────────────────────────────
@@ -72,6 +100,10 @@
     top: 10px;
     transform: translateY(0);
     font-size: var(--typo-regular-font-size-caption-1);
+  }
+
+  &.has-icon &__label {
+    left: 48px;
   }
 
   // ── Show/Hide toggle (password) ───────────────────────────

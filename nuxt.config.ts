@@ -42,7 +42,13 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@pinia/nuxt', '@nuxt/eslint', '@nuxtjs/tailwindcss', '@nuxtjs/i18n'],
+  modules: ['@pinia/nuxt', '@nuxt/eslint', '@nuxtjs/tailwindcss', '@nuxtjs/i18n', '@nuxt/icon'],
+
+  icon: {
+    serverBundle: {
+      collections: ['lucide'],
+    },
+  },
 
   i18n: {
     locales: [

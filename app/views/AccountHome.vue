@@ -54,6 +54,7 @@ const PROFILES = [
   { value: 'sarah', name: 'Sarah', image: 'https://i.pravatar.cc/150?img=47' },
 ]
 const activeProfile = ref('james')
+const searchOpen = ref(false)
 
 const authStore = useAuthStore()
 
@@ -75,9 +76,28 @@ const NAV_LINKS = computed(() => [
   { label: t('nav.browseByLanguage'), href: '/browse-by-language' },
 ])
 
-const HERO_IMAGE = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80'
+const FALLBACK_HERO_IMAGE = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80'
+
+const runtimeConfig = useRuntimeConfig()
+const apiBase = (runtimeConfig.public.apiUrl as string) || 'http://localhost:8080'
+
+function normalizeImageUrl(url: string | undefined | null) {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  return `${apiBase}${url}`
+}
 
 const { listMovies, mapMovie } = useMovieCatalog()
+const { listBanners } = useBanners()
+const { listWatchHistory, progressPercent } = useWatchHistory()
+
+const { data: banners } = await useAsyncData('browse-banners', () =>
+  listBanners().catch(() => []),
+)
+
+const { data: watchHistory } = await useAsyncData('browse-watch-history', () =>
+  authStore.isLoggedIn ? listWatchHistory().catch(() => []) : Promise.resolve([]),
+)
 
 const { data: topMovies } = await useAsyncData('browse-top-movies', () =>
   listMovies({ pageSize: 10, sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
@@ -101,11 +121,34 @@ const { data: freshMovies } = await useAsyncData('browse-fresh-movies', () =>
   listMovies({ pageSize: 20, tag: 'fresh-picks', sort: 'new' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
 )
 
+const featuredBanner = computed(() => banners.value?.[0] ?? null)
 const heroMovie = computed(() => topMovies.value?.items?.[0] ?? null)
+const heroImage = computed(() => normalizeImageUrl(featuredBanner.value?.image_url) || FALLBACK_HERO_IMAGE)
+const heroTargetId = computed(() => featuredBanner.value?.movie_id || heroMovie.value?.id || null)
+const heroTitle = computed(() => featuredBanner.value?.title || featuredBanner.value?.movie?.title || heroMovie.value?.title || t('browse.hero.title'))
+const heroDescription = computed(() => featuredBanner.value?.description || featuredBanner.value?.movie?.description || heroMovie.value?.description || t('browse.hero.description'))
+const heroCategory = computed(() => {
+  const movie = featuredBanner.value?.movie ?? heroMovie.value
+  if (movie?.type === 'series') return 'SERIES'
+  if (movie?.type === 'movie') return 'PHIM'
+  return t('browse.hero.category')
+})
 const MATCHED = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
 const NEW_ON_NETFLIX = computed<MovieBlockItem[]>(() => newMovies.value?.items?.map(movie => ({ ...mapMovie(movie), badge: t('badge.recentlyAdded') })) ?? [])
 const TOP_10 = computed<MovieBlockItem[]>(() => topMovies.value?.items?.map((movie, index) => mapMovie(movie, index)) ?? [])
-const CONTINUE = computed<MovieBlockItem[]>(() => topMovies.value?.items?.slice(0, 4).map(movie => ({ ...mapMovie(movie), progress: 35 })) ?? [])
+const CONTINUE = computed<MovieBlockItem[]>(() => {
+  const items = watchHistory.value ?? []
+  const unique = new Map<string, typeof items[number]>()
+  for (const item of items) {
+    if (!item.movie) continue
+    if (item.is_completed) continue
+    if (!unique.has(item.movie_id)) unique.set(item.movie_id, item)
+  }
+  return Array.from(unique.values()).slice(0, 10).map((item) => ({
+    ...mapMovie(item.movie!),
+    progress: progressPercent(item),
+  }))
+})
 const THINK_YOULL_LOVE = computed<MovieBlockItem[]>(() => seriesMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
 const ANIMATION = computed<MovieBlockItem[]>(() => animationMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
 const INSPIRING = computed<MovieBlockItem[]>(() => newMovies.value?.items?.map(movie => mapMovie(movie)) ?? [])
@@ -132,7 +175,7 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.m
         >{{ link.label }}</a>
       </template>
       <template #action>
-        <IconButton variant="ghost" size="small" :aria-label="t('action.search')">
+        <IconButton variant="ghost" size="small" :aria-label="t('action.search')" @click="searchOpen = true">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/>
             <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -165,17 +208,17 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.m
     </AppHeader>
 
     <!-- ── Hero ───────────────────────────────────────────── -->
-    <HeroBanner variant="home" :image="HERO_IMAGE">
+    <HeroBanner variant="home" :image="heroImage">
       <div class="browse-page__hero-inner">
         <div class="browse-page__hero-left">
           <TitleCard
             size="full"
-            :category="t('browse.hero.category')"
-            :title="t('browse.hero.title')"
-            :description="t('browse.hero.description')"
+            :category="heroCategory"
+            :title="heroTitle"
+            :description="heroDescription"
           >
             <template #actions>
-              <Button variant="light" size="large" @click="navigateTo(`/watch/${heroMovie?.id ?? 'demo'}`)">
+              <Button variant="light" size="large" :disabled="!heroTargetId" @click="heroTargetId && navigateTo(`/watch/${heroTargetId}`)">
                 <template #leading-icon>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3l14 9-14 9V3Z"/></svg>
                 </template>
@@ -222,6 +265,8 @@ const FRESH_PICKS = computed<MovieBlockItem[]>(() => freshMovies.value?.items?.m
     <Transition name="fdm-fade">
       <FilmDetailModal v-if="showDetail" :data="DEMO_FILM" @close="showDetail = false" />
     </Transition>
+
+    <SearchOverlay :open="searchOpen" @close="searchOpen = false" />
 
   </div>
 </template>

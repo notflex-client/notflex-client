@@ -1,18 +1,44 @@
 <script setup lang="ts">
 const { $api } = useNuxtApp()
+const route = useRoute()
+const authStore = useAuthStore()
 
 const money = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 })
 const date = new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' })
 
-const { data: subscriptionData } = await useAsyncData('billing-subscription', () =>
-  $api<{ subscription: any | null; status: string }>('/subscription/me').catch(() => ({ subscription: null, status: 'free' }))
+const { data: subscriptionData, refresh: refreshSubscription } = await useAsyncData('billing-subscription', () =>
+  $api<{ subscription: any | null, status: string }>('/subscription/me').catch(() => ({ subscription: null, status: 'free' })),
 )
-const { data: paymentsData } = await useAsyncData('billing-payments', () =>
-  $api<any[]>('/payments').catch(() => [])
+const { data: paymentsData, refresh: refreshPayments } = await useAsyncData('billing-payments', () =>
+  $api<any[]>('/payments').catch(() => []),
 )
 
 const subscription = computed(() => subscriptionData.value?.subscription ?? null)
 const payments = computed(() => paymentsData.value ?? [])
+
+const successMsg = ref('')
+
+onMounted(async () => {
+  if (route.query.status !== 'success') return
+
+  const sessionId = route.query.session_id as string | undefined
+  if (sessionId) {
+    try {
+      await $api('/subscription/stripe-verify', {
+        method: 'POST',
+        body: { session_id: sessionId },
+      })
+    } catch {}
+  }
+
+  successMsg.value = 'Thanh toán thành công! Tài khoản của bạn đã được nâng cấp.'
+  try {
+    const profile = await $api<any>('/auth/me')
+    authStore.updateUser(profile)
+  } catch {}
+  await Promise.all([refreshSubscription(), refreshPayments()])
+  setTimeout(() => navigateTo('/billing', { replace: true }), 100)
+})
 </script>
 
 <template>
@@ -32,6 +58,10 @@ const payments = computed(() => paymentsData.value ?? [])
         <span class="caption-2-regular billing-page__eyebrow">Billing</span>
         <h1 class="h1-bold">Tài khoản & thanh toán</h1>
       </div>
+
+      <p v-if="successMsg" class="billing-page__notice">
+        {{ successMsg }}
+      </p>
 
       <article class="billing-page__card">
         <div class="billing-page__row">
@@ -120,6 +150,14 @@ const payments = computed(() => paymentsData.value ?? [])
   &__payment p,
   &__empty {
     color: token("color-text-secondary");
+  }
+
+  &__notice {
+    padding: token("dm-12") token("dm-16");
+    border-radius: 8px;
+    background: rgba(46, 160, 67, 0.15);
+    border: 1px solid rgba(46, 160, 67, 0.4);
+    color: #2ea043;
   }
 }
 </style>

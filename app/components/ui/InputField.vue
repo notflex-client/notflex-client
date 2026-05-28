@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, useSlots } from 'vue'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -12,6 +12,7 @@ const props = defineProps({
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
+const slots = useSlots()
 const showPassword = ref(false)
 
 const inputType = computed(() => {
@@ -20,18 +21,24 @@ const inputType = computed(() => {
 })
 
 const isPassword = computed(() => props.type === 'password')
+const hasIcon = computed(() => !!slots.icon)
 
 const rootClass = computed(() => ({
   'input-field': true,
   'is-error': !!props.error,
   'is-disabled': props.disabled,
   'has-toggle': isPassword.value,
+  'has-icon': hasIcon.value,
 }))
 </script>
 
 <template>
   <div :class="rootClass">
     <div class="input-field__wrap">
+      <span v-if="hasIcon" class="input-field__icon">
+        <slot name="icon" />
+      </span>
+
       <input
         class="input-field__control"
         :type="inputType"
@@ -40,20 +47,18 @@ const rootClass = computed(() => ({
         :autocomplete="autocomplete"
         placeholder=" "
         @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-      />
+      >
       <label class="input-field__label">{{ label }}</label>
 
-      <Button
+      <button
         v-if="isPassword"
-        variant="ghost"
-        size="small"
         type="button"
         class="input-field__eye"
         tabindex="-1"
         @click="showPassword = !showPassword"
       >
         {{ showPassword ? 'Hide' : 'Show' }}
-      </Button>
+      </button>
     </div>
 
     <span v-if="error" class="input-field__error">

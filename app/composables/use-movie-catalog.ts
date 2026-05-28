@@ -32,6 +32,7 @@ export function useMovieCatalog() {
 
   function mapMovie(movie: CatalogMovie, index?: number): MovieBlockItem {
     return {
+      id: movie.id,
       image: movie.poster_url || movie.banner_url || '',
       title: movie.title,
       rank: typeof index === 'number' ? index + 1 : undefined,

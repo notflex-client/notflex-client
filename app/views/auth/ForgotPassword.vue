@@ -30,7 +30,7 @@ async function submit() {
   loading.value = true
   clearErrors()
   try {
-    const resp = await $api<{ success: boolean; resetPasswordTime?: number }>('/auth/forgot-password', {
+    const resp = await $api<{ success: boolean, resetPasswordTime?: number }>('/auth/forgot-password', {
       method: 'POST',
       body: { email: email.value },
     })
@@ -58,67 +58,67 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
   <div>
     <AppHeader transparent sticky>
       <template #logo>
-        <span class="fp-logo">NOTFLEX</span>
+        <span class="auth-logo">NOTFLEX</span>
       </template>
     </AppHeader>
 
     <HeroBanner variant="auth" image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80">
-      <div class="auth-card">
+      <AuthCard
+        v-if="!success"
+        :title="t('forgotPassword.title')"
+        :description="t('forgotPassword.description')"
+      >
+        <InputField
+          v-model="email"
+          :label="t('forgotPassword.emailLabel')"
+          type="email"
+          autocomplete="email"
+          @keydown.enter="submit"
+        >
+          <template #icon>
+            <Icon name="lucide:mail" />
+          </template>
+        </InputField>
 
-        <!-- State 1: Form nhập email -->
-        <template v-if="!success">
-          <span class="title-2-bold">{{ t('forgotPassword.title') }}</span>
-          <p class="body-regular auth-card__desc">{{ t('forgotPassword.description') }}</p>
+        <Button variant="brand" size="large" :block="true" :disabled="loading" @click="submit">
+          {{ loading ? t('forgotPassword.sending') : t('forgotPassword.sendLink') }}
+        </Button>
 
-          <div class="flex flex-col gap-4">
-            <InputField
-              v-model="email"
-              :label="t('forgotPassword.emailLabel')"
-              type="email"
-              autocomplete="email"
-              @keydown.enter="submit"
-            />
-            <Button variant="brand" size="large" :block="true" :disabled="loading" @click="submit">
-              {{ loading ? t('forgotPassword.sending') : t('forgotPassword.sendLink') }}
-            </Button>
-          </div>
+        <NuxtLink to="/login" class="auth-card__forgot">
+          {{ t('forgotPassword.backToLogin') }}
+        </NuxtLink>
+      </AuthCard>
 
-          <NuxtLink to="/login" class="auth-card__forgot body-regular">
-            {{ t('forgotPassword.backToLogin') }}
-          </NuxtLink>
-        </template>
+      <AuthCard v-else :title="t('forgotPassword.checkInboxTitle')">
+        <p class="auth-card__notice">
+          {{ t('forgotPassword.checkInboxDesc') }} <span class="auth-card__email">{{ email }}</span>.
+          {{ t('forgotPassword.checkSpam') }}
+        </p>
 
-        <!-- State 2: Thành công, kiểm tra hộp thư -->
-        <template v-else>
-          <span class="title-2-bold">{{ t('forgotPassword.checkInboxTitle') }}</span>
-          <p class="body-regular auth-card__desc">
-            {{ t('forgotPassword.checkInboxDesc') }} <strong>{{ email }}</strong>.
-            {{ t('forgotPassword.checkSpam') }}
-          </p>
+        <Button variant="brand" size="large" :block="true" @click="() => window.location.href = `mailto:${email}`">
+          {{ t('forgotPassword.openInbox') }}
+        </Button>
 
-          <Button variant="brand" size="large" :block="true" @click="() => window.location.href = `mailto:${email}`">
-            {{ t('forgotPassword.openInbox') }}
-          </Button>
-
-          <p class="caption-1-regular auth-card__resend">
+        <template #footer>
+          <span>
             {{ t('forgotPassword.cantFind') }}
-            <button v-if="seconds <= 0" class="auth-card__link-btn" @click="submit">
+            <button
+              v-if="seconds <= 0"
+              class="auth-card__link auth-card__resend-btn"
+              @click="submit"
+            >
               {{ t('forgotPassword.resendLink') }}
             </button>
-            <span v-else class="auth-card__countdown">
-              {{ t('forgotPassword.resendIn', { s: seconds }) }}
-            </span>
-          </p>
-
-          <p class="caption-1-regular auth-card__resend">
+            <span v-else>{{ t('forgotPassword.resendIn', { s: seconds }) }}</span>
+          </span>
+          <span>
             {{ t('forgotPassword.wrongEmail') }}
-            <button class="auth-card__link-btn" @click="resetForm">
+            <button class="auth-card__link auth-card__resend-btn" @click="resetForm">
               {{ t('forgotPassword.changeEmail') }}
             </button>
-          </p>
+          </span>
         </template>
-
-      </div>
+      </AuthCard>
     </HeroBanner>
 
     <AppFooter variant="auth" v-model:lang="lang" />
@@ -128,55 +128,18 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
 <style lang="scss" scoped>
 @use "~/assets/scss/tools/token" as *;
 
-.fp-logo {
+.auth-logo {
   font-family: token("font-family-logo");
   font-size: 28px;
   color: token("color-action-brand");
   letter-spacing: 2px;
 }
 
-.auth-card {
-  background-color: rgba(0, 0, 0, 0.75);
-  border-radius: 4px;
-  padding: token("dm-48") token("dm-64");
-  max-width: 450px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: token("dm-16");
-
-  &__desc {
-    color: token("color-text-secondary");
-    margin: 0;
-  }
-
-  &__forgot {
-    text-align: center;
-    color: token("color-text-secondary");
-    text-decoration: none;
-
-    &:hover { color: token("color-text-primary"); }
-  }
-
-  &__resend {
-    color: token("color-text-secondary");
-    text-align: center;
-  }
-
-  &__link-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: token("color-text-primary");
-    font-size: inherit;
-    text-decoration: underline;
-
-    &:hover { color: token("color-text-secondary"); }
-  }
-
-  &__countdown {
-    color: token("color-text-secondary");
-  }
+.auth-card__resend-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
 }
 </style>
