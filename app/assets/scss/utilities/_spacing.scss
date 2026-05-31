@@ -1,0 +1,129 @@
+@use "sass:map";
+
+@use "../tools/mq" as *;
+@use "../tokens/spacing" as spacing;
+
+// Common pixel set is emitted with bracket-form names (`.p-[Npx]`, `.m-[Npx]`,
+// `.gap-[Npx]`, …) to match Tailwind-style markup without depending on
+// Tailwind. Pixel values are the design-system $dm scale.
+// NOTE: notflex only defines the `$dm` scale (no semantic $gap/$padding maps),
+// so the bracket-form pixel utilities are the spacing API here.
+
+.m-auto  { margin: auto !important; }
+.mt-auto { margin-top: auto !important; }
+.mr-auto { margin-right: auto !important; }
+.mb-auto { margin-bottom: auto !important; }
+.ml-auto { margin-left: auto !important; }
+.mx-auto { margin-left: auto !important; margin-right: auto !important; }
+.my-auto { margin-top: auto !important; margin-bottom: auto !important; }
+
+// Zero-step utilities (Tailwind-aligned). The bracket-form loop only iterates
+// the $dm scale (which has no `0`), so the zero step is emitted explicitly.
+.p-0  { padding: 0 !important; }
+.pt-0 { padding-top: 0 !important; }
+.pr-0 { padding-right: 0 !important; }
+.pb-0 { padding-bottom: 0 !important; }
+.pl-0 { padding-left: 0 !important; }
+.px-0 { padding-left: 0 !important; padding-right: 0 !important; }
+.py-0 { padding-top: 0 !important; padding-bottom: 0 !important; }
+.m-0  { margin: 0 !important; }
+.mt-0 { margin-top: 0 !important; }
+.mr-0 { margin-right: 0 !important; }
+.mb-0 { margin-bottom: 0 !important; }
+.ml-0 { margin-left: 0 !important; }
+.mx-0 { margin-left: 0 !important; margin-right: 0 !important; }
+.my-0 { margin-top: 0 !important; margin-bottom: 0 !important; }
+.gap-0   { gap: 0 !important; }
+.gap-x-0 { column-gap: 0 !important; }
+.gap-y-0 { row-gap: 0 !important; }
+
+// Bracket-form pixel utilities (.p-[Npx], .m-[Npx], .gap-[Npx], …) covering
+// the $dm design-token scale.
+@each $n in map.keys(spacing.$dm) {
+  $v: $n * 1px;
+
+  // padding
+  .#{"p-\\[#{$n}px\\]"}  { padding: $v !important; }
+  .#{"pt-\\[#{$n}px\\]"} { padding-top: $v !important; }
+  .#{"pr-\\[#{$n}px\\]"} { padding-right: $v !important; }
+  .#{"pb-\\[#{$n}px\\]"} { padding-bottom: $v !important; }
+  .#{"pl-\\[#{$n}px\\]"} { padding-left: $v !important; }
+  .#{"px-\\[#{$n}px\\]"} { padding-left: $v !important; padding-right: $v !important; }
+  .#{"py-\\[#{$n}px\\]"} { padding-top: $v !important; padding-bottom: $v !important; }
+
+  // margin
+  .#{"m-\\[#{$n}px\\]"}  { margin: $v !important; }
+  .#{"mt-\\[#{$n}px\\]"} { margin-top: $v !important; }
+  .#{"mr-\\[#{$n}px\\]"} { margin-right: $v !important; }
+  .#{"mb-\\[#{$n}px\\]"} { margin-bottom: $v !important; }
+  .#{"ml-\\[#{$n}px\\]"} { margin-left: $v !important; }
+  .#{"mx-\\[#{$n}px\\]"} { margin-left: $v !important; margin-right: $v !important; }
+  .#{"my-\\[#{$n}px\\]"} { margin-top: $v !important; margin-bottom: $v !important; }
+
+  // gap
+  .#{"gap-\\[#{$n}px\\]"}   { gap: $v !important; }
+  .#{"gap-x-\\[#{$n}px\\]"} { column-gap: $v !important; }
+  .#{"gap-y-\\[#{$n}px\\]"} { row-gap: $v !important; }
+}
+
+@mixin spacing($p, $bp) {
+  @include up($bp) {
+    // Margin auto
+    .#{$p}\:m-auto  { margin: auto !important; }
+    .#{$p}\:mt-auto { margin-top: auto !important; }
+    .#{$p}\:mr-auto { margin-right: auto !important; }
+    .#{$p}\:mb-auto { margin-bottom: auto !important; }
+    .#{$p}\:ml-auto { margin-left: auto !important; }
+    .#{$p}\:mx-auto { margin-left: auto !important; margin-right: auto !important; }
+    .#{$p}\:my-auto { margin-top: auto !important; margin-bottom: auto !important; }
+
+    // Responsive zero-step utilities
+    .#{$p}\:p-0  { padding: 0 !important; }
+    .#{$p}\:pt-0 { padding-top: 0 !important; }
+    .#{$p}\:pr-0 { padding-right: 0 !important; }
+    .#{$p}\:pb-0 { padding-bottom: 0 !important; }
+    .#{$p}\:pl-0 { padding-left: 0 !important; }
+    .#{$p}\:px-0 { padding-left: 0 !important; padding-right: 0 !important; }
+    .#{$p}\:py-0 { padding-top: 0 !important; padding-bottom: 0 !important; }
+    .#{$p}\:m-0  { margin: 0 !important; }
+    .#{$p}\:mt-0 { margin-top: 0 !important; }
+    .#{$p}\:mr-0 { margin-right: 0 !important; }
+    .#{$p}\:mb-0 { margin-bottom: 0 !important; }
+    .#{$p}\:ml-0 { margin-left: 0 !important; }
+    .#{$p}\:mx-0 { margin-left: 0 !important; margin-right: 0 !important; }
+    .#{$p}\:my-0 { margin-top: 0 !important; margin-bottom: 0 !important; }
+    .#{$p}\:gap-0   { gap: 0 !important; }
+    .#{$p}\:gap-x-0 { column-gap: 0 !important; }
+    .#{$p}\:gap-y-0 { row-gap: 0 !important; }
+
+    // Responsive bracket-form pixel utilities
+    @each $n in map.keys(spacing.$dm) {
+      $v: $n * 1px;
+
+      .#{"#{$p}\\:p-\\[#{$n}px\\]"}  { padding: $v !important; }
+      .#{"#{$p}\\:pt-\\[#{$n}px\\]"} { padding-top: $v !important; }
+      .#{"#{$p}\\:pr-\\[#{$n}px\\]"} { padding-right: $v !important; }
+      .#{"#{$p}\\:pb-\\[#{$n}px\\]"} { padding-bottom: $v !important; }
+      .#{"#{$p}\\:pl-\\[#{$n}px\\]"} { padding-left: $v !important; }
+      .#{"#{$p}\\:px-\\[#{$n}px\\]"} { padding-left: $v !important; padding-right: $v !important; }
+      .#{"#{$p}\\:py-\\[#{$n}px\\]"} { padding-top: $v !important; padding-bottom: $v !important; }
+
+      .#{"#{$p}\\:m-\\[#{$n}px\\]"}  { margin: $v !important; }
+      .#{"#{$p}\\:mt-\\[#{$n}px\\]"} { margin-top: $v !important; }
+      .#{"#{$p}\\:mr-\\[#{$n}px\\]"} { margin-right: $v !important; }
+      .#{"#{$p}\\:mb-\\[#{$n}px\\]"} { margin-bottom: $v !important; }
+      .#{"#{$p}\\:ml-\\[#{$n}px\\]"} { margin-left: $v !important; }
+      .#{"#{$p}\\:mx-\\[#{$n}px\\]"} { margin-left: $v !important; margin-right: $v !important; }
+      .#{"#{$p}\\:my-\\[#{$n}px\\]"} { margin-top: $v !important; margin-bottom: $v !important; }
+
+      .#{"#{$p}\\:gap-\\[#{$n}px\\]"}   { gap: $v !important; }
+      .#{"#{$p}\\:gap-x-\\[#{$n}px\\]"} { column-gap: $v !important; }
+      .#{"#{$p}\\:gap-y-\\[#{$n}px\\]"} { row-gap: $v !important; }
+    }
+  }
+}
+
+@include spacing("sm", sm);
+@include spacing("md", md);
+@include spacing("lg", lg);
+@include spacing("xl", xl);

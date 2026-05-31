@@ -31,8 +31,6 @@ defineProps<{
 </template>
 
 <style lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .auth-card {
   width: min(440px, calc(100vw - 32px));
   background: linear-gradient(180deg, rgba(30, 30, 30, 0.92), rgba(15, 15, 15, 0.92));

@@ -1,0 +1,26 @@
+{
+  "billing": {
+    "title": "Account & Billing",
+    "subtitle": "Manage your plan, payments and billing history.",
+    "successTitle": "Payment successful!",
+    "successDesc": "Your account has been upgraded to the {plan} plan.",
+    "planEyebrow": "Your plan",
+    "planBadge": "Current plan",
+    "planDescDefault": "The best of Notflex in Ultra HD (4K) with immersive surround sound.",
+    "status": "Status",
+    "statusActive": "Active",
+    "endDate": "Expires",
+    "price": "Price",
+    "year": "year",
+    "month": "month",
+    "upgrade": "Upgrade / Renew plan",
+    "secureTitle": "Secure payment",
+    "secureDesc": "Your payment information is protected and encrypted to the highest security standards.",
+    "paymentMethod": "Payment method",
+    "managePayment": "Manage payment method",
+    "history": "Billing history",
+    "noHistory": "No transactions yet.",
+    "statusSuccess": "Success",
+    "viewAll": "View all billing history"
+  }
+}

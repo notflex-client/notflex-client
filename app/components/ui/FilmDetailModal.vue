@@ -327,9 +327,6 @@ function onBackdropClick(e: MouseEvent) {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-@use "~/assets/scss/mixins/typography" as *;
-
 // ── Transition ───────────────────────────────────────────────
 .film-detail-fade-enter-active,
 .film-detail-fade-leave-active {

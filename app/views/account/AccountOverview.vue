@@ -111,8 +111,6 @@ const dateFmt = new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' })
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .account-overview {
   display: flex;
   flex-direction: column;

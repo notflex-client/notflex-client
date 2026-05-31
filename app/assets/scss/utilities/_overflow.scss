@@ -1,0 +1,46 @@
+@use "../tools/mq" as *;
+
+.overflow-auto { overflow: auto !important; }
+.overflow-hidden { overflow: hidden !important; }
+.overflow-clip { overflow: clip !important; }
+.overflow-visible { overflow: visible !important; }
+.overflow-scroll { overflow: scroll !important; }
+
+.overflow-x-auto { overflow-x: auto !important; }
+.overflow-x-hidden { overflow-x: hidden !important; }
+.overflow-x-clip { overflow-x: clip !important; }
+.overflow-x-visible { overflow-x: visible !important; }
+.overflow-x-scroll { overflow-x: scroll !important; }
+
+.overflow-y-auto { overflow-y: auto !important; }
+.overflow-y-hidden { overflow-y: hidden !important; }
+.overflow-y-clip { overflow-y: clip !important; }
+.overflow-y-visible { overflow-y: visible !important; }
+.overflow-y-scroll { overflow-y: scroll !important; }
+
+// responsive
+@mixin overflow($p, $bp) {
+  @include up($bp) {
+    .#{$p}\:overflow-auto { overflow: auto !important; }
+    .#{$p}\:overflow-hidden { overflow: hidden !important; }
+    .#{$p}\:overflow-clip { overflow: clip !important; }
+    .#{$p}\:overflow-visible { overflow: visible !important; }
+    .#{$p}\:overflow-scroll { overflow: scroll !important; }
+
+    .#{$p}\:overflow-x-auto { overflow-x: auto !important; }
+    .#{$p}\:overflow-x-hidden { overflow-x: hidden !important; }
+    .#{$p}\:overflow-x-clip { overflow-x: clip !important; }
+    .#{$p}\:overflow-x-visible { overflow-x: visible !important; }
+    .#{$p}\:overflow-x-scroll { overflow-x: scroll !important; }
+
+    .#{$p}\:overflow-y-auto { overflow-y: auto !important; }
+    .#{$p}\:overflow-y-hidden { overflow-y: hidden !important; }
+    .#{$p}\:overflow-y-clip { overflow-y: clip !important; }
+    .#{$p}\:overflow-y-visible { overflow-y: visible !important; }
+    .#{$p}\:overflow-y-scroll { overflow-y: scroll !important; }
+  }
+}
+@include overflow("sm", sm);
+@include overflow("md", md);
+@include overflow("lg", lg);
+@include overflow("xl", xl);

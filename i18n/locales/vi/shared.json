@@ -13,7 +13,8 @@
     "play": "Phát",
     "moreInfo": "Thông tin khác",
     "loading": "Đang tải...",
-    "genre": "Thể loại"
+    "genre": "Thể loại",
+    "close": "Đóng"
   },
   "badge": {
     "newSeason": "Mùa mới",

@@ -1,0 +1,36 @@
+@use "../tools/mq" as *;
+
+.text-left {
+  text-align: left !important;
+}
+.text-center {
+  text-align: center !important;
+}
+.text-right {
+  text-align: right !important;
+}
+.text-justify {
+  text-align: justify !important;
+}
+.text-start {
+  text-align: start !important;
+}
+.text-end {
+  text-align: end !important;
+}
+
+@mixin text-align($p, $bp) {
+  @include up($bp) {
+    .#{$p}\:text-left { text-align: left !important; }
+    .#{$p}\:text-center { text-align: center !important; }
+    .#{$p}\:text-right { text-align: right !important; }
+    .#{$p}\:text-justify { text-align: justify !important; }
+    .#{$p}\:text-start { text-align: start !important; }
+    .#{$p}\:text-end { text-align: end !important; }
+  }
+}
+@include text-align("sm", sm);
+@include text-align("md", md);
+@include text-align("lg", lg);
+@include text-align("xl", xl);
+

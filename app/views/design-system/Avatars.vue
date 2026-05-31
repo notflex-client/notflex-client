@@ -92,8 +92,6 @@ const activeProfile = ref('jennifer')
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .av-demo-row {
   display: flex;
   align-items: center;

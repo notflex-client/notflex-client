@@ -1,0 +1,26 @@
+{
+  "billing": {
+    "title": "Tài khoản & thanh toán",
+    "subtitle": "Quản lý gói dịch vụ, thanh toán và lịch sử thanh toán.",
+    "successTitle": "Thanh toán thành công!",
+    "successDesc": "Tài khoản của bạn đã được nâng cấp lên gói {plan}.",
+    "planEyebrow": "Gói dịch vụ của bạn",
+    "planBadge": "Gói đang dùng",
+    "planDescDefault": "Trải nghiệm tốt nhất của Notflex với chất lượng hình ảnh Ultra HD (4K) và âm thanh vòm.",
+    "status": "Trạng thái",
+    "statusActive": "Đang hoạt động",
+    "endDate": "Hạn dùng",
+    "price": "Giá gói",
+    "year": "năm",
+    "month": "tháng",
+    "upgrade": "Nâng cấp / Gia hạn gói",
+    "secureTitle": "Thanh toán an toàn",
+    "secureDesc": "Thông tin thanh toán được bảo mật và mã hóa theo tiêu chuẩn bảo mật cao nhất.",
+    "paymentMethod": "Phương thức thanh toán",
+    "managePayment": "Quản lý phương thức thanh toán",
+    "history": "Lịch sử thanh toán",
+    "noHistory": "Chưa có giao dịch.",
+    "statusSuccess": "Thành công",
+    "viewAll": "Xem tất cả lịch sử thanh toán"
+  }
+}

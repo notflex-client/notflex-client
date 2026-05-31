@@ -100,10 +100,6 @@ async function onRemove(movieId: string) {
 </template>
 
 <style lang="scss" scoped>
-@use "~/assets/scss/tools/token" as *;
-@use "~/assets/scss/tools/mq" as *;
-@use "~/assets/scss/mixins/typography" as *;
-
 $px:  token("dm-48");
 $gap: token("dm-4");
 

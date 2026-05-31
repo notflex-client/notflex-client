@@ -245,9 +245,6 @@ const previewStyle = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-@use "~/assets/scss/tools/token" as *;
-@use "~/assets/scss/mixins/typography" as *;
-
 .films-page {
   min-height: 100vh;
   background-color: token("color-background-base");

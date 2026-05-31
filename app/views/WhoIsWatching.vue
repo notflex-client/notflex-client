@@ -40,8 +40,6 @@ function selectProfile(value: string) {
 </template>
 
 <style lang="scss" scoped>
-@use "~/assets/scss/tools/token" as *;
-
 .profiles-page {
   position: relative;
   min-height: 100vh;

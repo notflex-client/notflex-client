@@ -73,8 +73,6 @@ function checkout() {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .checkout-modal {
   position: fixed;
   inset: 0;

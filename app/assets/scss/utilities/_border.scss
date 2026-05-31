@@ -1,0 +1,26 @@
+@use "sass:list";
+
+// Border widths
+$border-widths: 0, 1, 2, 4, 8;
+
+@each $width in $border-widths {
+  $value: #{$width}px;
+  
+  @if $width == 1 {
+    .border { border-width: 1px !important; border-style: solid !important; }
+    .border-x { border-left-width: 1px !important; border-left-style: solid !important; border-right-width: 1px !important; border-right-style: solid !important; }
+    .border-y { border-top-width: 1px !important; border-top-style: solid !important; border-bottom-width: 1px !important; border-bottom-style: solid !important; }
+    .border-t { border-top-width: 1px !important; border-top-style: solid !important; }
+    .border-r { border-right-width: 1px !important; border-right-style: solid !important; }
+    .border-b { border-bottom-width: 1px !important; border-bottom-style: solid !important; }
+    .border-l { border-left-width: 1px !important; border-left-style: solid !important; }
+  } @else {
+    .border-#{$width} { border-width: $value !important; border-style: solid !important; }
+    .border-x-#{$width} { border-left-width: $value !important; border-left-style: solid !important; border-right-width: $value !important; border-right-style: solid !important; }
+    .border-y-#{$width} { border-top-width: $value !important; border-top-style: solid !important; border-bottom-width: $value !important; border-bottom-style: solid !important; }
+    .border-t-#{$width} { border-top-width: $value !important; border-top-style: solid !important; }
+    .border-r-#{$width} { border-right-width: $value !important; border-right-style: solid !important; }
+    .border-b-#{$width} { border-bottom-width: $value !important; border-bottom-style: solid !important; }
+    .border-l-#{$width} { border-left-width: $value !important; border-left-style: solid !important; }
+  }
+}

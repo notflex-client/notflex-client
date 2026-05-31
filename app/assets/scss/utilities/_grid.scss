@@ -1,0 +1,248 @@
+@use "../tools/mq" as *;
+
+// Grid template columns
+.grid-cols-none { grid-template-columns: none !important; }
+@for $i from 1 through 12 {
+	.grid-cols-#{$i} { grid-template-columns: repeat(#{$i}, minmax(0, 1fr)) !important; }
+}
+
+// Grid template rows
+.grid-rows-none { grid-template-rows: none !important; }
+@for $i from 1 through 6 {
+	.grid-rows-#{$i} { grid-template-rows: repeat(#{$i}, minmax(0, 1fr)) !important; }
+}
+
+// Auto flow
+.grid-flow-row { grid-auto-flow: row !important; }
+.grid-flow-col { grid-auto-flow: column !important; }
+.grid-flow-dense { grid-auto-flow: dense !important; }
+.grid-flow-row-dense { grid-auto-flow: row dense !important; }
+.grid-flow-col-dense { grid-auto-flow: column dense !important; }
+
+// Auto columns
+.auto-cols-auto { grid-auto-columns: auto !important; }
+.auto-cols-min { grid-auto-columns: min-content !important; }
+.auto-cols-max { grid-auto-columns: max-content !important; }
+.auto-cols-fr { grid-auto-columns: minmax(0, 1fr) !important; }
+
+// Auto rows
+.auto-rows-auto { grid-auto-rows: auto !important; }
+.auto-rows-min { grid-auto-rows: min-content !important; }
+.auto-rows-max { grid-auto-rows: max-content !important; }
+.auto-rows-fr { grid-auto-rows: minmax(0, 1fr) !important; }
+
+// Column span/start/end
+.col-auto { grid-column: auto !important; }
+@for $i from 1 through 12 {
+	.col-span-#{$i} { grid-column: span #{$i} / span #{$i} !important; }
+}
+.col-span-full { grid-column: 1 / -1 !important; }
+
+.col-start-auto { grid-column-start: auto !important; }
+.col-end-auto { grid-column-end: auto !important; }
+@for $i from 1 through 13 {
+	.col-start-#{$i} { grid-column-start: $i !important; }
+	.col-end-#{$i} { grid-column-end: $i !important; }
+}
+
+// Row span/start/end
+.row-auto { grid-row: auto !important; }
+@for $i from 1 through 6 {
+	.row-span-#{$i} { grid-row: span #{$i} / span #{$i} !important; }
+}
+.row-span-full { grid-row: 1 / -1 !important; }
+
+.row-start-auto { grid-row-start: auto !important; }
+.row-end-auto { grid-row-end: auto !important; }
+@for $i from 1 through 7 {
+	.row-start-#{$i} { grid-row-start: $i !important; }
+	.row-end-#{$i} { grid-row-end: $i !important; }
+}
+
+// Place items
+.place-items-start { place-items: start !important; }
+.place-items-end { place-items: end !important; }
+.place-items-center { place-items: center !important; }
+.place-items-stretch { place-items: stretch !important; }
+
+// Place content
+.place-content-start { place-content: start !important; }
+.place-content-end { place-content: end !important; }
+.place-content-center { place-content: center !important; }
+.place-content-between { place-content: space-between !important; }
+.place-content-around { place-content: space-around !important; }
+.place-content-evenly { place-content: space-evenly !important; }
+.place-content-stretch { place-content: stretch !important; }
+
+// Place self
+.place-self-auto { place-self: auto !important; }
+.place-self-start { place-self: start !important; }
+.place-self-end { place-self: end !important; }
+.place-self-center { place-self: center !important; }
+.place-self-stretch { place-self: stretch !important; }
+
+// Justify items / self / content
+.justify-items-start { justify-items: start !important; }
+.justify-items-end { justify-items: end !important; }
+.justify-items-center { justify-items: center !important; }
+.justify-items-stretch { justify-items: stretch !important; }
+
+.justify-self-auto { justify-self: auto !important; }
+.justify-self-start { justify-self: start !important; }
+.justify-self-end { justify-self: end !important; }
+.justify-self-center { justify-self: center !important; }
+.justify-self-stretch { justify-self: stretch !important; }
+
+.justify-content-normal { justify-content: normal !important; }
+.justify-content-center { justify-content: center !important; }
+.justify-content-start { justify-content: flex-start !important; }
+.justify-content-end { justify-content: flex-end !important; }
+.justify-content-between { justify-content: space-between !important; }
+.justify-content-around { justify-content: space-around !important; }
+.justify-content-evenly { justify-content: space-evenly !important; }
+.justify-content-stretch { justify-content: stretch !important; }
+
+// Align items / self / content
+.align-items-start { align-items: flex-start !important; }
+.align-items-end { align-items: flex-end !important; }
+.align-items-center { align-items: center !important; }
+.align-items-baseline { align-items: baseline !important; }
+.align-items-stretch { align-items: stretch !important; }
+
+.align-self-auto { align-self: auto !important; }
+.align-self-start { align-self: flex-start !important; }
+.align-self-end { align-self: flex-end !important; }
+.align-self-center { align-self: center !important; }
+.align-self-stretch { align-self: stretch !important; }
+.align-self-baseline { align-self: baseline !important; }
+
+.align-content-normal { align-content: normal !important; }
+.align-content-center { align-content: center !important; }
+.align-content-start { align-content: flex-start !important; }
+.align-content-end { align-content: flex-end !important; }
+.align-content-between { align-content: space-between !important; }
+.align-content-around { align-content: space-around !important; }
+.align-content-evenly { align-content: space-evenly !important; }
+.align-content-stretch { align-content: stretch !important; }
+
+@mixin grid($p, $bp) {
+	@include up($bp) {
+		.#{$p}\:grid-cols-none { grid-template-columns: none !important; }
+		@for $i from 1 through 12 {
+			.#{$p}\:grid-cols-#{$i} { grid-template-columns: repeat(#{$i}, minmax(0, 1fr)) !important; }
+		}
+
+		.#{$p}\:grid-rows-none { grid-template-rows: none !important; }
+		@for $i from 1 through 6 {
+			.#{$p}\:grid-rows-#{$i} { grid-template-rows: repeat(#{$i}, minmax(0, 1fr)) !important; }
+		}
+
+		.#{$p}\:grid-flow-row { grid-auto-flow: row !important; }
+		.#{$p}\:grid-flow-col { grid-auto-flow: column !important; }
+		.#{$p}\:grid-flow-dense { grid-auto-flow: dense !important; }
+		.#{$p}\:grid-flow-row-dense { grid-auto-flow: row dense !important; }
+		.#{$p}\:grid-flow-col-dense { grid-auto-flow: column dense !important; }
+
+		.#{$p}\:auto-cols-auto { grid-auto-columns: auto !important; }
+		.#{$p}\:auto-cols-min { grid-auto-columns: min-content !important; }
+		.#{$p}\:auto-cols-max { grid-auto-columns: max-content !important; }
+		.#{$p}\:auto-cols-fr { grid-auto-columns: minmax(0, 1fr) !important; }
+
+		.#{$p}\:auto-rows-auto { grid-auto-rows: auto !important; }
+		.#{$p}\:auto-rows-min { grid-auto-rows: min-content !important; }
+		.#{$p}\:auto-rows-max { grid-auto-rows: max-content !important; }
+		.#{$p}\:auto-rows-fr { grid-auto-rows: minmax(0, 1fr) !important; }
+
+		.#{$p}\:col-auto { grid-column: auto !important; }
+		@for $i from 1 through 12 {
+			.#{$p}\:col-span-#{$i} { grid-column: span #{$i} / span #{$i} !important; }
+		}
+		.#{$p}\:col-span-full { grid-column: 1 / -1 !important; }
+
+		.#{$p}\:col-start-auto { grid-column-start: auto !important; }
+		.#{$p}\:col-end-auto { grid-column-end: auto !important; }
+		@for $i from 1 through 13 {
+			.#{$p}\:col-start-#{$i} { grid-column-start: $i !important; }
+			.#{$p}\:col-end-#{$i} { grid-column-end: $i !important; }
+		}
+
+		.#{$p}\:row-auto { grid-row: auto !important; }
+		@for $i from 1 through 6 {
+			.#{$p}\:row-span-#{$i} { grid-row: span #{$i} / span #{$i} !important; }
+		}
+		.#{$p}\:row-span-full { grid-row: 1 / -1 !important; }
+
+		.#{$p}\:row-start-auto { grid-row-start: auto !important; }
+		.#{$p}\:row-end-auto { grid-row-end: auto !important; }
+		@for $i from 1 through 7 {
+			.#{$p}\:row-start-#{$i} { grid-row-start: $i !important; }
+			.#{$p}\:row-end-#{$i} { grid-row-end: $i !important; }
+		}
+
+		.#{$p}\:place-items-start { place-items: start !important; }
+		.#{$p}\:place-items-end { place-items: end !important; }
+		.#{$p}\:place-items-center { place-items: center !important; }
+		.#{$p}\:place-items-stretch { place-items: stretch !important; }
+
+		.#{$p}\:place-content-start { place-content: start !important; }
+		.#{$p}\:place-content-end { place-content: end !important; }
+		.#{$p}\:place-content-center { place-content: center !important; }
+		.#{$p}\:place-content-between { place-content: space-between !important; }
+		.#{$p}\:place-content-around { place-content: space-around !important; }
+		.#{$p}\:place-content-evenly { place-content: space-evenly !important; }
+		.#{$p}\:place-content-stretch { place-content: stretch !important; }
+
+		.#{$p}\:place-self-auto { place-self: auto !important; }
+		.#{$p}\:place-self-start { place-self: start !important; }
+		.#{$p}\:place-self-end { place-self: end !important; }
+		.#{$p}\:place-self-center { place-self: center !important; }
+		.#{$p}\:place-self-stretch { place-self: stretch !important; }
+
+		.#{$p}\:justify-items-start { justify-items: start !important; }
+		.#{$p}\:justify-items-end { justify-items: end !important; }
+		.#{$p}\:justify-items-center { justify-items: center !important; }
+		.#{$p}\:justify-items-stretch { justify-items: stretch !important; }
+
+		.#{$p}\:justify-self-auto { justify-self: auto !important; }
+		.#{$p}\:justify-self-start { justify-self: start !important; }
+		.#{$p}\:justify-self-end { justify-self: end !important; }
+		.#{$p}\:justify-self-center { justify-self: center !important; }
+		.#{$p}\:justify-self-stretch { justify-self: stretch !important; }
+
+		.#{$p}\:justify-content-normal { justify-content: normal !important; }
+		.#{$p}\:justify-content-center { justify-content: center !important; }
+		.#{$p}\:justify-content-start { justify-content: flex-start !important; }
+		.#{$p}\:justify-content-end { justify-content: flex-end !important; }
+		.#{$p}\:justify-content-between { justify-content: space-between !important; }
+		.#{$p}\:justify-content-around { justify-content: space-around !important; }
+		.#{$p}\:justify-content-evenly { justify-content: space-evenly !important; }
+		.#{$p}\:justify-content-stretch { justify-content: stretch !important; }
+
+		.#{$p}\:align-items-start { align-items: flex-start !important; }
+		.#{$p}\:align-items-end { align-items: flex-end !important; }
+		.#{$p}\:align-items-center { align-items: center !important; }
+		.#{$p}\:align-items-baseline { align-items: baseline !important; }
+		.#{$p}\:align-items-stretch { align-items: stretch !important; }
+
+		.#{$p}\:align-self-auto { align-self: auto !important; }
+		.#{$p}\:align-self-start { align-self: flex-start !important; }
+		.#{$p}\:align-self-end { align-self: flex-end !important; }
+		.#{$p}\:align-self-center { align-self: center !important; }
+		.#{$p}\:align-self-stretch { align-self: stretch !important; }
+		.#{$p}\:align-self-baseline { align-self: baseline !important; }
+
+		.#{$p}\:align-content-normal { align-content: normal !important; }
+		.#{$p}\:align-content-center { align-content: center !important; }
+		.#{$p}\:align-content-start { align-content: flex-start !important; }
+		.#{$p}\:align-content-end { align-content: flex-end !important; }
+		.#{$p}\:align-content-between { align-content: space-between !important; }
+		.#{$p}\:align-content-around { align-content: space-around !important; }
+		.#{$p}\:align-content-evenly { align-content: space-evenly !important; }
+		.#{$p}\:align-content-stretch { align-content: stretch !important; }
+	}
+}
+
+@include grid("sm", sm);
+@include grid("md", md);
+@include grid("lg", lg);
+@include grid("xl", xl);

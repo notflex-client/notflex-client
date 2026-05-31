@@ -77,8 +77,6 @@ const profiles = computed(() => {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .account-profiles {
   display: flex;
   flex-direction: column;

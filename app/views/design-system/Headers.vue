@@ -118,8 +118,6 @@ const navItems = ['Home', 'TV Shows', 'Movies', 'New & Popular', 'My List', 'Bro
 </script>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .hd-nav-link {
   color: token("color-text-primary");
   text-decoration: none;

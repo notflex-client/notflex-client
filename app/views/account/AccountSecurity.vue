@@ -37,8 +37,6 @@ const changePasswordRef = ref<InstanceType<typeof ChangePasswordModal> | null>(n
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .account-security {
   display: flex;
   flex-direction: column;

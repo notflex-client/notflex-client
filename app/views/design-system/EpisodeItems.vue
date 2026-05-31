@@ -89,8 +89,6 @@
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 // ── State showcase demo box ────────────────────────────────────
 .ep-demo-box {
   background-color: token("grey-800");

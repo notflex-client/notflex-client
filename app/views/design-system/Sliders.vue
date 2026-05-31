@@ -169,8 +169,6 @@ const genericVal = ref(40)
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .sl-demo-box {
   background-color: token("grey-800");
   border-radius: 8px;

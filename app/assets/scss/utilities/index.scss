@@ -1,0 +1,14 @@
+@forward "./display";
+@forward "./spacing";
+@forward "./flexbox";
+@forward "./sizing";
+@forward "./grid";
+@forward "./text";
+@forward "./transition";
+@forward "./border";
+@forward "./color";
+@forward "./overflow";
+
+// NOTE: ./radius and ./elevation are intentionally omitted — notflex has not
+// defined corner-radius / elevation tokens yet (see tokens/index.scss TODO).
+// Add the forwards here once those token files exist.

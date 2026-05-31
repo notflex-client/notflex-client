@@ -38,8 +38,6 @@ const items = computed(() => data.value?.items?.map(movie => ({
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .ai-recommendation {
   display: flex;
   flex-direction: column;

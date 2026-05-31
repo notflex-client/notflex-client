@@ -222,8 +222,6 @@ async function confirmTransfer() {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .transfer-page {
   min-height: 100vh;
   background: token("color-background-base");

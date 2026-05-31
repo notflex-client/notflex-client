@@ -2,8 +2,12 @@
   "account": {
     "eyebrow": "Tài khoản",
     "title": "Cài đặt tài khoản",
+    "subtitle": "Quản lý hồ sơ, bảo mật và gói dịch vụ của bạn.",
     "home": "Trang chủ",
     "billing": "Thanh toán",
+    "navProfile": "Hồ sơ",
+    "navSecurity": "Mật khẩu",
+    "navBilling": "Gói & Thanh toán",
     "tabProfile": "Hồ sơ",
     "tabPassword": "Mật khẩu",
     "profileTitle": "Thông tin hồ sơ",

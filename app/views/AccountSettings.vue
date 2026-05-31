@@ -1,25 +1,40 @@
 <script setup lang="ts">
 import type { AuthUser } from '~/stores/auth'
 
+type Section = 'profile' | 'security' | 'billing'
+
 const { t } = useI18n()
 const { $api } = useNuxtApp()
+const route = useRoute()
 const authStore = useAuthStore()
 const { errorMsg: profileError, formErrors: profileFieldErrors, setErrors: setProfileErrors, clearErrors: clearProfileErrors } = useResponseError()
 const { errorMsg: passwordError, formErrors: passwordFieldErrors, setErrors: setPasswordErrors, clearErrors: clearPasswordErrors } = useResponseError()
 
-const activeTab = ref<'profile' | 'password'>('profile')
+const money = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 })
+const date = new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' })
 
+// ── Active section (sidebar) ──────────────────────────────
+const section = ref<Section>(
+  route.path === '/billing' || route.query.section === 'billing'
+    ? 'billing'
+    : (route.query.section === 'security' ? 'security' : 'profile'),
+)
+
+const NAV = [
+  { key: 'profile' as Section, label: 'account.navProfile', icon: 'lucide:user' },
+  { key: 'security' as Section, label: 'account.navSecurity', icon: 'lucide:lock' },
+  { key: 'billing' as Section, label: 'account.navBilling', icon: 'lucide:credit-card' },
+]
+
+const userName = computed(() => authStore.user?.full_name || 'Bạn')
+const userEmail = computed(() => authStore.user?.email || '')
+const userInitial = computed(() => userName.value.trim().charAt(0).toUpperCase() || 'U')
+
+// ── Profile ───────────────────────────────────────────────
 const fullName = ref(authStore.user?.full_name ?? '')
 const avatarUrl = ref(authStore.user?.avatar_url ?? '')
 const profileLoading = ref(false)
 const profileSaved = ref(false)
-
-const currentPassword = ref('')
-const newPassword = ref('')
-const confirmPassword = ref('')
-const showNewPassword = ref(false)
-const passwordLoading = ref(false)
-const passwordSaved = ref(false)
 
 async function saveProfile() {
   profileLoading.value = true
@@ -38,6 +53,14 @@ async function saveProfile() {
     profileLoading.value = false
   }
 }
+
+// ── Security (password) ───────────────────────────────────
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const showNewPassword = ref(false)
+const passwordLoading = ref(false)
+const passwordSaved = ref(false)
 
 async function savePassword() {
   passwordSaved.value = false
@@ -62,159 +85,305 @@ async function savePassword() {
     passwordLoading.value = false
   }
 }
+
+// ── Billing ───────────────────────────────────────────────
+const { data: subscriptionData, refresh: refreshSubscription } = await useAsyncData('account-subscription', () =>
+  $api<{ subscription: any | null, status: string }>('/subscription/me').catch(() => ({ subscription: null, status: 'free' })),
+)
+const { data: paymentsData, refresh: refreshPayments } = await useAsyncData('account-payments', () =>
+  $api<any[]>('/payments').catch(() => []),
+)
+
+const subscription = computed(() => subscriptionData.value?.subscription ?? null)
+const payments = computed(() => paymentsData.value ?? [])
+
+const isActive = computed(() => (subscription.value?.status ?? 'free') === 'active')
+const planName = computed(() => subscription.value?.plan?.name || 'Free')
+const planDesc = computed(() => subscription.value?.plan?.description || t('billing.planDescDefault'))
+const priceLabel = computed(() => money.format(subscription.value?.plan?.price ?? 0))
+const cycleLabel = computed(() => ((subscription.value?.plan?.duration_days ?? 30) >= 365 ? t('billing.year') : t('billing.month')))
+const endLabel = computed(() => (subscription.value?.end_date ? date.format(new Date(subscription.value.end_date)) : '—'))
+const statusLabel = computed(() => (isActive.value ? t('billing.statusActive') : (subscription.value?.status || '—')))
+const paymentSuccess = ref(false)
+
+onMounted(async () => {
+  if (route.query.status !== 'success') return
+
+  section.value = 'billing'
+  const sessionId = route.query.session_id as string | undefined
+  if (sessionId) {
+    try {
+      await $api('/subscription/stripe-verify', { method: 'POST', body: { session_id: sessionId } })
+    } catch {}
+  }
+
+  paymentSuccess.value = true
+  try {
+    const profile = await $api<any>('/auth/me')
+    authStore.updateUser(profile)
+  } catch {}
+  await Promise.all([refreshSubscription(), refreshPayments()])
+  setTimeout(() => navigateTo('/account', { replace: true }), 100)
+})
 </script>
 
 <template>
   <main class="account-page">
-    <AppHeader sticky>
-      <template #logo>
-        <NuxtLink to="/browse" class="account-page__logo">NOTFLEX</NuxtLink>
-      </template>
-      <template #navigation>
-        <NuxtLink to="/browse" class="account-page__nav-link">{{ t('account.home') }}</NuxtLink>
-        <NuxtLink to="/billing" class="account-page__nav-link">{{ t('account.billing') }}</NuxtLink>
-      </template>
-    </AppHeader>
+    <SiteHeader :transparent="false" />
 
-    <section class="account-page__content">
-      <header class="account-page__header">
-        <span class="caption-2-regular account-page__eyebrow">{{ t('account.eyebrow') }}</span>
+    <section class="account-page__content w-full mx-auto flex flex-col gap-24">
+
+      <!-- ── Page header ─────────────────────────────────────── -->
+      <header class="flex flex-col gap-8">
         <h1 class="h1-bold">{{ t('account.title') }}</h1>
-        <p class="body-regular account-page__subtitle">{{ authStore.user?.email }}</p>
+        <p class="body-regular text-secondary">{{ t('account.subtitle') }}</p>
       </header>
 
-      <nav class="account-page__tabs">
-        <button :class="['account-page__tab', { 'account-page__tab--active': activeTab === 'profile' }]" @click="activeTab = 'profile'">
-          {{ t('account.tabProfile') }}
-        </button>
-        <button :class="['account-page__tab', { 'account-page__tab--active': activeTab === 'password' }]" @click="activeTab = 'password'">
-          {{ t('account.tabPassword') }}
-        </button>
-      </nav>
+      <!-- ── Sidebar + content ───────────────────────────────── -->
+      <div class="flex flex-col md:flex-row gap-24">
 
-      <article v-if="activeTab === 'profile'" class="account-page__card">
-        <h2 class="title-3-medium">{{ t('account.profileTitle') }}</h2>
-        <p class="body-regular account-page__desc">{{ t('account.profileDesc') }}</p>
-
-        <div class="flex flex-col gap-4">
-          <InputField v-model="fullName" :label="t('account.fullNameLabel')" :error="profileFieldErrors.full_name" />
-          <InputField v-model="avatarUrl" :label="t('account.avatarLabel')" :error="profileFieldErrors.avatar_url" />
-          <p v-if="profileError" class="account-page__api-error">{{ profileError }}</p>
-          <p v-if="profileSaved" class="account-page__api-success">{{ t('account.savedProfile') }}</p>
-          <Button variant="brand" size="large" :block="true" :disabled="profileLoading" @click="saveProfile">
-            {{ profileLoading ? t('account.saving') : t('account.save') }}
-          </Button>
-        </div>
-      </article>
-
-      <article v-else class="account-page__card">
-        <h2 class="title-3-medium">{{ t('account.passwordTitle') }}</h2>
-        <p class="body-regular account-page__desc">{{ t('account.passwordDesc') }}</p>
-
-        <div class="flex flex-col gap-4">
-          <InputField v-model="currentPassword" :label="t('account.currentPasswordLabel')" type="password" autocomplete="current-password" :error="passwordFieldErrors.currentPassword" />
-          <div class="account-page__field-wrap">
-            <InputField v-model="newPassword" :label="t('account.newPasswordLabel')" :type="showNewPassword ? 'text' : 'password'" autocomplete="new-password" :error="passwordFieldErrors.newPassword" />
-            <button class="account-page__toggle-pass caption-1-medium" @click="showNewPassword = !showNewPassword">
-              {{ showNewPassword ? t('account.hide') : t('account.show') }}
-            </button>
+        <!-- SIDEBAR -->
+        <aside class="account-sidebar w-full md:w-[280px] shrink-0 flex flex-col gap-20">
+          <div class="account-sidebar__user flex items-center gap-12">
+            <span class="account-sidebar__avatar">{{ userInitial }}</span>
+            <div class="flex flex-col gap-4 min-w-0">
+              <strong class="small-body-medium">{{ userName }}</strong>
+              <span class="caption-1-regular text-secondary account-sidebar__email">{{ userEmail }}</span>
+            </div>
           </div>
-          <InputField v-model="confirmPassword" :label="t('account.confirmPasswordLabel')" type="password" autocomplete="new-password" :error="passwordFieldErrors.confirmPassword" />
-          <p v-if="passwordError" class="account-page__api-error">{{ passwordError }}</p>
-          <p v-if="passwordSaved" class="account-page__api-success">{{ t('account.savedPassword') }}</p>
-          <Button variant="brand" size="large" :block="true" :disabled="passwordLoading" @click="savePassword">
-            {{ passwordLoading ? t('account.saving') : t('account.changePassword') }}
-          </Button>
+
+          <nav class="flex flex-col gap-4">
+            <button
+              v-for="item in NAV"
+              :key="item.key"
+              type="button"
+              class="account-nav__item flex items-center gap-12"
+              :class="{ 'is-active': section === item.key }"
+              @click="section = item.key"
+            >
+              <Icon :name="item.icon" size="18" />
+              <span>{{ t(item.label) }}</span>
+            </button>
+          </nav>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="flex-1 min-w-0 flex flex-col gap-24">
+
+          <!-- ───────── PROFILE ───────── -->
+          <article v-if="section === 'profile'" class="account-card flex flex-col gap-16">
+            <div class="flex flex-col gap-4">
+              <h2 class="title-3-medium">{{ t('account.profileTitle') }}</h2>
+              <p class="body-regular text-secondary">{{ t('account.profileDesc') }}</p>
+            </div>
+
+            <div class="flex flex-col gap-16">
+              <InputField v-model="fullName" :label="t('account.fullNameLabel')" :error="profileFieldErrors.full_name" />
+              <InputField v-model="avatarUrl" :label="t('account.avatarLabel')" :error="profileFieldErrors.avatar_url" />
+              <p v-if="profileError" class="account-card__api-error">{{ profileError }}</p>
+              <p v-if="profileSaved" class="account-card__api-success">{{ t('account.savedProfile') }}</p>
+              <Button variant="brand" size="large" :block="true" :disabled="profileLoading" @click="saveProfile">
+                {{ profileLoading ? t('account.saving') : t('account.save') }}
+              </Button>
+            </div>
+          </article>
+
+          <!-- ───────── SECURITY ───────── -->
+          <article v-else-if="section === 'security'" class="account-card flex flex-col gap-16">
+            <div class="flex flex-col gap-4">
+              <h2 class="title-3-medium">{{ t('account.passwordTitle') }}</h2>
+              <p class="body-regular text-secondary">{{ t('account.passwordDesc') }}</p>
+            </div>
+
+            <div class="flex flex-col gap-16">
+              <InputField v-model="currentPassword" :label="t('account.currentPasswordLabel')" type="password" autocomplete="current-password" :error="passwordFieldErrors.currentPassword" />
+              <div class="account-card__field-wrap">
+                <InputField v-model="newPassword" :label="t('account.newPasswordLabel')" :type="showNewPassword ? 'text' : 'password'" autocomplete="new-password" :error="passwordFieldErrors.newPassword" />
+                <button type="button" class="account-card__toggle-pass caption-1-medium" @click="showNewPassword = !showNewPassword">
+                  {{ showNewPassword ? t('account.hide') : t('account.show') }}
+                </button>
+              </div>
+              <InputField v-model="confirmPassword" :label="t('account.confirmPasswordLabel')" type="password" autocomplete="new-password" :error="passwordFieldErrors.confirmPassword" />
+              <p v-if="passwordError" class="account-card__api-error">{{ passwordError }}</p>
+              <p v-if="passwordSaved" class="account-card__api-success">{{ t('account.savedPassword') }}</p>
+              <Button variant="brand" size="large" :block="true" :disabled="passwordLoading" @click="savePassword">
+                {{ passwordLoading ? t('account.saving') : t('account.changePassword') }}
+              </Button>
+            </div>
+          </article>
+
+          <!-- ───────── BILLING ───────── -->
+          <template v-else>
+            <!-- success alert -->
+            <div v-if="paymentSuccess" class="bill-alert flex items-start gap-12">
+              <Icon name="lucide:circle-check" class="bill-alert__icon" size="22" />
+              <div class="flex flex-col gap-4 flex-1">
+                <strong class="body-medium">{{ t('billing.successTitle') }}</strong>
+                <span class="small-body-regular text-secondary">{{ t('billing.successDesc', { plan: planName }) }}</span>
+              </div>
+              <button type="button" class="bill-alert__close" :aria-label="t('action.close')" @click="paymentSuccess = false">
+                <Icon name="lucide:x" size="18" />
+              </button>
+            </div>
+
+            <!-- plan card -->
+            <section class="account-card flex flex-col gap-20">
+              <span class="bill-eyebrow">{{ t('billing.planEyebrow') }}</span>
+
+              <div class="flex items-center gap-16">
+                <span class="bill-plan-icon"><Icon name="lucide:crown" size="26" /></span>
+                <div class="flex items-center flex-wrap gap-12">
+                  <span class="title-2-bold">{{ planName }}</span>
+                  <span v-if="isActive" class="bill-badge bill-badge--plan">{{ t('billing.planBadge') }}</span>
+                </div>
+              </div>
+
+              <p class="body-regular text-secondary">{{ planDesc }}</p>
+
+              <div class="flex flex-col gap-12">
+                <div class="bill-row flex items-center justify-between gap-16">
+                  <span class="bill-row__label flex items-center gap-8"><Icon name="lucide:activity" size="18" /> {{ t('billing.status') }}</span>
+                  <strong :class="isActive ? 'text-success' : 'text-secondary'">{{ statusLabel }}</strong>
+                </div>
+                <div class="bill-row flex items-center justify-between gap-16">
+                  <span class="bill-row__label flex items-center gap-8"><Icon name="lucide:calendar" size="18" /> {{ t('billing.endDate') }}</span>
+                  <strong>{{ endLabel }}</strong>
+                </div>
+                <div class="bill-row flex items-center justify-between gap-16">
+                  <span class="bill-row__label flex items-center gap-8"><Icon name="lucide:wallet" size="18" /> {{ t('billing.price') }}</span>
+                  <strong>{{ priceLabel }} <span class="text-secondary">/ {{ cycleLabel }}</span></strong>
+                </div>
+              </div>
+
+              <Button variant="brand" size="large" :block="true" @click="navigateTo('/plans')">
+                <template #leading-icon><Icon name="lucide:crown" size="18" /></template>
+                {{ t('billing.upgrade') }}
+              </Button>
+
+              <div class="bill-secure flex items-center gap-12">
+                <Icon name="lucide:shield-check" size="20" class="bill-secure__icon" />
+                <div class="flex flex-col gap-4">
+                  <strong class="small-body-medium">{{ t('billing.secureTitle') }}</strong>
+                  <span class="caption-1-regular text-secondary">{{ t('billing.secureDesc') }}</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- payment method -->
+            <section class="account-card flex flex-col gap-16">
+              <span class="bill-eyebrow">{{ t('billing.paymentMethod') }}</span>
+              <div class="flex items-center gap-12">
+                <span class="bill-visa">VISA</span>
+                <span class="body-regular flex-1">•••• •••• •••• 4242</span>
+                <Icon name="lucide:circle-check" size="20" class="text-success" />
+              </div>
+              <button type="button" class="bill-link flex items-center justify-between gap-12">
+                <span>{{ t('billing.managePayment') }}</span>
+                <Icon name="lucide:chevron-right" size="18" />
+              </button>
+            </section>
+
+            <!-- history -->
+            <section class="account-card flex flex-col gap-16">
+              <span class="bill-eyebrow">{{ t('billing.history') }}</span>
+              <p v-if="!payments.length" class="body-regular text-secondary">{{ t('billing.noHistory') }}</p>
+              <div
+                v-for="payment in payments"
+                :key="payment.id"
+                class="bill-history flex items-center justify-between gap-12"
+              >
+                <div class="flex flex-col gap-4">
+                  <strong class="bill-history__name">{{ payment.subscription?.plan?.name || 'Subscription' }}</strong>
+                  <span class="caption-1-regular text-secondary">{{ payment.created_at ? date.format(new Date(payment.created_at)) : '' }}</span>
+                </div>
+                <div class="flex flex-col items-end gap-4">
+                  <strong>{{ money.format(payment.amount || 0) }}</strong>
+                  <span class="bill-badge bill-badge--success">{{ payment.status === 'success' ? t('billing.statusSuccess') : payment.status }}</span>
+                </div>
+              </div>
+              <button v-if="payments.length" type="button" class="bill-link flex items-center justify-between gap-12">
+                <span>{{ t('billing.viewAll') }}</span>
+                <Icon name="lucide:chevron-right" size="18" />
+              </button>
+            </section>
+          </template>
+
         </div>
-      </article>
+      </div>
     </section>
 
-    <AppFooter />
+    <AppFooter v-model:lang="lang" variant="home" />
   </main>
 </template>
 
 <style lang="scss" scoped>
-@use "~/assets/scss/tools/token" as *;
-
 .account-page {
   min-height: 100vh;
   background: token("color-background-base");
   color: token("color-text-primary");
 
-  &__logo {
-    font-family: token("font-family-logo");
-    font-size: 28px;
-    color: token("color-action-brand");
-    letter-spacing: 2px;
-    text-decoration: none;
-  }
-
-  &__nav-link {
-    color: token("color-text-secondary");
-    text-decoration: none;
-    &:hover { color: token("color-text-primary"); }
-  }
-
+  // arbitrary container width — not expressible via the dm-scale utilities.
   &__content {
-    max-width: 720px;
-    padding: 128px token("layout-margin") token("dm-64");
-    display: flex;
-    flex-direction: column;
-    gap: token("dm-24");
+    max-width: 1120px;
+    padding: token("dm-80") token("dm-24") token("dm-64");
+  }
+}
+
+// ── Sidebar ───────────────────────────────────────────────
+.account-sidebar {
+  &__user {
+    padding-bottom: token("dm-16");
+    border-bottom: 1px solid token("color-border-subtle");
   }
 
-  &__header {
-    display: flex;
-    flex-direction: column;
-    gap: token("dm-4");
+  &__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e50914, #b1060f);
+    color: #fff;
+    font-weight: 700;
+    font-size: 18px;
   }
 
-  &__eyebrow {
-    color: token("color-action-brand");
-    text-transform: uppercase;
-  }
+  &__email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
 
-  &__subtitle {
-    color: token("color-text-secondary");
-  }
+.account-nav__item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: token("dm-12") token("dm-16");
+  border-radius: 10px;
+  color: token("color-text-secondary");
+  transition: background-color 0.15s ease, color 0.15s ease;
 
-  &__tabs {
-    display: flex;
-    gap: token("dm-8");
-    border-bottom: 1px solid token("grey-600");
-  }
+  &:hover { background: token("color-background-highlight"); color: token("color-text-primary"); }
 
-  &__tab {
-    background: none;
-    border: none;
-    padding: token("dm-12") token("dm-16");
-    color: token("color-text-secondary");
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-
-    &--active {
-      color: token("color-text-primary");
-      border-bottom-color: token("color-action-brand");
-    }
+  &.is-active {
+    background: token("color-background-elevated");
+    color: token("color-text-primary");
+    font-weight: var(--font-weight-medium);
   }
+}
 
-  &__card {
-    display: flex;
-    flex-direction: column;
-    gap: token("dm-16");
-    padding: token("dm-24");
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.06);
-  }
+// ── Card surface (shared by all sections) ─────────────────
+.account-card {
+  padding: token("dm-24");
+  border-radius: 16px;
+  background: token("color-background-surface");
+  border: 1px solid token("color-border-subtle");
 
-  &__desc {
-    color: token("color-text-secondary");
-    margin: 0;
-  }
+  &__api-error   { margin: 0; color: #e87c03; }
+  &__api-success { margin: 0; color: token("color-status-success"); }
 
-  &__field-wrap {
-    position: relative;
-  }
+  &__field-wrap { position: relative; }
 
   &__toggle-pass {
     position: absolute;
@@ -226,18 +395,111 @@ async function savePassword() {
     cursor: pointer;
     color: token("color-text-primary");
     padding: 0;
-
     &:hover { color: token("color-text-secondary"); }
   }
+}
 
-  &__api-error {
-    margin: 0;
-    color: #e87c03;
+// ── Billing visuals ───────────────────────────────────────
+.bill-eyebrow {
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: token("color-text-secondary");
+}
+
+.bill-alert {
+  padding: token("dm-16") token("dm-20");
+  border-radius: 12px;
+  background: token("color-status-success-surface");
+  border: 1px solid rgba(70, 211, 105, 0.35);
+
+  &__icon { color: token("color-status-success"); flex-shrink: 0; margin-top: 2px; }
+  &__close {
+    background: none;
+    border: none;
+    color: token("color-text-secondary");
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    &:hover { color: token("color-text-primary"); }
   }
+}
 
-  &__api-success {
-    margin: 0;
-    color: #2ea043;
+.bill-plan-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  color: #fff;
+  background: linear-gradient(135deg, #7b2ff7, #b14bff);
+}
+
+.bill-row {
+  padding: token("dm-12") 0;
+  border-bottom: 1px solid token("color-border-subtle");
+  &:last-child { border-bottom: none; }
+  &__label { color: token("color-text-secondary"); }
+}
+
+.bill-secure {
+  padding-top: token("dm-16");
+  border-top: 1px solid token("color-border-subtle");
+  &__icon { color: token("color-status-success"); flex-shrink: 0; }
+}
+
+.bill-visa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1f71;
+  font-weight: 800;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.bill-link {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: token("dm-12") 0 0;
+  margin-top: token("dm-4");
+  border-top: 1px solid token("color-border-subtle");
+  color: token("color-text-primary");
+  font-size: 14px;
+  &:hover { color: token("color-action-brand"); }
+}
+
+.bill-history__name { color: #b388ff; }
+
+.bill-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+
+  &--plan {
+    background: rgba(123, 47, 247, 0.18);
+    color: #c79bff;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  &--success {
+    background: token("color-status-success-surface");
+    color: token("color-status-success");
   }
 }
 </style>

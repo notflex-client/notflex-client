@@ -1,0 +1,43 @@
+@use "../tools/token" as *;
+
+// Color utilities mapped to notflex semantic tokens (see tokens/_color-semantic.scss).
+// Dark-only theme: backgrounds layer from base → surface → elevated.
+
+// ----------------------------------------------------------
+// Background — surface layers
+// ----------------------------------------------------------
+.bg-base      { background-color: token("color-background-base") !important; }
+.bg-surface   { background-color: token("color-background-surface") !important; }
+.bg-elevated  { background-color: token("color-background-elevated") !important; }
+.bg-overlay   { background-color: token("color-background-overlay") !important; }
+.bg-highlight { background-color: token("color-background-highlight") !important; }
+
+// Background — action / status
+.bg-brand     { background-color: token("color-action-brand") !important; }
+.bg-info      { background-color: token("color-status-info-surface") !important; }
+.bg-success   { background-color: token("color-status-success-surface") !important; }
+.bg-warning   { background-color: token("color-status-warning-surface") !important; }
+.bg-error     { background-color: token("color-status-error-surface") !important; }
+
+// ----------------------------------------------------------
+// Text color
+// ----------------------------------------------------------
+.text-primary   { color: token("color-text-primary") !important; }
+.text-secondary { color: token("color-text-secondary") !important; }
+.text-disabled  { color: token("color-text-disabled") !important; }
+.text-inverse   { color: token("color-text-inverse") !important; }
+.text-on-brand  { color: token("color-text-on-brand") !important; }
+.text-brand     { color: token("color-action-brand") !important; }
+
+// Text — status
+.text-info    { color: token("color-status-info") !important; }
+.text-success { color: token("color-status-success") !important; }
+.text-warning { color: token("color-status-warning") !important; }
+.text-error   { color: token("color-status-error") !important; }
+
+// ----------------------------------------------------------
+// Border color
+// ----------------------------------------------------------
+.border-subtle  { border-color: token("color-border-subtle") !important; }
+.border-default { border-color: token("color-border-default") !important; }
+.border-strong  { border-color: token("color-border-strong") !important; }

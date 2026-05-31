@@ -36,13 +36,13 @@ export default defineNuxtConfig({
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `@use "@/assets/scss/tools/index.scss" as *;`,
+          additionalData: `@use "@/assets/scss/tools/index.scss" as *; @use "@/assets/scss/mixins/typography" as *;`,
         },
       },
     },
   },
 
-  modules: ['@pinia/nuxt', '@nuxt/eslint', '@nuxtjs/tailwindcss', '@nuxtjs/i18n', '@nuxt/icon'],
+  modules: ['@pinia/nuxt', '@nuxt/eslint', '@nuxtjs/i18n', '@nuxt/icon'],
 
   icon: {
     serverBundle: {
@@ -55,12 +55,12 @@ export default defineNuxtConfig({
       {
         code: 'vi',
         language: 'vi-VN',
-        files: ['vi/shared.json', 'vi/browse.json', 'vi/series.json', 'vi/films.json', 'vi/new-popular.json', 'vi/my-list.json', 'vi/browse-lang.json', 'vi/auth.json', 'vi/account.json'],
+        files: ['vi/shared.json', 'vi/browse.json', 'vi/series.json', 'vi/films.json', 'vi/new-popular.json', 'vi/my-list.json', 'vi/browse-lang.json', 'vi/auth.json', 'vi/account.json', 'vi/billing.json'],
       },
       {
         code: 'en',
         language: 'en-US',
-        files: ['en/shared.json', 'en/browse.json', 'en/series.json', 'en/films.json', 'en/new-popular.json', 'en/my-list.json', 'en/browse-lang.json', 'en/auth.json', 'en/account.json'],
+        files: ['en/shared.json', 'en/browse.json', 'en/series.json', 'en/films.json', 'en/new-popular.json', 'en/my-list.json', 'en/browse-lang.json', 'en/auth.json', 'en/account.json', 'en/billing.json'],
       },
     ],
     defaultLocale: 'vi',

@@ -593,8 +593,6 @@ const speedSteps = [
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .watch-page {
   position: fixed;
   inset: 0;

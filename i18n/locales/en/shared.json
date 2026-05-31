@@ -13,7 +13,8 @@
     "play": "Play",
     "moreInfo": "More Info",
     "loading": "Loading...",
-    "genre": "Genre"
+    "genre": "Genre",
+    "close": "Close"
   },
   "badge": {
     "newSeason": "New Season",

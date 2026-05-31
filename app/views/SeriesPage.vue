@@ -218,9 +218,6 @@ const TRENDING = computed<MovieBlockItem[]>(() => trendingSeries.value?.items?.m
 </template>
 
 <style lang="scss" scoped>
-@use "~/assets/scss/tools/token" as *;
-@use "~/assets/scss/mixins/typography" as *;
-
 .series-page {
   background-color: token("color-background-base");
 

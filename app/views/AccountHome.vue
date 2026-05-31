@@ -268,9 +268,6 @@ const CONTINUE = computed<MovieBlockItem[]>(() => {
 </template>
 
 <style lang="scss" scoped>
-@use "~/assets/scss/tools/token" as *;
-@use "~/assets/scss/mixins/typography" as *;
-
 .browse-page {
   background-color: token("color-background-base");
 

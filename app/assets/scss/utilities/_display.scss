@@ -1,0 +1,32 @@
+@use "../tools/mq" as *;
+
+.block { display: block !important; }
+.inline-block { display: inline-block !important; }
+.inline { display: inline !important; }
+.flex { display: flex !important; }
+.inline-flex { display: inline-flex !important; }
+.grid { display: grid !important; }
+.hidden { display: none !important; }
+.table-cell { display: table-cell!important; }
+.table-row { display: table-row !important; }
+.table { display: table !important; }
+
+// responsive
+@mixin display($p, $bp) {
+  @include up($bp) {
+    .#{$p}\:block { display: block !important; }
+    .#{$p}\:inline-block { display: inline-block !important; }
+    .#{$p}\:inline { display: inline !important; }
+    .#{$p}\:flex { display: flex !important; }
+    .#{$p}\:inline-flex { display: inline-flex !important; }
+    .#{$p}\:grid { display: grid !important; }
+    .#{$p}\:hidden { display: none !important; }
+    .#{$p}\:table-cell { display: table-cell !important; }
+    .#{$p}\:table-row { display: table-row !important; }
+    .#{$p}\:table { display: table !important; }
+  }
+}
+@include display("sm", sm);
+@include display("md", md);
+@include display("lg", lg);
+@include display("xl", xl);

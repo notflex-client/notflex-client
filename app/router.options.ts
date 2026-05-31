@@ -48,8 +48,10 @@ export default {
         meta: { authRequired: true },
       },
       {
+        // Billing is now a section of the unified account page; keep the path
+        // so Stripe's success_url (/billing?status=success) still resolves.
         path: '/billing',
-        component: () => import('~/views/BillingPage.vue'),
+        component: () => import('~/views/AccountSettings.vue'),
         meta: { authRequired: true },
       },
       {

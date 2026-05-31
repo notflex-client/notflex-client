@@ -107,8 +107,6 @@ defineExpose({ open: openModal, close })
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .cp-modal {
   position: fixed;
   inset: 0;

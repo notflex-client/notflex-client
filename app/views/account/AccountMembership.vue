@@ -93,8 +93,6 @@ function durationLabel(days: number) {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .account-membership {
   display: flex;
   flex-direction: column;

@@ -52,8 +52,6 @@ const cycleLabel = computed(() => props.plan.duration_days >= 365 ? 'năm' : 'th
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .plan-card {
   display: flex;
   flex-direction: column;

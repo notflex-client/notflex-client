@@ -1,0 +1,219 @@
+@use "sass:map";
+@use "sass:list";
+
+@use "../tools/mq" as *;
+@use "../tools/token" as *;
+@use "../tokens/spacing" as spacing;
+
+$_S: list.join((0), map.keys(spacing.$dm));
+
+// Flex direction
+.flex-row { flex-direction: row !important; }
+.flex-row-reverse { flex-direction: row-reverse !important; }
+.flex-col { flex-direction: column !important; }
+.flex-col-reverse { flex-direction: column-reverse !important; }
+
+// Flex wrap
+.flex-wrap { flex-wrap: wrap !important; }
+.flex-wrap-reverse { flex-wrap: wrap-reverse !important; }
+.flex-nowrap { flex-wrap: nowrap !important; }
+
+// Flex
+.flex-1 { flex: 1 1 0% !important; }
+.flex-auto { flex: 1 1 auto !important; }
+.flex-initial { flex: 0 1 auto !important; }
+.flex-none { flex: none !important; }
+
+// Grow / Shrink
+.grow { flex-grow: 1 !important; }
+.grow-0 { flex-grow: 0 !important; }
+.shrink { flex-shrink: 1 !important; }
+.shrink-0 { flex-shrink: 0 !important; }
+
+// Basis
+.basis-0 { flex-basis: 0px !important; }
+.basis-auto { flex-basis: auto !important; }
+.basis-full { flex-basis: 100% !important; }
+.basis-1\/2 { flex-basis: 50% !important; }
+.basis-1\/3 { flex-basis: 33.333333% !important; }
+.basis-2\/3 { flex-basis: 66.666667% !important; }
+.basis-1\/4 { flex-basis: 25% !important; }
+.basis-2\/4 { flex-basis: 50% !important; }
+.basis-3\/4 { flex-basis: 75% !important; }
+
+// Order
+.order-first { order: -9999 !important; }
+.order-last { order: 9999 !important; }
+.order-none { order: 0 !important; }
+@for $i from 1 through 12 {
+  .order-#{$i} { order: $i !important; }
+}
+
+// Justify content
+.justify-normal { justify-content: normal !important; }
+.justify-start { justify-content: flex-start !important; }
+.justify-end { justify-content: flex-end !important; }
+.justify-center { justify-content: center !important; }
+.justify-between { justify-content: space-between !important; }
+.justify-around { justify-content: space-around !important; }
+.justify-evenly { justify-content: space-evenly !important; }
+.justify-stretch { justify-content: stretch !important; }
+
+// Align items
+.items-start { align-items: flex-start !important; }
+.items-end { align-items: flex-end !important; }
+.items-center { align-items: center !important; }
+.items-baseline { align-items: baseline !important; }
+.items-stretch { align-items: stretch !important; }
+
+// Align content
+.content-normal { align-content: normal !important; }
+.content-center { align-content: center !important; }
+.content-start { align-content: flex-start !important; }
+.content-end { align-content: flex-end !important; }
+.content-between { align-content: space-between !important; }
+.content-around { align-content: space-around !important; }
+.content-evenly { align-content: space-evenly !important; }
+.content-baseline { align-content: baseline !important; }
+.content-stretch { align-content: stretch !important; }
+
+// Align self
+.self-auto { align-self: auto !important; }
+.self-start { align-self: flex-start !important; }
+.self-end { align-self: flex-end !important; }
+.self-center { align-self: center !important; }
+.self-stretch { align-self: stretch !important; }
+.self-baseline { align-self: baseline !important; }
+
+// Gap (Tailwind-like)
+@each $k in $_S {
+  $v: token("dm-#{$k}");
+  @if $k == 0 { $v: 0; }
+
+  .gap-#{$k} { gap: $v !important; }
+  .gap-x-#{$k} { column-gap: $v !important; }
+  .gap-y-#{$k} { row-gap: $v !important; }
+}
+
+// Space between (Tailwind-like)
+// Usage: .space-x-* / .space-y-* on container
+.space-x-reverse { --tw-space-x-reverse: 1 !important; }
+.space-y-reverse { --tw-space-y-reverse: 1 !important; }
+
+@each $k in $_S {
+  $v: token("dm-#{$k}");
+  @if $k == 0 { $v: 0; }
+
+  .space-x-#{$k} > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: var(--tw-space-x-reverse, 0);
+    margin-right: calc(#{$v} * var(--tw-space-x-reverse)) !important;
+    margin-left: calc(#{$v} * (1 - var(--tw-space-x-reverse))) !important;
+  }
+
+  .space-y-#{$k} > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: var(--tw-space-y-reverse, 0);
+    margin-bottom: calc(#{$v} * var(--tw-space-y-reverse)) !important;
+    margin-top: calc(#{$v} * (1 - var(--tw-space-y-reverse))) !important;
+  }
+}
+
+@mixin flexbox($p, $bp) {
+	@include up($bp) {
+		.#{$p}\:flex-row { flex-direction: row !important; }
+		.#{$p}\:flex-row-reverse { flex-direction: row-reverse !important; }
+		.#{$p}\:flex-col { flex-direction: column !important; }
+		.#{$p}\:flex-col-reverse { flex-direction: column-reverse !important; }
+
+		.#{$p}\:flex-wrap { flex-wrap: wrap !important; }
+		.#{$p}\:flex-wrap-reverse { flex-wrap: wrap-reverse !important; }
+		.#{$p}\:flex-nowrap { flex-wrap: nowrap !important; }
+
+		.#{$p}\:flex-1 { flex: 1 1 0% !important; }
+		.#{$p}\:flex-auto { flex: 1 1 auto !important; }
+		.#{$p}\:flex-initial { flex: 0 1 auto !important; }
+		.#{$p}\:flex-none { flex: none !important; }
+
+		.#{$p}\:grow { flex-grow: 1 !important; }
+		.#{$p}\:grow-0 { flex-grow: 0 !important; }
+		.#{$p}\:shrink { flex-shrink: 1 !important; }
+		.#{$p}\:shrink-0 { flex-shrink: 0 !important; }
+
+		.#{$p}\:basis-0 { flex-basis: 0px !important; }
+		.#{$p}\:basis-auto { flex-basis: auto !important; }
+		.#{$p}\:basis-full { flex-basis: 100% !important; }
+		.#{$p}\:basis-1\/2 { flex-basis: 50% !important; }
+		.#{$p}\:basis-1\/3 { flex-basis: 33.333333% !important; }
+		.#{$p}\:basis-2\/3 { flex-basis: 66.666667% !important; }
+		.#{$p}\:basis-1\/4 { flex-basis: 25% !important; }
+		.#{$p}\:basis-2\/4 { flex-basis: 50% !important; }
+		.#{$p}\:basis-3\/4 { flex-basis: 75% !important; }
+
+		.#{$p}\:order-first { order: -9999 !important; }
+		.#{$p}\:order-last { order: 9999 !important; }
+		.#{$p}\:order-none { order: 0 !important; }
+		@for $i from 1 through 12 {
+			.#{$p}\:order-#{$i} { order: $i !important; }
+		}
+
+		.#{$p}\:justify-normal { justify-content: normal !important; }
+		.#{$p}\:justify-start { justify-content: flex-start !important; }
+		.#{$p}\:justify-end { justify-content: flex-end !important; }
+		.#{$p}\:justify-center { justify-content: center !important; }
+		.#{$p}\:justify-between { justify-content: space-between !important; }
+		.#{$p}\:justify-around { justify-content: space-around !important; }
+		.#{$p}\:justify-evenly { justify-content: space-evenly !important; }
+		.#{$p}\:justify-stretch { justify-content: stretch !important; }
+
+		.#{$p}\:items-start { align-items: flex-start !important; }
+		.#{$p}\:items-end { align-items: flex-end !important; }
+		.#{$p}\:items-center { align-items: center !important; }
+		.#{$p}\:items-baseline { align-items: baseline !important; }
+		.#{$p}\:items-stretch { align-items: stretch !important; }
+
+		.#{$p}\:content-normal { align-content: normal !important; }
+		.#{$p}\:content-center { align-content: center !important; }
+		.#{$p}\:content-start { align-content: flex-start !important; }
+		.#{$p}\:content-end { align-content: flex-end !important; }
+		.#{$p}\:content-between { align-content: space-between !important; }
+		.#{$p}\:content-around { align-content: space-around !important; }
+		.#{$p}\:content-evenly { align-content: space-evenly !important; }
+		.#{$p}\:content-baseline { align-content: baseline !important; }
+		.#{$p}\:content-stretch { align-content: stretch !important; }
+
+		.#{$p}\:self-auto { align-self: auto !important; }
+		.#{$p}\:self-start { align-self: flex-start !important; }
+		.#{$p}\:self-end { align-self: flex-end !important; }
+		.#{$p}\:self-center { align-self: center !important; }
+		.#{$p}\:self-stretch { align-self: stretch !important; }
+		.#{$p}\:self-baseline { align-self: baseline !important; }
+
+		@each $k in $_S {
+			$v: token("dm-#{$k}");
+			@if $k == 0 { $v: 0; }
+
+			.#{$p}\:gap-#{$k} { gap: $v !important; }
+			.#{$p}\:gap-x-#{$k} { column-gap: $v !important; }
+			.#{$p}\:gap-y-#{$k} { row-gap: $v !important; }
+
+			.#{$p}\:space-x-#{$k} > :not([hidden]) ~ :not([hidden]) {
+				--tw-space-x-reverse: var(--tw-space-x-reverse, 0);
+				margin-right: calc(#{$v} * var(--tw-space-x-reverse)) !important;
+				margin-left: calc(#{$v} * (1 - var(--tw-space-x-reverse))) !important;
+			}
+			.#{$p}\:space-y-#{$k} > :not([hidden]) ~ :not([hidden]) {
+				--tw-space-y-reverse: var(--tw-space-y-reverse, 0);
+				margin-bottom: calc(#{$v} * var(--tw-space-y-reverse)) !important;
+				margin-top: calc(#{$v} * (1 - var(--tw-space-y-reverse))) !important;
+			}
+		}
+
+		.#{$p}\:space-x-reverse { --tw-space-x-reverse: 1 !important; }
+		.#{$p}\:space-y-reverse { --tw-space-y-reverse: 1 !important; }
+	}
+}
+
+@include flexbox("sm", sm);
+@include flexbox("md", md);
+@include flexbox("lg", lg);
+@include flexbox("xl", xl);
+

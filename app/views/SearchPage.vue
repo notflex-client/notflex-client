@@ -162,8 +162,6 @@ watch(() => route.query.q, (q) => {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .search-page {
   min-height: 100vh;
   background: token("color-background-base");

@@ -60,11 +60,11 @@ function getStarted(emailVal: string) {
 
     <!-- ── Hero ───────────────────────────────────────────── -->
     <HeroBanner variant="landing" image="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1400&q=80">
-      <div class="flex flex-col items-center gap-3 w-full">
+      <div class="flex flex-col items-center gap-12 w-full">
         <h1 class="title-1-bold">Unlimited movies, TV shows, and more</h1>
         <span class="headline-2-regular">Watch anywhere. Cancel anytime.</span>
         <span class="body-regular">Ready to watch? Enter your email to create or restart your membership.</span>
-        <div class="flex gap-2 w-full mt-2 items-start">
+        <div class="flex gap-8 w-full mt-[8px] items-start">
           <InputField v-model="heroEmail" label="Email address" type="email" autocomplete="email" class="flex-1 min-w-0" />
           <Button variant="brand" size="large" @click="getStarted(heroEmail)">
             Get Started
@@ -124,17 +124,17 @@ function getStarted(emailVal: string) {
 
     <!-- ── FAQ ────────────────────────────────────────────── -->
     <section class="lp-faq">
-      <div class="max-w-[660px] mx-auto flex flex-col items-center gap-5 text-center">
+      <div class="lp-faq__inner mx-auto flex flex-col items-center gap-20 text-center">
         <h2 class="title-2-bold">Frequently Asked Questions</h2>
 
-        <div class="w-full text-left flex flex-col gap-2">
+        <div class="w-full text-left flex flex-col gap-8">
           <Accordion v-for="item in FAQ_ITEMS" :key="item.id" :title="item.q">
             {{ item.a }}
           </Accordion>
         </div>
 
         <span class="body-regular">Ready to watch? Enter your email to create or restart your membership.</span>
-        <div class="flex gap-2 w-full items-start">
+        <div class="flex gap-8 w-full items-start">
           <InputField v-model="faqEmail" label="Email address" type="email" autocomplete="email" class="flex-1 min-w-0" />
           <Button variant="brand" size="large" @click="getStarted(faqEmail)">
             Get Started
@@ -155,8 +155,6 @@ function getStarted(emailVal: string) {
 </template>
 
 <style lang="scss" scoped>
-@use "~/assets/scss/tools/token" as *;
-
 .lp {
   background-color: token("color-background-base");
 }
@@ -208,5 +206,7 @@ function getStarted(emailVal: string) {
 .lp-faq {
   padding: token("dm-80") token("dm-20");
   border-top: 1px solid token("color-border-subtle");
+
+  &__inner { max-width: 660px; }
 }
 </style>

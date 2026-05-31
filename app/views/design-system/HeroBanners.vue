@@ -83,8 +83,6 @@
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .hb-demo-rounded { border-radius: 8px; overflow: hidden; }
 
 // ── Landing content ─────────────────────────────────────────────

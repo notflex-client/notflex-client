@@ -91,8 +91,6 @@ async function openCheckout(plan: SubscriptionPlan) {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .plans-page {
   min-height: 100vh;
   background: radial-gradient(circle at top, rgba(229, 9, 20, 0.24), transparent 34%), token("color-background-base");

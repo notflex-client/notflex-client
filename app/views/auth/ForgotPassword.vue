@@ -126,8 +126,6 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
 </template>
 
 <style lang="scss" scoped>
-@use "~/assets/scss/tools/token" as *;
-
 .auth-logo {
   font-family: token("font-family-logo");
   font-size: 28px;

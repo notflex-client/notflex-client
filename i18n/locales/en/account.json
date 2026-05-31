@@ -2,8 +2,12 @@
   "account": {
     "eyebrow": "Account",
     "title": "Account settings",
+    "subtitle": "Manage your profile, security and subscription.",
     "home": "Home",
     "billing": "Billing",
+    "navProfile": "Profile",
+    "navSecurity": "Password",
+    "navBilling": "Plan & Billing",
     "tabProfile": "Profile",
     "tabPassword": "Password",
     "profileTitle": "Profile information",

@@ -57,8 +57,6 @@ function handleSignOutAll() {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .account-devices {
   display: flex;
   flex-direction: column;

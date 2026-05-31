@@ -97,7 +97,7 @@ async function confirmRegistration() {
             Enter your email to get started.
           </p>
 
-          <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-16">
             <InputField
               v-model="email"
               label="Email address"
@@ -133,7 +133,7 @@ async function confirmRegistration() {
             Enter it below.
           </p>
 
-          <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-16">
             <InputField
               v-model="otp"
               label="Verification code"
@@ -167,7 +167,7 @@ async function confirmRegistration() {
             Set your name and password.
           </p>
 
-          <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-16">
             <InputField
               v-model="fullName"
               label="Full name"
@@ -215,8 +215,6 @@ async function confirmRegistration() {
 </template>
 
 <style lang="scss" scoped>
-@use "~/assets/scss/tools/token" as *;
-
 .signup-logo {
   font-family: token("font-family-logo");
   font-size: 28px;

@@ -77,8 +77,6 @@ const selectedSubtitle = ref('en-cc')
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/tools/token" as *;
-
 .pc-demo-box {
   background-color: token("grey-800");
   border-radius: 8px;

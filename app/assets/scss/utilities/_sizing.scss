@@ -1,0 +1,229 @@
+@use "sass:map";
+@use "sass:math";
+
+@use "../tools/mq" as *;
+@use "../tools/token" as *;
+@use "../tokens/spacing" as spacing;
+
+// Common pixel set is emitted with bracket-form names (`.w-[Npx]`,
+// `.min-w-[Npx]`, `.size-[Npx]`, …) to match Tailwind-style markup without
+// depending on Tailwind. Pixel values are the design-system $dm scale.
+// Fractions below (w-1/2, min-w-3/10, …) cover percentage cases.
+// Keyword utilities (w-full, w-screen, w-fit, …) remain.
+
+// Width
+.w-0 { width: 0 !important; }
+.w-auto { width: auto !important; }
+.w-px { width: 1px !important; }
+.w-full { width: 100% !important; }
+.w-screen { width: 100vw !important; }
+.w-svw { width: 100svw !important; }
+.w-lvw { width: 100lvw !important; }
+.w-dvw { width: 100dvw !important; }
+.w-min { width: min-content !important; }
+.w-max { width: max-content !important; }
+.w-fit { width: fit-content !important; }
+
+// Height
+.h-0 { height: 0 !important; }
+.h-auto { height: auto !important; }
+.h-px { height: 1px !important; }
+.h-full { height: 100% !important; }
+.h-screen { height: 100vh !important; }
+.h-svh { height: 100svh !important; }
+.h-lvh { height: 100lvh !important; }
+.h-dvh { height: 100dvh !important; }
+.h-min { height: min-content !important; }
+.h-max { height: max-content !important; }
+.h-fit { height: fit-content !important; }
+
+// Min/Max
+.min-w-0 { min-width: 0px !important; }
+.min-w-px { min-width: 1px !important; }
+.min-w-full { min-width: 100% !important; }
+.min-w-min { min-width: min-content !important; }
+.min-w-max { min-width: max-content !important; }
+.min-w-fit { min-width: fit-content !important; }
+.min-h-0 { min-height: 0px !important; }
+.min-h-px { min-height: 1px !important; }
+.min-h-full { min-height: 100% !important; }
+.min-h-screen { min-height: 100vh !important; }
+.min-h-svh { min-height: 100svh !important; }
+.min-h-lvh { min-height: 100lvh !important; }
+.min-h-dvh { min-height: 100dvh !important; }
+.min-h-min { min-height: min-content !important; }
+.min-h-max { min-height: max-content !important; }
+.min-h-fit { min-height: fit-content !important; }
+
+.max-w-none { max-width: none !important; }
+.max-w-px { max-width: 1px !important; }
+.max-w-full { max-width: 100% !important; }
+.max-w-screen { max-width: 100vw !important; }
+.max-w-min { max-width: min-content !important; }
+.max-w-max { max-width: max-content !important; }
+.max-w-fit { max-width: fit-content !important; }
+.max-w-screen-sm { max-width: breakpoint(sm) !important; }
+.max-w-screen-md { max-width: breakpoint(md) !important; }
+.max-w-screen-lg { max-width: breakpoint(lg) !important; }
+.max-w-screen-xl { max-width: breakpoint(xl) !important; }
+.max-h-none { max-height: none !important; }
+.max-h-px { max-height: 1px !important; }
+.max-h-full { max-height: 100% !important; }
+.max-h-screen { max-height: 100vh !important; }
+.max-h-svh { max-height: 100svh !important; }
+.max-h-lvh { max-height: 100lvh !important; }
+.max-h-dvh { max-height: 100dvh !important; }
+.max-h-min { max-height: min-content !important; }
+.max-h-max { max-height: max-content !important; }
+.max-h-fit { max-height: fit-content !important; }
+
+// Size (width + height)
+.size-0 { width: 0 !important; height: 0 !important; }
+.size-auto { width: auto !important; height: auto !important; }
+.size-px { width: 1px !important; height: 1px !important; }
+.size-full { width: 100% !important; height: 100% !important; }
+.size-screen { width: 100vw !important; height: 100vh !important; }
+.size-min { width: min-content !important; height: min-content !important; }
+.size-max { width: max-content !important; height: max-content !important; }
+.size-fit { width: fit-content !important; height: fit-content !important; }
+
+
+
+// Bracket-form pixel utilities (.w-[Npx], .h-[Npx], .size-[Npx], .min-w-[Npx],
+// .max-w-[Npx], .min-h-[Npx], .max-h-[Npx]) covering the $dm design-token scale.
+@each $n in map.keys(spacing.$dm) {
+	$v: $n * 1px;
+
+	.#{"w-\\[#{$n}px\\]"}     { width:      $v !important; }
+	.#{"h-\\[#{$n}px\\]"}     { height:     $v !important; }
+	.#{"size-\\[#{$n}px\\]"}  { width: $v !important; height: $v !important; }
+	.#{"min-w-\\[#{$n}px\\]"} { min-width:  $v !important; }
+	.#{"max-w-\\[#{$n}px\\]"} { max-width:  $v !important; }
+	.#{"min-h-\\[#{$n}px\\]"} { min-height: $v !important; }
+	.#{"max-h-\\[#{$n}px\\]"} { max-height: $v !important; }
+}
+
+// Fractions — generates w/h/size and min-w/max-w/min-h/max-h fractional utilities.
+// Denominators include 10 and 20 so percentages 5/10/15/30/70/etc. are expressible.
+@each $d in (2, 3, 4, 5, 6, 10, 12, 20) {
+	@for $n from 1 through ($d - 1) {
+		$pct: math.percentage(math.div($n, $d));
+		.#{"w-#{$n}\\/#{$d}"}     { width:      $pct !important; }
+		.#{"h-#{$n}\\/#{$d}"}     { height:     $pct !important; }
+		.#{"size-#{$n}\\/#{$d}"}  { width: $pct !important; height: $pct !important; }
+		.#{"min-w-#{$n}\\/#{$d}"} { min-width:  $pct !important; }
+		.#{"max-w-#{$n}\\/#{$d}"} { max-width:  $pct !important; }
+		.#{"min-h-#{$n}\\/#{$d}"} { min-height: $pct !important; }
+		.#{"max-h-#{$n}\\/#{$d}"} { max-height: $pct !important; }
+	}
+}
+
+@mixin sizing($p, $bp) {
+	@include up($bp) {
+		.#{$p}\:w-0 { width: 0 !important; }
+		.#{$p}\:w-auto { width: auto !important; }
+		.#{$p}\:w-px { width: 1px !important; }
+		.#{$p}\:w-full { width: 100% !important; }
+		.#{$p}\:w-screen { width: 100vw !important; }
+		.#{$p}\:w-svw { width: 100svw !important; }
+		.#{$p}\:w-lvw { width: 100lvw !important; }
+		.#{$p}\:w-dvw { width: 100dvw !important; }
+		.#{$p}\:w-min { width: min-content !important; }
+		.#{$p}\:w-max { width: max-content !important; }
+		.#{$p}\:w-fit { width: fit-content !important; }
+
+		.#{$p}\:h-0 { height: 0 !important; }
+		.#{$p}\:h-auto { height: auto !important; }
+		.#{$p}\:h-px { height: 1px !important; }
+		.#{$p}\:h-full { height: 100% !important; }
+		.#{$p}\:h-screen { height: 100vh !important; }
+		.#{$p}\:h-svh { height: 100svh !important; }
+		.#{$p}\:h-lvh { height: 100lvh !important; }
+		.#{$p}\:h-dvh { height: 100dvh !important; }
+		.#{$p}\:h-min { height: min-content !important; }
+		.#{$p}\:h-max { height: max-content !important; }
+		.#{$p}\:h-fit { height: fit-content !important; }
+
+		.#{$p}\:min-w-0 { min-width: 0px !important; }
+		.#{$p}\:min-w-px { min-width: 1px !important; }
+		.#{$p}\:min-w-full { min-width: 100% !important; }
+		.#{$p}\:min-w-min { min-width: min-content !important; }
+		.#{$p}\:min-w-max { min-width: max-content !important; }
+		.#{$p}\:min-w-fit { min-width: fit-content !important; }
+		.#{$p}\:min-h-0 { min-height: 0px !important; }
+		.#{$p}\:min-h-px { min-height: 1px !important; }
+		.#{$p}\:min-h-full { min-height: 100% !important; }
+		.#{$p}\:min-h-screen { min-height: 100vh !important; }
+		.#{$p}\:min-h-svh { min-height: 100svh !important; }
+		.#{$p}\:min-h-lvh { min-height: 100lvh !important; }
+		.#{$p}\:min-h-dvh { min-height: 100dvh !important; }
+		.#{$p}\:min-h-min { min-height: min-content !important; }
+		.#{$p}\:min-h-max { min-height: max-content !important; }
+		.#{$p}\:min-h-fit { min-height: fit-content !important; }
+
+		.#{$p}\:max-w-none { max-width: none !important; }
+		.#{$p}\:max-w-px { max-width: 1px !important; }
+		.#{$p}\:max-w-full { max-width: 100% !important; }
+		.#{$p}\:max-w-screen { max-width: 100vw !important; }
+		.#{$p}\:max-w-min { max-width: min-content !important; }
+		.#{$p}\:max-w-max { max-width: max-content !important; }
+		.#{$p}\:max-w-fit { max-width: fit-content !important; }
+		.#{$p}\:max-w-screen-sm { max-width: breakpoint(sm) !important; }
+		.#{$p}\:max-w-screen-md { max-width: breakpoint(md) !important; }
+		.#{$p}\:max-w-screen-lg { max-width: breakpoint(lg) !important; }
+		.#{$p}\:max-w-screen-xl { max-width: breakpoint(xl) !important; }
+		.#{$p}\:max-h-none { max-height: none !important; }
+		.#{$p}\:max-h-px { max-height: 1px !important; }
+		.#{$p}\:max-h-full { max-height: 100% !important; }
+		.#{$p}\:max-h-screen { max-height: 100vh !important; }
+		.#{$p}\:max-h-svh { max-height: 100svh !important; }
+		.#{$p}\:max-h-lvh { max-height: 100lvh !important; }
+		.#{$p}\:max-h-dvh { max-height: 100dvh !important; }
+		.#{$p}\:max-h-min { max-height: min-content !important; }
+		.#{$p}\:max-h-max { max-height: max-content !important; }
+		.#{$p}\:max-h-fit { max-height: fit-content !important; }
+
+		.#{$p}\:size-0 { width: 0 !important; height: 0 !important; }
+		.#{$p}\:size-auto { width: auto !important; height: auto !important; }
+		.#{$p}\:size-px { width: 1px !important; height: 1px !important; }
+		.#{$p}\:size-full { width: 100% !important; height: 100% !important; }
+		.#{$p}\:size-screen { width: 100vw !important; height: 100vh !important; }
+		.#{$p}\:size-min { width: min-content !important; height: min-content !important; }
+		.#{$p}\:size-max { width: max-content !important; height: max-content !important; }
+		.#{$p}\:size-fit { width: fit-content !important; height: fit-content !important; }
+
+
+
+		// Responsive bracket-form pixel utilities
+		@each $n in map.keys(spacing.$dm) {
+			$v: $n * 1px;
+
+			.#{"#{$p}\\:w-\\[#{$n}px\\]"}     { width:      $v !important; }
+			.#{"#{$p}\\:h-\\[#{$n}px\\]"}     { height:     $v !important; }
+			.#{"#{$p}\\:size-\\[#{$n}px\\]"}  { width: $v !important; height: $v !important; }
+			.#{"#{$p}\\:min-w-\\[#{$n}px\\]"} { min-width:  $v !important; }
+			.#{"#{$p}\\:max-w-\\[#{$n}px\\]"} { max-width:  $v !important; }
+			.#{"#{$p}\\:min-h-\\[#{$n}px\\]"} { min-height: $v !important; }
+			.#{"#{$p}\\:max-h-\\[#{$n}px\\]"} { max-height: $v !important; }
+		}
+
+		// Responsive fractions — w/h/size + min-w/max-w/min-h/max-h
+		@each $d in (2, 3, 4, 5, 6, 10, 12, 20) {
+			@for $n from 1 through ($d - 1) {
+				$pct: math.percentage(math.div($n, $d));
+				.#{"#{$p}\\:w-#{$n}\\/#{$d}"}     { width:      $pct !important; }
+				.#{"#{$p}\\:h-#{$n}\\/#{$d}"}     { height:     $pct !important; }
+				.#{"#{$p}\\:size-#{$n}\\/#{$d}"}  { width: $pct !important; height: $pct !important; }
+				.#{"#{$p}\\:min-w-#{$n}\\/#{$d}"} { min-width:  $pct !important; }
+				.#{"#{$p}\\:max-w-#{$n}\\/#{$d}"} { max-width:  $pct !important; }
+				.#{"#{$p}\\:min-h-#{$n}\\/#{$d}"} { min-height: $pct !important; }
+				.#{"#{$p}\\:max-h-#{$n}\\/#{$d}"} { max-height: $pct !important; }
+			}
+		}
+	}
+}
+
+@include sizing("sm", sm);
+@include sizing("md", md);
+@include sizing("lg", lg);
+@include sizing("xl", xl);
