@@ -18,6 +18,30 @@ const { data: subscriptionData } = await useAsyncData('my-subscription', () =>
 const plans = computed(() => plansData.value ?? [])
 const activePlanId = computed(() => subscriptionData.value?.subscription?.plan_id ?? 0)
 
+// Savings badge: prefer a percentage stated in the plan description, otherwise
+// derive it by comparing the plan's per-day price against the shortest plan.
+const savingsByPlanId = computed<Record<number, number>>(() => {
+  const map: Record<number, number> = {}
+  const list = plans.value
+  const baseline = [...list]
+    .filter(p => p.duration_days > 0)
+    .sort((a, b) => a.duration_days - b.duration_days)[0]
+  const basePerDay = baseline ? baseline.price / baseline.duration_days : 0
+
+  for (const plan of list) {
+    const fromDescription = plan.description?.match(/(\d+)\s*%/)?.[1]
+    if (fromDescription) {
+      map[plan.id] = Number(fromDescription)
+      continue
+    }
+    if (basePerDay && baseline && plan.duration_days > baseline.duration_days) {
+      const pct = Math.round((1 - (plan.price / plan.duration_days) / basePerDay) * 100)
+      if (pct > 0) map[plan.id] = pct
+    }
+  }
+  return map
+})
+
 onMounted(() => {
   if (route.query.status === 'canceled') {
     canceledMsg.value = 'Thanh toán đã bị hủy. Bạn có thể thử lại bất cứ lúc nào.'
@@ -45,20 +69,15 @@ async function openCheckout(plan: SubscriptionPlan) {
 
 <template>
   <main class="plans-page">
-    <AppHeader v-if="!fromSignup" sticky>
-      <template #logo>
-        <span class="plans-page__logo">NOTFLEX</span>
-      </template>
-      <template #navigation>
-        <NuxtLink to="/browse" class="plans-page__nav-link">Trang chủ</NuxtLink>
-        <NuxtLink to="/billing" class="plans-page__nav-link">Thanh toán</NuxtLink>
-      </template>
-    </AppHeader>
+    <SiteHeader v-if="!fromSignup" />
 
     <section class="plans-page__hero">
-      
-      <h1 class="h1-bold">
-        {{ fromSignup ? 'Bước cuối cùng — chọn gói của bạn' : 'Chọn gói xem phim premium' }}
+      <span v-if="!fromSignup" class="plans-page__crown">
+        <Icon name="lucide:crown" />
+      </span>
+      <h1 class="h1-bold plans-page__title">
+        <template v-if="fromSignup">Bước cuối cùng — chọn gói của bạn</template>
+        <template v-else>Chọn gói xem phim <span class="plans-page__title-accent">premium</span></template>
       </h1>
       <p class="body-regular">
         {{ fromSignup
@@ -78,6 +97,7 @@ async function openCheckout(plan: SubscriptionPlan) {
         :key="plan.id"
         :plan="plan"
         :active="plan.id === activePlanId"
+        :savings="savingsByPlanId[plan.id]"
         @select="openCheckout"
       />
     </section>
@@ -98,29 +118,34 @@ async function openCheckout(plan: SubscriptionPlan) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-
-  &__logo {
-    font-family: token("font-family-logo");
-    font-size: 28px;
-    color: token("color-action-brand");
-    letter-spacing: 2px;
-  }
-
-  &__nav-link {
-    color: token("color-text-secondary");
-    text-decoration: none;
-  }
 
   &__hero {
     width: 100%;
     max-width: 860px;
-    padding: token("dm-40") token("layout-margin") token("dm-40");
+    padding: token("dm-96") token("layout-margin") token("dm-112");
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: token("dm-16");
+  }
+
+  &__crown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(229, 9, 20, 0.4);
+    background: rgba(229, 9, 20, 0.08);
+    color: token("color-action-brand");
+    font-size: 26px;
+  }
+
+  &__title-accent {
+    font-weight: var(--font-weight-regular);
+    color: token("color-text-secondary");
   }
 
   &__hero p {

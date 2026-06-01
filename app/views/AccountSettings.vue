@@ -4,6 +4,7 @@ import type { AuthUser } from '~/stores/auth'
 type Section = 'profile' | 'security' | 'billing'
 
 const { t } = useI18n()
+const { lang } = useLocale()
 const { $api } = useNuxtApp()
 const route = useRoute()
 const authStore = useAuthStore()
@@ -22,7 +23,7 @@ const section = ref<Section>(
 
 const NAV = [
   { key: 'profile' as Section, label: 'account.navProfile', icon: 'lucide:user' },
-  { key: 'security' as Section, label: 'account.navSecurity', icon: 'lucide:lock' },
+  { key: 'security' as Section, label: 'account.navSecurity', icon: 'lucide:shield' },
   { key: 'billing' as Section, label: 'account.navBilling', icon: 'lucide:credit-card' },
 ]
 
@@ -58,7 +59,6 @@ async function saveProfile() {
 const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
-const showNewPassword = ref(false)
 const passwordLoading = ref(false)
 const passwordSaved = ref(false)
 
@@ -170,46 +170,34 @@ onMounted(async () => {
         <!-- MAIN -->
         <div class="flex-1 min-w-0 flex flex-col gap-24">
 
-          <!-- ───────── PROFILE ───────── -->
+          <!-- ───────── HỒ SƠ ───────── -->
           <article v-if="section === 'profile'" class="account-card flex flex-col gap-16">
             <div class="flex flex-col gap-4">
               <h2 class="title-3-medium">{{ t('account.profileTitle') }}</h2>
               <p class="body-regular text-secondary">{{ t('account.profileDesc') }}</p>
             </div>
-
-            <div class="flex flex-col gap-16">
-              <InputField v-model="fullName" :label="t('account.fullNameLabel')" :error="profileFieldErrors.full_name" />
-              <InputField v-model="avatarUrl" :label="t('account.avatarLabel')" :error="profileFieldErrors.avatar_url" />
-              <p v-if="profileError" class="account-card__api-error">{{ profileError }}</p>
-              <p v-if="profileSaved" class="account-card__api-success">{{ t('account.savedProfile') }}</p>
-              <Button variant="brand" size="large" :block="true" :disabled="profileLoading" @click="saveProfile">
-                {{ profileLoading ? t('account.saving') : t('account.save') }}
-              </Button>
-            </div>
+            <InputField v-model="fullName" :label="t('account.fullNameLabel')" :error="profileFieldErrors.full_name" />
+            <p v-if="profileError" class="account-card__api-error">{{ profileError }}</p>
+            <p v-if="profileSaved" class="account-card__api-success">{{ t('account.savedProfile') }}</p>
+            <Button variant="brand" size="large" :block="true" :disabled="profileLoading" @click="saveProfile">
+              {{ profileLoading ? t('account.saving') : t('account.save') }}
+            </Button>
           </article>
 
-          <!-- ───────── SECURITY ───────── -->
+          <!-- ───────── BẢO MẬT ───────── -->
           <article v-else-if="section === 'security'" class="account-card flex flex-col gap-16">
             <div class="flex flex-col gap-4">
               <h2 class="title-3-medium">{{ t('account.passwordTitle') }}</h2>
               <p class="body-regular text-secondary">{{ t('account.passwordDesc') }}</p>
             </div>
-
-            <div class="flex flex-col gap-16">
-              <InputField v-model="currentPassword" :label="t('account.currentPasswordLabel')" type="password" autocomplete="current-password" :error="passwordFieldErrors.currentPassword" />
-              <div class="account-card__field-wrap">
-                <InputField v-model="newPassword" :label="t('account.newPasswordLabel')" :type="showNewPassword ? 'text' : 'password'" autocomplete="new-password" :error="passwordFieldErrors.newPassword" />
-                <button type="button" class="account-card__toggle-pass caption-1-medium" @click="showNewPassword = !showNewPassword">
-                  {{ showNewPassword ? t('account.hide') : t('account.show') }}
-                </button>
-              </div>
-              <InputField v-model="confirmPassword" :label="t('account.confirmPasswordLabel')" type="password" autocomplete="new-password" :error="passwordFieldErrors.confirmPassword" />
-              <p v-if="passwordError" class="account-card__api-error">{{ passwordError }}</p>
-              <p v-if="passwordSaved" class="account-card__api-success">{{ t('account.savedPassword') }}</p>
-              <Button variant="brand" size="large" :block="true" :disabled="passwordLoading" @click="savePassword">
-                {{ passwordLoading ? t('account.saving') : t('account.changePassword') }}
-              </Button>
-            </div>
+            <InputField v-model="currentPassword" :label="t('account.currentPasswordLabel')" type="password" autocomplete="current-password" :error="passwordFieldErrors.currentPassword" />
+            <InputField v-model="newPassword" :label="t('account.newPasswordLabel')" type="password" autocomplete="new-password" :error="passwordFieldErrors.newPassword" />
+            <InputField v-model="confirmPassword" :label="t('account.confirmPasswordLabel')" type="password" autocomplete="new-password" :error="passwordFieldErrors.confirmPassword" />
+            <p v-if="passwordError" class="account-card__api-error">{{ passwordError }}</p>
+            <p v-if="passwordSaved" class="account-card__api-success">{{ t('account.savedPassword') }}</p>
+            <Button variant="brand" size="large" :block="true" :disabled="passwordLoading" @click="savePassword">
+              {{ passwordLoading ? t('account.saving') : t('account.changePassword') }}
+            </Button>
           </article>
 
           <!-- ───────── BILLING ───────── -->
@@ -227,7 +215,7 @@ onMounted(async () => {
             </div>
 
             <!-- plan card -->
-            <section class="account-card flex flex-col gap-20">
+            <section class="account-card account-card--plan flex flex-col gap-20">
               <span class="bill-eyebrow">{{ t('billing.planEyebrow') }}</span>
 
               <div class="flex items-center gap-16">
@@ -259,26 +247,20 @@ onMounted(async () => {
                 <template #leading-icon><Icon name="lucide:crown" size="18" /></template>
                 {{ t('billing.upgrade') }}
               </Button>
+            </section>
 
-              <div class="bill-secure flex items-center gap-12">
-                <Icon name="lucide:shield-check" size="20" class="bill-secure__icon" />
+            <!-- secure payment + saved card -->
+            <section class="account-card flex flex-col md:flex-row md:items-center justify-between gap-16">
+              <div class="flex items-center gap-12">
+                <Icon name="lucide:shield-check" size="22" class="bill-secure__icon" />
                 <div class="flex flex-col gap-4">
                   <strong class="small-body-medium">{{ t('billing.secureTitle') }}</strong>
                   <span class="caption-1-regular text-secondary">{{ t('billing.secureDesc') }}</span>
                 </div>
               </div>
-            </section>
-
-            <!-- payment method -->
-            <section class="account-card flex flex-col gap-16">
-              <span class="bill-eyebrow">{{ t('billing.paymentMethod') }}</span>
-              <div class="flex items-center gap-12">
+              <button type="button" class="bill-pm flex items-center gap-12" :aria-label="t('billing.managePayment')">
                 <span class="bill-visa">VISA</span>
-                <span class="body-regular flex-1">•••• •••• •••• 4242</span>
-                <Icon name="lucide:circle-check" size="20" class="text-success" />
-              </div>
-              <button type="button" class="bill-link flex items-center justify-between gap-12">
-                <span>{{ t('billing.managePayment') }}</span>
+                <span class="body-regular">•••• •••• •••• 4242</span>
                 <Icon name="lucide:chevron-right" size="18" />
               </button>
             </section>
@@ -321,11 +303,14 @@ onMounted(async () => {
   min-height: 100vh;
   background: token("color-background-base");
   color: token("color-text-primary");
+  overflow-x: clip; // chặn tràn ngang (clip không phá position:sticky của header)
 
   // arbitrary container width — not expressible via the dm-scale utilities.
   &__content {
     max-width: 1120px;
-    padding: token("dm-80") token("dm-24") token("dm-64");
+    padding: token("dm-32") token("dm-24") token("dm-64");
+
+    h1 { font-size: 30px; line-height: 1.25; margin: 0; }
   }
 }
 
@@ -380,23 +365,26 @@ onMounted(async () => {
   background: token("color-background-surface");
   border: 1px solid token("color-border-subtle");
 
+  // Highlighted plan card — red glow + top accent streak
+  &--plan {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(229, 9, 20, 0.45);
+    box-shadow: 0 0 0 1px rgba(229, 9, 20, 0.16), 0 20px 55px -24px rgba(229, 9, 20, 0.55);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 28%;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 70, 70, 0.95) 75%, transparent);
+    }
+  }
+
   &__api-error   { margin: 0; color: #e87c03; }
   &__api-success { margin: 0; color: token("color-status-success"); }
-
-  &__field-wrap { position: relative; }
-
-  &__toggle-pass {
-    position: absolute;
-    top: 50%;
-    right: token("dm-12");
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: token("color-text-primary");
-    padding: 0;
-    &:hover { color: token("color-text-secondary"); }
-  }
 }
 
 // ── Billing visuals ───────────────────────────────────────
@@ -445,10 +433,15 @@ onMounted(async () => {
   &__label { color: token("color-text-secondary"); }
 }
 
-.bill-secure {
-  padding-top: token("dm-16");
-  border-top: 1px solid token("color-border-subtle");
-  &__icon { color: token("color-status-success"); flex-shrink: 0; }
+.bill-secure__icon { color: token("color-text-secondary"); flex-shrink: 0; }
+
+.bill-pm {
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: token("color-text-primary");
+  &:hover { color: token("color-action-brand"); }
 }
 
 .bill-visa {
