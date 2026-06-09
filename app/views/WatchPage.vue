@@ -357,13 +357,20 @@ const speedSteps = [
       </video>
 
       <div v-else class="watch-page__brand">
-        <span class="watch-page__logo">N</span>
-        <template v-if="needsSubscription">
-          <span class="h1-bold watch-page__no-video">Nội dung Premium</span>
-          <span class="body-regular watch-page__no-video">Đăng ký gói Notflex để mở khóa phim này.</span>
+        <!-- Premium gate -->
+        <div v-if="needsSubscription" class="watch-page__gate">
+          <span class="watch-page__gate-logo">N</span>
+          <span class="watch-page__gate-badge">Premium</span>
+          <span class="title-2-bold watch-page__gate-title">Nội dung Premium</span>
+          <span class="body-regular watch-page__gate-sub">Đăng ký gói Notflex để mở khóa phim này và toàn bộ kho phim premium.</span>
           <Button variant="brand" size="large" @click="navigateTo('/plans')">Chọn gói cước</Button>
+        </div>
+
+        <!-- Invalid / missing video URL -->
+        <template v-else>
+          <span class="watch-page__logo">N</span>
+          <span class="body-regular watch-page__no-video">Video URL phải là link .mp4 hoặc .m3u8</span>
         </template>
-        <span v-else class="body-regular watch-page__no-video">Video URL phải là link .mp4 hoặc .m3u8</span>
       </div>
 
       <Transition name="fade">
@@ -636,6 +643,48 @@ const speedSteps = [
     position: absolute;
     bottom: 28%;
     color: rgba(255, 255, 255, 0.72);
+  }
+
+  // ── Premium gate ─────────────────────────────────────────
+  &__gate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: token("dm-12");
+    padding: token("dm-32");
+    max-width: 480px;
+  }
+
+  &__gate-logo {
+    color: #e50914;
+    font-size: clamp(72px, 9vw, 120px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.12em;
+    text-shadow: 0 0 40px rgba(229, 9, 20, 0.35);
+  }
+
+  &__gate-badge {
+    margin-top: token("dm-8");
+    padding: token("dm-4") token("dm-12");
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #ffd479;
+    background: rgba(255, 196, 0, 0.12);
+    border: 1px solid rgba(255, 196, 0, 0.35);
+  }
+
+  &__gate-title {
+    margin-top: token("dm-4");
+  }
+
+  &__gate-sub {
+    color: rgba(255, 255, 255, 0.66);
+    margin-bottom: token("dm-8");
   }
 
   &__chrome {

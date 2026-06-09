@@ -1,15 +1,24 @@
 <script setup lang="ts">
-definePageMeta({ path: '/who-is-watching' })
+import type { UserProfile } from '~/stores/auth'
 
-const PROFILES = [
-  { value: 'jennifer', name: 'Jennifer', image: 'https://www.figma.com/api/mcp/asset/bf2e085b-39c5-4cc0-842a-2b62a01d6422' },
-  { value: 'bill',     name: 'Bill',     image: 'https://www.figma.com/api/mcp/asset/98955b16-70e9-48e6-8ee4-0077decc80d7' },
-  { value: 'alise',    name: 'Alise',    image: 'https://www.figma.com/api/mcp/asset/ffe5c9d2-aef6-4c23-8264-35a124e3107e' },
-  { value: 'james',    name: 'James',    image: 'https://www.figma.com/api/mcp/asset/3652841e-b89a-4d86-98a4-b9322e061693' },
-]
+definePageMeta({ path: '/who-is-watching', authRequired: true })
 
-function selectProfile(value: string) {
+const authStore = useAuthStore()
+const { listProfiles } = useProfiles()
+
+const profiles = computed(() => authStore.profiles)
+const canAdd = computed(() => authStore.canAddProfile)
+
+// Pull the freshest list (covers a hard refresh landing straight on this page).
+await useAsyncData('who-is-watching-profiles', () => listProfiles().catch(() => authStore.profiles))
+
+function selectProfile(profile: UserProfile) {
+  authStore.selectProfile(profile)
   navigateTo('/browse')
+}
+
+function manageProfiles() {
+  navigateTo('/account?section=profiles')
 }
 </script>
 
@@ -22,18 +31,18 @@ function selectProfile(value: string) {
 
       <div class="profiles-page__list">
         <Avatar
-          v-for="p in PROFILES"
-          :key="p.value"
+          v-for="p in profiles"
+          :key="p.id"
           :name="p.name"
-          :image="p.image"
+          :image="p.avatar_url ?? ''"
           size="large"
-          @click="selectProfile(p.value)"
+          @click="selectProfile(p)"
         />
-        <Avatar :add="true" size="large" />
+        <Avatar v-if="canAdd" :add="true" size="large" @click="manageProfiles" />
       </div>
     </div>
 
-    <Button variant="ghost" size="small" class="profiles-page__manage">
+    <Button variant="ghost" size="small" class="profiles-page__manage" @click="manageProfiles">
       Manage Profiles
     </Button>
   </div>

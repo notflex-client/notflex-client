@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { AuthUser } from '~/stores/auth'
 
-type Section = 'profile' | 'security' | 'billing'
+type Section = 'profile' | 'profiles' | 'security' | 'billing'
 
 const { t } = useI18n()
 const { lang } = useLocale()
@@ -18,11 +18,16 @@ const date = new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' })
 const section = ref<Section>(
   route.path === '/billing' || route.query.section === 'billing'
     ? 'billing'
-    : (route.query.section === 'security' ? 'security' : 'profile'),
+    : route.query.section === 'security'
+      ? 'security'
+      : route.query.section === 'profiles'
+        ? 'profiles'
+        : 'profile',
 )
 
 const NAV = [
   { key: 'profile' as Section, label: 'account.navProfile', icon: 'lucide:user' },
+  { key: 'profiles' as Section, label: 'account.navProfiles', icon: 'lucide:users' },
   { key: 'security' as Section, label: 'account.navSecurity', icon: 'lucide:shield' },
   { key: 'billing' as Section, label: 'account.navBilling', icon: 'lucide:credit-card' },
 ]
@@ -183,6 +188,9 @@ onMounted(async () => {
               {{ profileLoading ? t('account.saving') : t('account.save') }}
             </Button>
           </article>
+
+          <!-- ───────── HỒ SƠ XEM (multi-profile) ───────── -->
+          <ProfilesManager v-else-if="section === 'profiles'" />
 
           <!-- ───────── BẢO MẬT ───────── -->
           <article v-else-if="section === 'security'" class="account-card flex flex-col gap-16">

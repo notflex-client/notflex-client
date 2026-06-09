@@ -9,6 +9,9 @@ export default defineNuxtPlugin(() => {
       if (authStore.token) {
         options.headers.set('Authorization', `Bearer ${authStore.token}`)
       }
+      if (authStore.activeProfile?.id) {
+        options.headers.set('X-Profile-Id', authStore.activeProfile.id)
+      }
     },
 
     async onResponseError({ request, response }) {

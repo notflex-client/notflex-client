@@ -50,17 +50,31 @@ const DEMO_FILM: FdmData = {
   ],
 }
 
-const PROFILES = [
-  { value: 'james', name: 'James', image: 'https://i.pravatar.cc/150?img=11' },
-  { value: 'sarah', name: 'Sarah', image: 'https://i.pravatar.cc/150?img=47' },
-]
-const activeProfile = ref('james')
 const searchOpen = ref(false)
 
 const authStore = useAuthStore()
+const { listProfiles } = useProfiles()
+
+// Profiles for the avatar dropdown — mapped to the popover's {value,name,image} shape.
+const popoverProfiles = computed(() =>
+  authStore.profiles.map(p => ({ value: p.id, name: p.name, image: p.avatar_url ?? '' })),
+)
+const activeProfile = computed(() => authStore.activeProfile?.id ?? authStore.profiles[0]?.id ?? '')
+const activeProfileData = computed(() => popoverProfiles.value.find(p => p.value === activeProfile.value))
+
+// Ensure the account's profiles are loaded for the header dropdown.
+await useAsyncData('browse-profiles', () => listProfiles().catch(() => authStore.profiles))
+
+function onSelectProfile(id: string) {
+  const profile = authStore.profiles.find(p => p.id === id)
+  if (profile) authStore.selectProfile(profile)
+}
 
 function onMenuAction(action: string) {
   if (action === 'account') navigateTo('/account')
+  else if (action === 'manage-profiles') navigateTo('/account?section=profiles')
+  else if (action === 'transfer-profiles') navigateTo('/account/transfer-profile')
+  else if (action === 'help') navigateTo('/')
 }
 
 async function onSignOut() {
@@ -185,9 +199,9 @@ const CONTINUE = computed<MovieBlockItem[]>(() => {
           </svg>
         </IconButton>
         <AvatarPopover
-          :profiles="PROFILES"
+          :profiles="popoverProfiles"
           :active-profile="activeProfile"
-          @select-profile="activeProfile = $event"
+          @select-profile="onSelectProfile"
           @menu-action="onMenuAction"
           @sign-out="onSignOut"
         >
@@ -195,8 +209,8 @@ const CONTINUE = computed<MovieBlockItem[]>(() => {
             <Avatar
               size="small"
               :show-arrow="true"
-              :name="PROFILES.find(p => p.value === activeProfile)?.name ?? ''"
-              :image="PROFILES.find(p => p.value === activeProfile)?.image ?? ''"
+              :name="activeProfileData?.name ?? ''"
+              :image="activeProfileData?.image ?? ''"
               v-bind="(triggerProps as any)"
             />
           </template>

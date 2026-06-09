@@ -22,7 +22,7 @@ async function signIn() {
       body: { email: email.value, password: password.value, remember: remember.value },
     })
     authStore.login(data.token, data.user)
-    navigateTo('/browse')
+    navigateTo('/who-is-watching')
   } catch (err: unknown) {
     const e = err as { data?: unknown }
     setErrors(e.data ?? err)

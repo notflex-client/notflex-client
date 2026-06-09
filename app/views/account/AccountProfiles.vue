@@ -4,7 +4,7 @@ const authStore = useAuthStore()
 
 const profiles = computed(() => {
   if (authStore.profiles.length) return authStore.profiles
-  if (authStore.user) return [{ id: authStore.user.id, name: authStore.user.full_name, image: authStore.user.avatar_url ?? '' }]
+  if (authStore.user) return [{ id: authStore.user.id, name: authStore.user.full_name, avatar_url: authStore.user.avatar_url ?? '' }]
   return []
 })
 </script>
@@ -57,7 +57,7 @@ const profiles = computed(() => {
           class="account-profiles__profile-item"
         >
           <div class="account-profiles__avatar">
-            <img v-if="profile.image" :src="profile.image" class="account-profiles__avatar-img" alt="" />
+            <img v-if="profile.avatar_url" :src="profile.avatar_url" class="account-profiles__avatar-img" alt="" />
             <span v-else class="account-profiles__avatar-placeholder">
               {{ profile.name?.charAt(0)?.toUpperCase() ?? '?' }}
             </span>

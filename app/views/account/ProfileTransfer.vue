@@ -1,24 +1,29 @@
 <script setup lang="ts">
+definePageMeta({ authRequired: true })
+
 const { t } = useI18n()
 const { $api } = useNuxtApp()
 const authStore = useAuthStore()
 const { lang } = useLocale()
+const { listProfiles } = useProfiles()
+
+await useAsyncData('transfer-profiles', () => listProfiles().catch(() => authStore.profiles))
 
 type Step = 'select' | 'confirm' | 'email' | 'success'
 
 const step = ref<Step>('select')
-const selectedProfile = ref<{ id: string; name: string; image?: string | null } | null>(null)
+const selectedProfile = ref<{ id: string; name: string; avatar_url?: string | null } | null>(null)
 const targetEmail = ref('')
 const loading = ref(false)
 const error = ref('')
 
 const profiles = computed(() => {
   if (authStore.profiles.length) return authStore.profiles
-  if (authStore.user) return [{ id: authStore.user.id, name: authStore.user.full_name, image: authStore.user.avatar_url ?? '' }]
+  if (authStore.user) return [{ id: authStore.user.id, name: authStore.user.full_name, avatar_url: authStore.user.avatar_url ?? '' }]
   return []
 })
 
-function selectProfile(profile: { id: string; name: string; image?: string | null }) {
+function selectProfile(profile: { id: string; name: string; avatar_url?: string | null }) {
   selectedProfile.value = profile
   step.value = 'confirm'
 }
@@ -46,6 +51,7 @@ async function confirmTransfer() {
         targetEmail: targetEmail.value.trim(),
       },
     })
+    await listProfiles().catch(() => {})
     step.value = 'success'
   } catch (err: any) {
     error.value = err?.data?.message || err?.message || t('signup.errorGeneric')
@@ -83,7 +89,7 @@ async function confirmTransfer() {
             @click="selectProfile(profile)"
           >
             <div class="transfer-page__avatar">
-              <img v-if="profile.image" :src="profile.image" class="transfer-page__avatar-img" alt="" />
+              <img v-if="profile.avatar_url" :src="profile.avatar_url" class="transfer-page__avatar-img" alt="" />
               <span v-else class="transfer-page__avatar-placeholder">
                 {{ profile.name?.charAt(0)?.toUpperCase() ?? '?' }}
               </span>
@@ -103,7 +109,7 @@ async function confirmTransfer() {
         <!-- Selected profile -->
         <div class="transfer-page__selected-profile">
           <div class="transfer-page__avatar transfer-page__avatar-lg">
-            <img v-if="selectedProfile?.image" :src="selectedProfile.image" class="transfer-page__avatar-img" alt="" />
+            <img v-if="selectedProfile?.avatar_url" :src="selectedProfile.avatar_url" class="transfer-page__avatar-img" alt="" />
             <span v-else class="transfer-page__avatar-placeholder">
               {{ selectedProfile?.name?.charAt(0)?.toUpperCase() ?? '?' }}
             </span>
@@ -163,7 +169,7 @@ async function confirmTransfer() {
 
         <div class="transfer-page__selected-profile">
           <div class="transfer-page__avatar">
-            <img v-if="selectedProfile?.image" :src="selectedProfile.image" class="transfer-page__avatar-img" alt="" />
+            <img v-if="selectedProfile?.avatar_url" :src="selectedProfile.avatar_url" class="transfer-page__avatar-img" alt="" />
             <span v-else class="transfer-page__avatar-placeholder">
               {{ selectedProfile?.name?.charAt(0)?.toUpperCase() ?? '?' }}
             </span>

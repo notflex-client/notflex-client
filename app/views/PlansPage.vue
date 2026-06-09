@@ -122,12 +122,12 @@ async function openCheckout(plan: SubscriptionPlan) {
   &__hero {
     width: 100%;
     max-width: 860px;
-    padding: token("dm-96") token("layout-margin") token("dm-112");
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: token("dm-16");
+    padding-top: token("dm-64");
   }
 
   &__crown {

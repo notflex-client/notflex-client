@@ -56,7 +56,7 @@ async function confirmCode() {
       body: { id: requestId.value, verifyCode: otp.value },
     })
     authStore.login(data.token, data.user)
-    navigateTo('/browse')
+    navigateTo('/who-is-watching')
   } catch (err: unknown) {
     setErrors((err as { data?: unknown }).data ?? err)
   } finally {

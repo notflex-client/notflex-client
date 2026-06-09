@@ -60,6 +60,11 @@ export default {
         meta: { authRequired: true },
       },
       {
+        path: '/account/transfer-profile',
+        component: () => import('~/views/account/ProfileTransfer.vue'),
+        meta: { authRequired: true },
+      },
+      {
         path: '/login',
         component: () => import('~/views/auth/login.vue'),
         meta: { authRequired: false, guestOnly: true },
