@@ -726,7 +726,17 @@ const speedSteps = [
     width: 112px;
     height: 112px;
     color: rgba(255, 255, 255, 0.9);
-    background: rgba(0, 0, 0, 0.18);
+    background: transparent;
+  }
+
+  // Player controls: icon-only — drop the dark rounded button boxes, keep a
+  // subtle hover and an icon drop-shadow so they stay legible over the video.
+  :deep(.icon-btn-overlay) {
+    --icon-btn-bg: transparent;
+    --icon-btn-bg-hover: rgba(255, 255, 255, 0.16);
+    --icon-btn-bg-press: rgba(255, 255, 255, 0.24);
+
+    svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.75)); }
   }
 
   &__bottom {
