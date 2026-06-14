@@ -6,16 +6,26 @@ const { t } = useI18n()
 const { $api } = useNuxtApp()
 const authStore = useAuthStore()
 const { errorMsg, setErrors, clearErrors } = useResponseError()
+const v = useValidators()
 
 const email    = ref('')
 const password = ref('')
 const remember = ref(false)
 const loading  = ref(false)
+const emailErr    = ref('')
+const passwordErr = ref('')
 const { lang } = useLocale()
 
+function validate(): boolean {
+  emailErr.value    = v.email(email.value)
+  passwordErr.value = v.required(password.value)
+  return !emailErr.value && !passwordErr.value
+}
+
 async function signIn() {
-  loading.value = true
   clearErrors()
+  if (!validate()) return
+  loading.value = true
   try {
     const data = await $api<{ token: string, user: AuthUser }>('/auth/login', {
       method: 'POST',
@@ -47,6 +57,8 @@ async function signIn() {
           :label="t('login.emailLabel')"
           type="email"
           autocomplete="email"
+          :error="emailErr"
+          @input="emailErr = ''"
         >
           <template #icon>
             <Icon name="lucide:mail" />
@@ -58,6 +70,8 @@ async function signIn() {
           :label="t('login.passwordLabel')"
           type="password"
           autocomplete="current-password"
+          :error="passwordErr"
+          @input="passwordErr = ''"
         >
           <template #icon>
             <Icon name="lucide:lock" />

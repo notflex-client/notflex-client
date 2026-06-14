@@ -4,20 +4,16 @@ definePageMeta({ path: '/signup' })
 const { t } = useI18n()
 const { lang } = useLocale()
 const { $api } = useNuxtApp()
+const v = useValidators()
 const email = ref('')
 const error = ref('')
+const emailErr = ref('')
 const submitLoading = ref(false)
-
-function validateEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-}
 
 async function submit() {
   error.value = ''
-  if (!validateEmail(email.value)) {
-    error.value = t('signup.errorEmail')
-    return
-  }
+  emailErr.value = v.email(email.value)
+  if (emailErr.value) return
   submitLoading.value = true
   try {
     const res = await $api<{ id: string }>('/registration/request', {
@@ -49,6 +45,8 @@ async function submit() {
           :label="t('signup.emailLabel')"
           type="email"
           autocomplete="email"
+          :error="emailErr"
+          @input="emailErr = ''"
           @keydown.enter="submit"
         >
           <template #icon>

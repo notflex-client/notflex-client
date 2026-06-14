@@ -6,6 +6,7 @@ const { $api } = useNuxtApp()
 const authStore = useAuthStore()
 const { lang } = useLocale()
 const { listProfiles } = useProfiles()
+const v = useValidators()
 
 await useAsyncData('transfer-profiles', () => listProfiles().catch(() => authStore.profiles))
 
@@ -38,10 +39,16 @@ function startTransfer() {
 }
 
 async function confirmTransfer() {
-  if (!targetEmail.value.trim() || !selectedProfile.value) return
+  if (!selectedProfile.value) return
+
+  error.value = ''
+  const emailErr = v.email(targetEmail.value)
+  if (emailErr) {
+    error.value = emailErr
+    return
+  }
 
   loading.value = true
-  error.value = ''
 
   try {
     await $api('/profile/transfer', {

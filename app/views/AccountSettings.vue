@@ -10,6 +10,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 const { errorMsg: profileError, formErrors: profileFieldErrors, setErrors: setProfileErrors, clearErrors: clearProfileErrors } = useResponseError()
 const { errorMsg: passwordError, formErrors: passwordFieldErrors, setErrors: setPasswordErrors, clearErrors: clearPasswordErrors } = useResponseError()
+const vd = useValidators()
 
 const money = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 })
 const date = new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' })
@@ -43,9 +44,13 @@ const profileLoading = ref(false)
 const profileSaved = ref(false)
 
 async function saveProfile() {
-  profileLoading.value = true
   profileSaved.value = false
   clearProfileErrors()
+  if (vd.required(fullName.value)) {
+    setProfileErrors({ details: { full_name: vd.required(fullName.value) } })
+    return
+  }
+  profileLoading.value = true
   try {
     const data = await $api<AuthUser>('/auth/me', {
       method: 'PUT',
@@ -70,8 +75,13 @@ const passwordSaved = ref(false)
 async function savePassword() {
   passwordSaved.value = false
   clearPasswordErrors()
-  if (newPassword.value !== confirmPassword.value) {
-    setPasswordErrors({ details: { confirmPassword: t('account.errorMismatch') } })
+  const errs: Record<string, string> = {}
+  if (vd.required(currentPassword.value)) errs.currentPassword = vd.required(currentPassword.value)
+  const strong = vd.passwordStrong(newPassword.value)
+  if (strong) errs.newPassword = strong
+  if (newPassword.value !== confirmPassword.value) errs.confirmPassword = t('account.errorMismatch')
+  if (Object.keys(errs).length) {
+    setPasswordErrors({ details: errs })
     return
   }
   passwordLoading.value = true

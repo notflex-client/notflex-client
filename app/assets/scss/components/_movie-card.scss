@@ -112,6 +112,13 @@ $play-size: 44px;
   // ══ VARIANT: episode ══════════════════════════════════════════
   &-episode &__thumb { aspect-ratio: 4 / 3; }
 
+  // ══ Portrait posters (2:3) — match the Top 10 frame ═══════════
+  // more-like-this is the shared card for the browse rows and list pages;
+  // continue is the Continue Watching row. A 2:3 frame lets portrait posters
+  // fill the card edge-to-edge (object-fit:cover) like the Top 10 cards.
+  &-more-like-this &__thumb,
+  &-continue &__thumb { aspect-ratio: 2 / 3; }
+
   // ══ VARIANT: top10 ════════════════════════════════════════════
   &-top10 {
     flex-direction: row;

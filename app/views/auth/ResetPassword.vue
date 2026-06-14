@@ -5,10 +5,12 @@ const { t } = useI18n()
 const { $api } = useNuxtApp()
 const { lang } = useLocale()
 const { setErrors, clearErrors } = useResponseError()
+const v = useValidators()
 const route = useRoute()
 
 const token = ref('')
 const newPassword = ref('')
+const newPasswordErr = ref('')
 const firstLoading = ref(true)
 const submitLoading = ref(false)
 const isValidToken = ref(false)
@@ -26,8 +28,10 @@ async function checkToken(tk: string) {
 }
 
 async function submit() {
-  submitLoading.value = true
   clearErrors()
+  newPasswordErr.value = v.passwordStrong(newPassword.value)
+  if (newPasswordErr.value) return
+  submitLoading.value = true
   try {
     await $api('/auth/forgot-password/reset', {
       method: 'POST',
@@ -81,6 +85,8 @@ onMounted(() => {
           :label="t('resetPassword.newPasswordLabel')"
           type="password"
           autocomplete="new-password"
+          :error="newPasswordErr"
+          @input="newPasswordErr = ''"
           @keydown.enter="submit"
         >
           <template #icon>

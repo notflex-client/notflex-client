@@ -37,19 +37,7 @@ async function onRemove(movieId: string) {
         <a href="/browse-by-language" class="mylist-page__nav-link">{{ t('nav.browseByLanguage') }}</a>
       </template>
       <template #action>
-        <IconButton variant="ghost" size="small" :aria-label="t('action.search')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </IconButton>
-        <IconButton variant="ghost" size="small" :aria-label="t('action.notifications')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </IconButton>
-        <Avatar size="small" :showArrow="true" name="James" />
+        <ProfileMenu />
       </template>
     </AppHeader>
 

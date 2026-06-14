@@ -16,6 +16,14 @@
     "genre": "Thể loại",
     "close": "Đóng"
   },
+  "validation": {
+    "required": "Vui lòng nhập trường này",
+    "email": "Email không hợp lệ",
+    "minLen": "Tối thiểu {n} ký tự",
+    "passwordStrong": "Cần chữ hoa, chữ thường, số và ký tự đặc biệt",
+    "passwordMatch": "Mật khẩu nhập lại không khớp",
+    "otp": "Nhập mã gồm {n} chữ số"
+  },
   "badge": {
     "newSeason": "Mùa mới",
     "newEpisode": "Tập mới",

@@ -9,6 +9,10 @@ const props = defineProps({
   hideOnScroll: { type: Boolean, default: false },
 })
 
+// Logo goes to the browse home when signed in, otherwise the public landing page.
+const authStore = useAuthStore()
+const logoTo = computed(() => (authStore.isLoggedIn ? '/browse' : '/'))
+
 // ── Scroll state ──────────────────────────────────────────
 const isScrolled = ref(false)
 const isHidden   = ref(false)
@@ -63,7 +67,7 @@ const headerClass = computed(() => [
     <div class="app-header__inner">
 
       <!-- Logo -->
-      <NuxtLink to="/" class="app-header__logo">
+      <NuxtLink :to="logoTo" class="app-header__logo">
         <slot name="logo" />
       </NuxtLink>
 

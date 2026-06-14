@@ -5,8 +5,10 @@ const { t } = useI18n()
 const { $api } = useNuxtApp()
 const { lang } = useLocale()
 const { setErrors, clearErrors } = useResponseError()
+const v = useValidators()
 
 const email = ref('')
+const emailErr = ref('')
 const loading = ref(false)
 const success = ref(false)
 const seconds = ref(0)
@@ -27,8 +29,10 @@ function startCountdown(resetPasswordTime: number) {
 
 async function submit() {
   if (seconds.value > 0) return
-  loading.value = true
   clearErrors()
+  emailErr.value = v.email(email.value)
+  if (emailErr.value) return
+  loading.value = true
   try {
     const resp = await $api<{ success: boolean, resetPasswordTime?: number }>('/auth/forgot-password', {
       method: 'POST',
@@ -73,6 +77,8 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
           :label="t('forgotPassword.emailLabel')"
           type="email"
           autocomplete="email"
+          :error="emailErr"
+          @input="emailErr = ''"
           @keydown.enter="submit"
         >
           <template #icon>

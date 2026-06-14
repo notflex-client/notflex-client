@@ -6,6 +6,7 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const { listProfiles, createProfile, updateProfile, deleteProfile } = useProfiles()
 const { errorMsg, formErrors, setErrors, clearErrors } = useResponseError()
+const v = useValidators()
 
 const profiles = computed<UserProfile[]>(() => authStore.profiles)
 const canAdd = computed(() => authStore.canAddProfile)
@@ -50,8 +51,13 @@ function closeEditor() {
 }
 
 async function save() {
-  saving.value = true
   clearErrors()
+  const nameErr = v.required(draftName.value)
+  if (nameErr) {
+    setErrors({ details: { name: nameErr } })
+    return
+  }
+  saving.value = true
   const payload = { name: draftName.value.trim(), avatar_url: draftAvatar.value, is_kids: draftKids.value }
   try {
     if (editorMode.value === 'create') await createProfile(payload)

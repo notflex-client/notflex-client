@@ -6,6 +6,7 @@ const { lang } = useLocale()
 const { $api } = useNuxtApp()
 const authStore = useAuthStore()
 const { errorMsg, formErrors, setErrors, clearErrors } = useResponseError()
+const v = useValidators()
 
 const step = ref<'email' | 'otp'>('email')
 const email = ref('')
@@ -26,8 +27,13 @@ function startCountdown() {
 }
 
 async function requestCode() {
-  submitLoading.value = true
   clearErrors()
+  const emailErr = v.email(email.value)
+  if (emailErr) {
+    setErrors({ details: { email: emailErr } })
+    return
+  }
+  submitLoading.value = true
   try {
     const res = await $api<{ id: string }>('/auth/login-code', {
       method: 'POST',

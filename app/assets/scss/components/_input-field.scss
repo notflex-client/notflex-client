@@ -47,6 +47,21 @@
       cursor: not-allowed;
     }
 
+    // Browser autofill paints inputs light blue — force the dark field colour
+    // back using an inset box-shadow (the only reliable autofill override).
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover {
+      -webkit-box-shadow: 0 0 0 1000px var(--grey-600) inset;
+      -webkit-text-fill-color: var(--color-text-primary);
+      caret-color: var(--white);
+      transition: background-color 9999s ease-in-out 0s;
+    }
+
+    &:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px var(--grey-550) inset;
+      -webkit-text-fill-color: var(--color-text-primary);
+    }
+
     .has-toggle & {
       padding-right: 56px;
     }

@@ -53,35 +53,6 @@ const DEMO_FILM: FdmData = {
 const searchOpen = ref(false)
 
 const authStore = useAuthStore()
-const { listProfiles } = useProfiles()
-
-// Profiles for the avatar dropdown — mapped to the popover's {value,name,image} shape.
-const popoverProfiles = computed(() =>
-  authStore.profiles.map(p => ({ value: p.id, name: p.name, image: p.avatar_url ?? '' })),
-)
-const activeProfile = computed(() => authStore.activeProfile?.id ?? authStore.profiles[0]?.id ?? '')
-const activeProfileData = computed(() => popoverProfiles.value.find(p => p.value === activeProfile.value))
-
-// Ensure the account's profiles are loaded for the header dropdown.
-await useAsyncData('browse-profiles', () => listProfiles().catch(() => authStore.profiles))
-
-function onSelectProfile(id: string) {
-  const profile = authStore.profiles.find(p => p.id === id)
-  if (profile) authStore.selectProfile(profile)
-}
-
-function onMenuAction(action: string) {
-  if (action === 'account') navigateTo('/account')
-  else if (action === 'manage-profiles') navigateTo('/account?section=profiles')
-  else if (action === 'transfer-profiles') navigateTo('/account/transfer-profile')
-  else if (action === 'help') navigateTo('/')
-}
-
-async function onSignOut() {
-  await authStore.logout()
-  navigateTo('/login')
-}
-
 const NAV_LINKS = computed(() => [
   { label: t('nav.home'),            active: true },
   { label: t('nav.series'),          href: '/series' },
@@ -117,6 +88,17 @@ const { data: watchHistory } = await useAsyncData('browse-watch-history', () =>
   authStore.isLoggedIn ? listWatchHistory().catch(() => []) : Promise.resolve([]),
 )
 
+// Premium gating: watch history / continue watching and AI recommendations are
+// only offered to accounts with an active subscription (free accounts hide them).
+const { data: subscription } = await useAsyncData('browse-subscription', () =>
+  authStore.isLoggedIn
+    ? $fetch<{ status: string }>(`${apiBase}/subscription/me`, {
+        headers: { Authorization: `Bearer ${authStore.token}` },
+      }).catch(() => ({ status: 'free' }))
+    : Promise.resolve({ status: 'free' }),
+)
+const isPremium = computed(() => subscription.value?.status === 'active')
+
 const { data: topMovies } = await useAsyncData('browse-top-movies', () =>
   listMovies({ pageSize: 10, sort: 'top' }).catch(() => ({ items: [], page: 1, itemCount: 0, pageCount: 0 }))
 )
@@ -141,7 +123,13 @@ const { data: tagRows } = await useAsyncData('browse-tag-rows-v2', async () => {
 
 const featuredBanner = computed(() => banners.value?.[0] ?? null)
 const heroMovie = computed(() => topMovies.value?.items?.[0] ?? null)
-const heroImage = computed(() => normalizeImageUrl(featuredBanner.value?.image_url) || FALLBACK_HERO_IMAGE)
+// Prefer a landscape backdrop for the wide hero (banner_url / banner image),
+// only falling back to the portrait poster when no wide art exists.
+const heroImage = computed(() => {
+  const movie = featuredBanner.value?.movie ?? heroMovie.value
+  const src = movie?.banner_url || featuredBanner.value?.image_url || movie?.poster_url
+  return normalizeImageUrl(src) || FALLBACK_HERO_IMAGE
+})
 const heroTargetId = computed(() => featuredBanner.value?.movie_id || heroMovie.value?.id || null)
 const heroTitle = computed(() => featuredBanner.value?.title || featuredBanner.value?.movie?.title || heroMovie.value?.title || t('browse.hero.title'))
 const heroDescription = computed(() => featuredBanner.value?.description || featuredBanner.value?.movie?.description || heroMovie.value?.description || t('browse.hero.description'))
@@ -152,6 +140,11 @@ const heroCategory = computed(() => {
   return t('browse.hero.category')
 })
 
+
+// Name shown in the "Continue Watching for …" row — the active profile.
+const profileName = computed(() =>
+  authStore.activeProfile?.name || authStore.profiles[0]?.name || authStore.user?.full_name || '',
+)
 
 const CONTINUE = computed<MovieBlockItem[]>(() => {
   const items = watchHistory.value ?? []
@@ -192,29 +185,7 @@ const CONTINUE = computed<MovieBlockItem[]>(() => {
             <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </IconButton>
-        <IconButton variant="ghost" size="small" :aria-label="t('action.notifications')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </IconButton>
-        <AvatarPopover
-          :profiles="popoverProfiles"
-          :active-profile="activeProfile"
-          @select-profile="onSelectProfile"
-          @menu-action="onMenuAction"
-          @sign-out="onSignOut"
-        >
-          <template #trigger="{ triggerProps }">
-            <Avatar
-              size="small"
-              :show-arrow="true"
-              :name="activeProfileData?.name ?? ''"
-              :image="activeProfileData?.image ?? ''"
-              v-bind="(triggerProps as any)"
-            />
-          </template>
-        </AvatarPopover>
+        <ProfileMenu />
       </template>
     </AppHeader>
 
@@ -256,7 +227,7 @@ const CONTINUE = computed<MovieBlockItem[]>(() => {
 
     <!-- ── Movie rows ─────────────────────────────────────── -->
     <div class="browse-page__content">
-      <AiRecommendationSection />
+      <AiRecommendationSection v-if="isPremium" />
       <MovieBlock
         v-for="row in (tagRows ?? [])"
         :key="row.tag.id"
@@ -264,7 +235,7 @@ const CONTINUE = computed<MovieBlockItem[]>(() => {
         :variant="row.tag.slug === 'top-10' ? 'top10' : 'default'"
         :items="row.items"
       />
-      <MovieBlock :title="t('browse.rows.continueWatching', { name: 'James' })" variant="continue" :items="CONTINUE" />
+      <MovieBlock v-if="isPremium" :title="t('browse.rows.continueWatching', { name: profileName })" variant="continue" :items="CONTINUE" />
       
     </div>
 
